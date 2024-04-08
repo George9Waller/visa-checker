@@ -1,0 +1,55 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+    // Uses connection pooling
+    url       = env("POSTGRES_PRISMA_URL")
+    // Uses direct connection, ⚠️ make sure to keep this to `POSTGRES_URL_NON_POOLING`
+    // or you'll have dangling databases from migrations
+    directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Trip {
+    id           String     @id @default(uuid())
+    user_id      String
+    startDate    DateTime
+    endDate      DateTime
+    name         String?
+    colour       String
+    countryCode  String
+    visaRequired Boolean    @default(true)
+    VisaTrip     VisaTrip[]
+
+    @@index([user_id])
+}
+
+model Visa {
+    id                       String     @id @default(uuid())
+    user_id                  String
+    name                     String
+    type                     String
+    validFrom                DateTime
+    expires                  DateTime?
+    visaNumber               String?
+    documentNumber           String?
+    countries                String[]
+    maxNumTrips              Int?
+    tripMaxLen               Int?
+    totalMaxLen              Int?
+    rollingPeriodLen         Int?
+    mustExitBeforeExpiry     Boolean    @default(true)
+    includeEntryAndExitDates Boolean    @default(false)
+    VisaTrip                 VisaTrip[]
+
+    @@index([user_id])
+}
+
+model VisaTrip {
+    id     String @id @default(uuid())
+    trip   Trip   @relation(fields: [tripId], references: [id])
+    Visa   Visa   @relation(fields: [visaId], references: [id])
+    tripId String
+    visaId String
+}
