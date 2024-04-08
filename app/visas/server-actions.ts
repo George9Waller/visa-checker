@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "../api/auth/[...nextauth]/options";
 import { prisma } from "../constants";
 import { getDateWithOffset, getDaysBetweenDates } from "../server-actions";
 

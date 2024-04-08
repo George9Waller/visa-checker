@@ -6,6 +6,7 @@ import NextAuthProvider from "./context/NextAuthProvider";
 import SignOut from "./components/SignOut";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +32,7 @@ export default function RootLayout({
               </Link>
             </div>
             <div className="flex-none flex flex-row gap-2">
-            <Link href="/" className="btn btn-accent">
+              <Link href="/" className="btn btn-accent">
                 Calendar
               </Link>
               <Link href="/visas" className="btn btn-primary">
@@ -40,9 +41,11 @@ export default function RootLayout({
               <SignOut />
             </div>
           </div>
-          <main className="flex flex-col items-center justify-between py-12 max-w-screen-lg mx-auto">
-            {children}
-          </main>
+          <Suspense>
+            <main className="flex flex-col items-center justify-between py-12 max-w-screen-lg mx-auto">
+              {children}
+            </main>
+          </Suspense>
         </NextAuthProvider>
         <ToastContainer />
       </body>

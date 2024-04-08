@@ -2,7 +2,7 @@
 
 import { getServerSession } from "next-auth";
 import { prisma } from "./constants";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "./api/auth/[...nextauth]/options";
 import { Trip } from "@prisma/client";
 import { convertDateToString } from "./utils";
 import { visaInfoForDate } from "./visas/server-actions";
