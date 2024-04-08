@@ -49,6 +49,7 @@ export default function CreateTrip() {
     getPossibleVisasForTrip(params.id)
       .then((visas) => setVisas(visas))
       .catch((e) => toast.error(`Error fetching visas for trip: ${e}`));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {

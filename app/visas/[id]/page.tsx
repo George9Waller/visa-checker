@@ -216,8 +216,11 @@ export default async function Home({
                   </div>
                   {aggregate.data && (
                     <div className="flex-0 flex flex-wrap justify-end w-1/2">
-                      {aggregate.data.map((dataPoint) => (
-                        <div className="px-4 py-2 flex items-center">
+                      {aggregate.data.map((dataPoint, index) => (
+                        <div
+                          key={dataPoint.descriptor + index}
+                          className="px-4 py-2 flex items-center"
+                        >
                           <Link
                             href={`#trip-${tripLabels[dataPoint.tripId].index}`}
                             className="font-bold text-sm mr-1 w-6 leading-6 flex items-center justify-center rounded-full border-2 cursor-pointer"
@@ -317,8 +320,9 @@ export default async function Home({
                       <div className="flex justify-between flex-col">
                         <h4 className="font-medium text-sm mb-0.5">Validity</h4>
                         <div className="flex gap-1">
-                          {trip.results.map((result) => (
+                          {trip.results.map((result, index) => (
                             <div
+                              key={result.name + index}
                               className={`tooltip w-fit border p-1 rounded ${
                                 result.valid ? "border-success" : "border-error"
                               }`}

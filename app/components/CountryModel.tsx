@@ -20,6 +20,7 @@ export default function CountryModel({
         <div className="flex flex-row flex-wrap gap-2">
           {Object.keys(COUNTRY_LABELS).map((countryCode) => (
             <button
+              key={countryCode}
               className={`grow btn btn-sm btn-outline ${
                 countries.includes(countryCode) ? "btn-success" : "btn-error"
               }`}
