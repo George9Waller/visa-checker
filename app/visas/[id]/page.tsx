@@ -50,11 +50,11 @@ export default async function Home({
     },
     {
       title: "Valid From",
-      content: visa.validFrom.toLocaleDateString(),
+      content: visa.validFrom.toLocaleDateString("en-GB"),
     },
     {
       title: "Expiry",
-      content: visa.expires ? visa.expires.toLocaleDateString() : "Never",
+      content: visa.expires ? visa.expires.toLocaleDateString("en-GB") : "Never",
     },
   ].filter((detail) => detail.content);
 
@@ -163,7 +163,7 @@ export default async function Home({
           <div className="outline outline-error my-2 p-4 rounded">
             <p>
               The calculations are not based off today, they are as if it was{" "}
-              {date.toLocaleDateString()}
+              {date.toLocaleDateString("en-GB")}
             </p>
           </div>
         )}
@@ -307,8 +307,8 @@ export default async function Home({
                           <span className="material-symbols-outlined text-xs">
                             calendar_month
                           </span>{" "}
-                          {trip.trip.startDate.toLocaleDateString()} -{" "}
-                          {trip.trip.endDate.toLocaleDateString()}
+                          {trip.trip.startDate.toLocaleDateString("en-GB")} -{" "}
+                          {trip.trip.endDate.toLocaleDateString("en-GB")}
                         </p>
                         <p className="text-xs">
                           <span className="material-symbols-outlined text-xs">

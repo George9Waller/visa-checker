@@ -321,7 +321,7 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
       valid: true,
       description: `${
         visa.rollingPeriodLen
-      } days, starts from ${rollingCutOff.toLocaleDateString()}`,
+      } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
       data: validTrips.map((trip) => ({
         tripId: trip.trip.id,
         count: "",

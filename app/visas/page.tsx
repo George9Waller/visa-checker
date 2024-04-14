@@ -45,12 +45,12 @@ export default async function Home() {
                 <button className="btn btn-sm btn-outline btn-success">
                   ✅ In date
                   {visa.expires &&
-                    ` until ${new Date(visa.expires).toLocaleDateString()}`}
+                    ` until ${new Date(visa.expires).toLocaleDateString("en-GB")}`}
                 </button>
               ) : (
                 <button className="btn btn-sm btn-outline btn-error">
                   ❌ Expired{" "}
-                  {visa.expires && new Date(visa.expires).toLocaleDateString()}
+                  {visa.expires && new Date(visa.expires).toLocaleDateString("en-GB")}
                 </button>
               )}
               <Link
