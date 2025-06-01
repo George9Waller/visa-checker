@@ -1,3 +1,21 @@
+# What is it?
+This is a nextjs web app I created to manage visa compliance. It is deployed in Vercel and uses a postgres db hosted in heroku.
+
+## Features
+- Auth - Sign in with Google (NextAuth)
+- Visa cration/management to create your visas with the conditions of travel & counties they apply to
+- Calendar to view past and upcoming trips
+- Trip creation to record all of your holidays. It automatically tries to select a visa relevant to the location if required. If the visa would be invalid a warning is displayed
+- Visa overview page showing all the trips using the visa and calculations against the limits. This is perfect for showing at a border if asked to outline all the trips and overall calculations
+
+## Stack
+- NextJS
+- Prisma
+
+
+![image](https://github.com/user-attachments/assets/64a66ddc-3518-4d89-a24d-5f1bd16af3c8)
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
