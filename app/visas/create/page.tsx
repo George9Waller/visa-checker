@@ -125,44 +125,44 @@ export default function Home() {
           </div>
         </div>
         <hr />
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Name</span>
+            <span className="">Name</span>
           </div>
           <input
             name="name"
             type="text"
             required
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Visa number (optional)</span>
+            <span className="">Visa number (optional)</span>
           </div>
           <input
             name="visaNumber"
             type="text"
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Document number (optional)</span>
+            <span className="">Document number (optional)</span>
           </div>
           <input
             name="documentNumber"
             type="text"
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Type</span>
+            <span className="">Type</span>
           </div>
           <select
             name="type"
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
             onChange={typeOnChange}
             required
           >
@@ -174,9 +174,9 @@ export default function Home() {
             ))}
           </select>
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Countries</span>
+            <span className="">Countries</span>
             <button
               className="btn btn-xs"
               onClick={(e) => {
@@ -199,33 +199,33 @@ export default function Home() {
               ))}
           </div>
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Valid from</span>
+            <span className="">Valid from</span>
           </div>
           <input
             name="validFrom"
             type="date"
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
             required
             defaultValue={convertDateToString(new Date())}
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa have an expiry, if so when is it?
             </span>
           </div>
           <input
             name="expires"
             type="date"
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa have a maximum number of trips you can take, if so
               how many?
             </span>
@@ -239,12 +239,12 @@ export default function Home() {
                 e.target.value ? parseInt(e.currentTarget.value) : ""
               )
             }
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa have a maximum number of days any single trip can
               be, if so how many?
             </span>
@@ -258,12 +258,12 @@ export default function Home() {
                 e.target.value ? parseInt(e.currentTarget.value) : ""
               )
             }
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa have a total maximum number of days (e.g. 90), if
               so how many?
             </span>
@@ -277,12 +277,12 @@ export default function Home() {
                 e.target.value ? parseInt(e.currentTarget.value) : ""
               )
             }
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa have a rolling period (e.g. in the last 180 days),
               if so what is it?
             </span>
@@ -296,12 +296,12 @@ export default function Home() {
                 e.target.value ? parseInt(e.currentTarget.value) : ""
               )
             }
-            className="input input-bordered w-full max-w-xs"
+            className="input w-full max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa require you to exit the country before it expires?
             </span>
           </div>
@@ -310,12 +310,12 @@ export default function Home() {
             type="checkbox"
             checked={mustExitBeforeExpiry}
             onChange={(e) => setMustExitBeforeExpiry(e.target.checked)}
-            className="checkbox input-bordered max-w-xs"
+            className="checkbox max-w-xs"
           />
         </label>
-        <label className="form-control w-full max-w-xs">
+        <label className="w-full max-w-xs">
           <div className="label">
-            <span className="label-text">
+            <span className="">
               Does this visa include both the entry and exit date when counting
               the number of days?
             </span>
@@ -325,7 +325,7 @@ export default function Home() {
             type="checkbox"
             checked={includeEntryAndExitDates}
             onChange={(e) => setIncludeEntryAndExitDates(e.target.checked)}
-            className="checkbox input-bordered max-w-xs"
+            className="checkbox max-w-xs"
           />
         </label>
         <button type="submit" className="btn btn-primary w-fit">

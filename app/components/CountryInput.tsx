@@ -5,12 +5,12 @@ const CountryInput = ({
 }: {
   defaultValue?: string;
 }) => (
-  <label className="form-control w-full max-w-xs">
+  <label className="w-full max-w-xs">
     <div className="label">
-      <span className="label-text">Country</span>
+      <span className="">Country</span>
     </div>
     <select
-      className="input input-bordered w-full max-w-xs"
+      className="input w-full max-w-xs"
       required
       name="country"
       defaultValue={defaultValue}

@@ -55,44 +55,44 @@ export default function CreateTrip() {
         </Link>
       </div>
       <hr />
-      <label className="form-control w-full max-w-xs">
+      <label className="w-full max-w-xs">
         <div className="label">
-          <span className="label-text">Name</span>
+          <span className="">Name</span>
         </div>
         <input
           name="name"
           type="text"
-          className="input input-bordered w-full max-w-xs"
+          className="input w-full max-w-xs"
         />
       </label>
-      <label className="form-control w-full max-w-xs">
+      <label className="w-full max-w-xs">
         <div className="label">
-          <span className="label-text">Start date</span>
+          <span className="">Start date</span>
         </div>
         <input
           type="date"
           name="startDate"
-          className="input input-bordered w-full max-w-xs"
+          className="input w-full max-w-xs"
           defaultValue={searchParams.get("start") || today.toDateString()}
           required
         />
       </label>
-      <label className="form-control w-full max-w-xs">
+      <label className="w-full max-w-xs">
         <div className="label">
-          <span className="label-text">End date</span>
+          <span className="">End date</span>
         </div>
         <input
           type="date"
           name="endDate"
-          className="input input-bordered w-full max-w-xs"
+          className="input w-full max-w-xs"
           defaultValue={searchParams.get("end") || undefined}
           required
         />
       </label>
       <CountryInput />
-      <label className="form-control w-full max-w-xs">
+      <label className="w-full max-w-xs">
         <div className="label">
-          <span className="label-text">Visa required?</span>
+          <span className="">Visa required?</span>
         </div>
         <input
           type="checkbox"

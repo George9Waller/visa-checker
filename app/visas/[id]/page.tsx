@@ -133,9 +133,9 @@ export default async function Home({
       <div className="p-4">
         <h2 className="font-semibold text-xl ">Calculation Date</h2>
         <form action={`/visas/${params.id}`} method="GET">
-          <label className="form-control w-full">
+          <label className="w-full">
             <div className="label">
-              <span className="label-text">
+              <span className="">
                 The calculations and trips will be shown as if this is the
                 current date
               </span>
@@ -149,7 +149,7 @@ export default async function Home({
               <input
                 name="date"
                 type="date"
-                className="input input-bordered w-full max-w-xs"
+                className="input w-full max-w-xs"
                 defaultValue={convertDateToString(date)}
               />
               <button type="submit" className="btn">
