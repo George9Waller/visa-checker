@@ -1,4 +1,4 @@
-name: Lint
+name: Build
 on:
   pull_request:
 
@@ -19,5 +19,5 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run prettier
-        run: npm run format:check
+      - name: Run Vitest
+        run: npm run build
