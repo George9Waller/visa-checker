@@ -11,7 +11,7 @@ import {
   VisaWithValid,
 } from "../server-actions";
 import { useParams, useRouter } from "next/navigation";
-import { Trip, Visa, VisaTrip } from "@prisma/client";
+import { Trip, Visa, VisaTrip } from "../../../generated/prisma/client";
 import { convertDateToString } from "@/app/utils";
 import { COLOURS } from "@/app/constants";
 import Link from "next/link";

@@ -2,7 +2,7 @@
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/app/constants-server";
-import { Trip, Visa, VisaTrip } from "@prisma/client";
+import { Trip, Visa, VisaTrip } from "../../generated/prisma/client";
 import { getServerSession } from "next-auth";
 import { isVisaValidForTrip } from "../server-actions";
 
