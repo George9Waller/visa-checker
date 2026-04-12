@@ -42,7 +42,7 @@ export default function RootLayout({
             </div>
           </div>
           <Suspense>
-            <main className="flex flex-col items-center justify-between py-12 max-w-screen-lg mx-auto">
+            <main className="flex flex-col items-center justify-between py-12 max-w-(--breakpoint-lg) mx-auto">
               {children}
             </main>
           </Suspense>
