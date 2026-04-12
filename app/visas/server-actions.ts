@@ -2,7 +2,7 @@
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/options";
-import { prisma } from "../constants";
+import { prisma } from "../constants-server";
 import { getDateWithOffset, getDaysBetweenDates } from "../server-actions";
 
 export const getVisas = async () => {
@@ -202,8 +202,8 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
   const singleTripMaxLenIsValid = (numDays: number) =>
     visa.tripMaxLen ? numDays < visa.tripMaxLen : true;
 
-  const trips = visa.VisaTrip.map((visaTrip) => {
-    const tripLen = getDaysBetweenDates(
+  const trips = await Promise.all(visa.VisaTrip.map(async (visaTrip) => {
+    const tripLen = await getDaysBetweenDates(
       visaTrip.trip.startDate,
       visaTrip.trip.endDate,
       visa.includeEntryAndExitDates
@@ -261,13 +261,14 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
       },
       results,
     };
-  });
+  }));
 
+  const dateWithOffset = await getDateWithOffset(date);
   const rollingCutOff = visa.rollingPeriodLen
     ? new Date(
-        getDateWithOffset(date).getTime() -
-          visa.rollingPeriodLen * 24 * 60 * 60 * 1000
-      )
+      dateWithOffset.getTime() -
+      visa.rollingPeriodLen * 24 * 60 * 60 * 1000
+    )
     : undefined;
 
   // Aggregate trip validation
@@ -285,27 +286,30 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
     ? validTrips.length <= visa.maxNumTrips
     : true;
 
-  const tripLengths = validTrips.map((trip) => {
+  const tripLengths = await Promise.all(validTrips.map(async (trip) => {
+    const startDateWithOffset = await getDateWithOffset(trip.trip.startDate);
+    const endDateWithOffset = await getDateWithOffset(trip.trip.endDate);
     const start = rollingCutOff
       ? Math.max(
-          getDateWithOffset(trip.trip.startDate).getTime(),
-          rollingCutOff.getTime()
-        )
-      : getDateWithOffset(trip.trip.startDate).getTime();
+        startDateWithOffset.getTime(),
+        rollingCutOff.getTime()
+      )
+      : startDateWithOffset.getTime();
     const end = Math.min(
-      getDateWithOffset(trip.trip.endDate).getTime(),
+      endDateWithOffset.getTime(),
       date.getTime()
+    );
+    const numDays = await getDaysBetweenDates(
+      new Date(start),
+      new Date(end),
+      visa.includeEntryAndExitDates
     );
     return {
       tripId: trip.trip.id,
-      count: getDaysBetweenDates(
-        new Date(start),
-        new Date(end),
-        visa.includeEntryAndExitDates
-      ),
+      count: numDays,
       descriptor: "days",
     };
-  });
+  }));
   const totalTripLength = tripLengths
     .map((trip) => trip.count)
     .reduce((previousValue, currentValue) => previousValue + currentValue, 0);
@@ -319,9 +323,8 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
     aggregateValidation.push({
       name: "Rolling Period",
       valid: true,
-      description: `${
-        visa.rollingPeriodLen
-      } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
+      description: `${visa.rollingPeriodLen
+        } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
       data: validTrips.map((trip) => ({
         tripId: trip.trip.id,
         count: "",

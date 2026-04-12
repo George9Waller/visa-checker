@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { prisma } from "./constants";
+import { prisma } from "./constants-server";
 import { authOptions } from "./api/auth/[...nextauth]/options";
 import { Trip } from "@prisma/client";
 import { convertDateToString } from "./utils";
@@ -27,16 +27,14 @@ export const isVisaValidForTrip = async (
   tripId: string,
   tripEndDate: Date
 ) => {
-  const visaInfo = await visaInfoForDate(
-    visaId,
-    getDateWithOffset(tripEndDate)
-  );
+  const dateWithOffset = await getDateWithOffset(tripEndDate);
+  const visaInfo = await visaInfoForDate(visaId, dateWithOffset);
 
   const trip = visaInfo.trips?.find((trip) => trip.trip.id === tripId);
   return (trip && trip.valid && visaInfo.aggregatesValid) || false;
 };
 
-export const getDateWithOffset = (date: Date) => {
+export const getDateWithOffset = async (date: Date) => {
   const offset = date.getTimezoneOffset();
   if (offset > 0) {
     return new Date(date.getTime() + offset * 60 * 1000);
@@ -46,26 +44,28 @@ export const getDateWithOffset = (date: Date) => {
   return date;
 };
 
-export const getDaysBetweenDates = (
+export const getDaysBetweenDates = async (
   date1: Date,
   date2: Date,
   includeStartAndEnd = false
 ) => {
+  const date1WithOffset = await getDateWithOffset(date1);
+  const date2WithOffset = await getDateWithOffset(date2);
   const time =
-    getDateWithOffset(date2).getTime() - getDateWithOffset(date1).getTime();
+    date2WithOffset.getTime() - date1WithOffset.getTime();
   const count = Math.abs(Math.floor(time / 1000 / 60 / 60 / 24));
   return includeStartAndEnd ? count + 1 : count;
 };
 
-const getDayList = (year: number, month: number): CalendarDay[] => {
-  const firstDayOfMonth = getDateWithOffset(new Date(year, month - 1, 1));
-  const lastDayOfMonth = getDateWithOffset(new Date(year, month, 0));
+const getDayList = async (year: number, month: number): Promise<CalendarDay[]> => {
+  const firstDayOfMonth = await getDateWithOffset(new Date(year, month - 1, 1));
+  const lastDayOfMonth = await getDateWithOffset(new Date(year, month, 0));
 
   const calendarDates = [];
   let currentDate = new Date(firstDayOfMonth);
 
   if (currentDate.getDay() > 1 || currentDate.getDay() === 0) {
-    currentDate = getDateWithOffset(new Date(year, month - 1, 0));
+    currentDate = await getDateWithOffset(new Date(year, month - 1, 0));
     while (currentDate.getDay() >= 1) {
       calendarDates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() - 1);
@@ -97,7 +97,7 @@ export const getCalendarDates = async (year: number, month: number) => {
     throw Error("Authentication required");
   }
 
-  const dayList = getDayList(year, month);
+  const dayList = await getDayList(year, month);
   const firstDay = new Date(dayList[0].date);
   const lastDay = new Date(dayList[dayList.length - 1].date);
 

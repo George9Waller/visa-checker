@@ -24,10 +24,8 @@ export default async function Home({
   const { date: dateParam, show_outside_rolling_range } = await searchParams;
   const date = dateParam ? new Date(dateParam.toString()) : new Date();
   const visa = await getVisa(id);
-  const visaTripInfo = await visaInfoForDate(
-    id,
-    getDateWithOffset(date)
-  );
+  const dateWithOffset = await getDateWithOffset(date);
+  const visaTripInfo = await visaInfoForDate(id, dateWithOffset);
 
   if (!visa) {
     redirect("/visas");
@@ -89,7 +87,7 @@ export default async function Home({
       <div className="flex items-center">
         <h1 className="text-lg flex-1">{visa.name}</h1>
         <div className="flex-0 flex flex-row gap-2">
-          <DeleteVisaButton visaId={params.id} />
+          <DeleteVisaButton visaId={id} />
           <Link href={"/visas"} className="btn btn-square flex-0">
             x
           </Link>
@@ -132,7 +130,7 @@ export default async function Home({
       </div>
       <div className="p-4">
         <h2 className="font-semibold text-xl ">Calculation Date</h2>
-        <form action={`/visas/${params.id}`} method="GET">
+        <form action={`/visas/${id}`} method="GET">
           <label className="w-full">
             <div className="label">
               <span className="">
@@ -244,7 +242,7 @@ export default async function Home({
           <h2 className="font-semibold text-xl mb-2">
             Trips
             {tripIdInRollingPeriod.length > 0 && (
-              <form className="inline" action={`/visas/${params.id}`}>
+              <form className="inline" action={`/visas/${id}`}>
                 <input
                   type="hidden"
                   name="date"

@@ -12,7 +12,7 @@ vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn(),
 }));
  
-import { prisma } from "../constants";
+import { prisma } from "../constants-server";
 import { visaInfoForDate } from "./server-actions";
  
 const mockFindUnique = prisma.visa.findUnique as ReturnType<typeof vi.fn>;
