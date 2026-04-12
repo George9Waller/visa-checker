@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MutableRefObject, useRef } from "react";
+import { useRef } from "react";
 import { deleteVisa } from "../visas/server-actions";
 import { toast } from "react-toastify";
 
 export default function DeleteVisaButton({ visaId }: { visaId: string }) {
   const router = useRouter();
-  const modal = useRef<HTMLDialogElement>();
+  const modal = useRef<HTMLDialogElement | null>(null);
 
   const deleteVisaHandler = () => {
     deleteVisa(visaId)
@@ -30,7 +30,7 @@ export default function DeleteVisaButton({ visaId }: { visaId: string }) {
         Delete visa
       </button>
       <dialog
-        ref={modal as MutableRefObject<HTMLDialogElement> | undefined}
+        ref={modal}
         className="modal"
       >
         <div className="modal-box">

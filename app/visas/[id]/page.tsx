@@ -14,18 +14,18 @@ export default async function Home({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{
     show_outside_rolling_range?: string | string[];
     date?: string | string[];
-  };
+  }>;
 }) {
-  const date = searchParams.date
-    ? new Date(searchParams.date.toString())
-    : new Date();
-  const visa = await getVisa(params.id);
+  const { id } = await params;
+  const { date: dateParam, show_outside_rolling_range } = await searchParams;
+  const date = dateParam ? new Date(dateParam.toString()) : new Date();
+  const visa = await getVisa(id);
   const visaTripInfo = await visaInfoForDate(
-    params.id,
+    id,
     getDateWithOffset(date)
   );
 
@@ -62,11 +62,11 @@ export default async function Home({
 
   const tripLabels = visaTripInfo.trips
     ? Object.fromEntries(
-        visaTripInfo.trips.map((trip, index) => [
-          trip.trip.id,
-          { index: index + 1, colour: trip.trip.colour },
-        ])
-      )
+      visaTripInfo.trips.map((trip, index) => [
+        trip.trip.id,
+        { index: index + 1, colour: trip.trip.colour },
+      ])
+    )
     : {};
 
   const tripIdInRollingPeriod: string[] =
@@ -111,9 +111,8 @@ export default async function Home({
             </div>
           ))}
           <div
-            className={`collapse rounded border ${
-              hasManyCountries ? "collapse-arrow col-span-2" : "collapse-open"
-            }`}
+            className={`collapse rounded border ${hasManyCountries ? "collapse-arrow col-span-2" : "collapse-open"
+              }`}
           >
             <input type="checkbox" />
             <div className="collapse-title">
@@ -145,7 +144,7 @@ export default async function Home({
               <input
                 type="hidden"
                 name="show_outside_rolling_range"
-                value={searchParams.show_outside_rolling_range}
+                value={show_outside_rolling_range}
               />
               <input
                 name="date"
@@ -174,9 +173,8 @@ export default async function Home({
           {visaTripInfo.summary.items.map((item, index) => (
             <div
               key={index}
-              className={`rounded py-2 px-4 border ${
-                visaTripInfo.summary.valid ? "border-success" : "border-error"
-              }`}
+              className={`rounded py-2 px-4 border ${visaTripInfo.summary.valid ? "border-success" : "border-error"
+                }`}
             >
               <h2 className="font-semibold">{item.title}</h2>
               <p className="text-sm">{item.content}</p>
@@ -192,9 +190,8 @@ export default async function Home({
               {visaTripInfo.aggregateValidation.map((aggregate) => (
                 <div
                   key={aggregate.name}
-                  className={`rounded my-2 border p-4 flex items-start gap-4 ${
-                    aggregate.valid ? "border-success" : "border-error"
-                  }`}
+                  className={`rounded my-2 border p-4 flex items-start gap-4 ${aggregate.valid ? "border-success" : "border-error"
+                    }`}
                 >
                   <div className="flex-1 flex flex-col justify-between gap-2">
                     <div>
@@ -203,11 +200,10 @@ export default async function Home({
                     </div>
                     {(aggregate.remaining || aggregate.remaining === 0) && (
                       <h3
-                        className={`text-xs ${
-                          aggregate.remaining > 0
-                            ? "text-success"
-                            : "text-error"
-                        }`}
+                        className={`text-xs ${aggregate.remaining > 0
+                          ? "text-success"
+                          : "text-error"
+                          }`}
                       >
                         <span className="font-medium">Remaining:</span>{" "}
                         {aggregate.remaining}
@@ -257,13 +253,13 @@ export default async function Home({
                 <input
                   type="hidden"
                   name="show_outside_rolling_range"
-                  value={searchParams.show_outside_rolling_range ? "" : "true"}
+                  value={show_outside_rolling_range ? "" : "true"}
                 />
                 <button
                   type="submit"
                   className="text-xs hover:underline text-base-500 font-normal ml-2"
                 >
-                  {searchParams.show_outside_rolling_range
+                  {show_outside_rolling_range
                     ? "hide trips before the rolling range"
                     : "show trips before the rolling range?"}
                 </button>
@@ -273,7 +269,7 @@ export default async function Home({
           <div className="">
             {visaTripInfo.trips
               .filter((trip) => {
-                if (searchParams.show_outside_rolling_range) {
+                if (show_outside_rolling_range) {
                   return true;
                 } else if (tripIdInRollingPeriod.length > 0) {
                   return tripIdInRollingPeriod.includes(trip.trip.id);
@@ -285,9 +281,8 @@ export default async function Home({
                   {yearMarker(trip.trip.startDate.getFullYear())}
                   <div
                     key={trip.trip.id}
-                    className={`rounded my-2 border p-4 flex items-stretch gap-4 ${
-                      trip.valid ? "border-success" : "border-error"
-                    }`}
+                    className={`rounded my-2 border p-4 flex items-stretch gap-4 ${trip.valid ? "border-success" : "border-error"
+                      }`}
                   >
                     <div className="flex-1 flex flex-col justify-between gap-2">
                       <div>
@@ -323,15 +318,13 @@ export default async function Home({
                           {trip.results.map((result, index) => (
                             <div
                               key={result.name + index}
-                              className={`tooltip w-fit border p-1 rounded ${
-                                result.valid ? "border-success" : "border-error"
-                              }`}
+                              className={`tooltip w-fit border p-1 rounded ${result.valid ? "border-success" : "border-error"
+                                }`}
                               data-tip={result.description}
                             >
                               <p
-                                className={`text-xs ${
-                                  result.valid ? "text-success" : "text-error"
-                                }`}
+                                className={`text-xs ${result.valid ? "text-success" : "text-error"
+                                  }`}
                               >
                                 {result.name}
                               </p>
