@@ -1,14 +1,14 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // Mock Prisma and Next-auth before importing the module under test
-vi.mock("../constants", () => ({
+vi.mock("../constants-server", () => ({
   prisma: {
     visa: { findUnique: vi.fn() },
     visaTrip: { findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   },
 }));
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
-vi.mock("@prisma/client", () => ({
+vi.mock("../../generated/prisma/client", () => ({
   PrismaClient: vi.fn(),
 }));
 
