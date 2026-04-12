@@ -1,5 +1,5 @@
-import Calendar from "./components/Calendar";
+import TripTimeline from "./components/TripTimeline";
 
 export default function Home() {
-  return <Calendar />;
+  return <TripTimeline />;
 }

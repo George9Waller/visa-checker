@@ -26,12 +26,8 @@ export default function CreateTrip() {
       (formData.get("visaRequired") as string) === "on",
       formData.get("name") as string | null
     )
-      .then((trip) => {
-        router.push(
-          `/?year=${trip.startDate.getFullYear()}&month=${
-            trip.startDate.getMonth() + 1
-          }`
-        );
+      .then(() => {
+        router.push("/");
       })
       .catch((e) => {
         toast.error(`Error creating trip: ${e}`);
@@ -45,12 +41,7 @@ export default function CreateTrip() {
     >
       <div className="flex items-center">
         <h1 className="text-lg flex-1">Create Trip</h1>
-        <Link
-          href={`/?year=${initialStartDate.getFullYear()}&month=${
-            initialStartDate.getMonth() + 1
-          }`}
-          className="btn btn-square flex-0"
-        >
+        <Link href="/" className="btn btn-square flex-0">
           x
         </Link>
       </div>

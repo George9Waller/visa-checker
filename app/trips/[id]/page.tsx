@@ -65,12 +65,8 @@ export default function CreateTrip() {
       (formData.get("visaRequired") as string) === "on",
       formData.get("name") as string | null
     )
-      .then((trip) => {
-        router.push(
-          `/?year=${trip.startDate.getFullYear()}&month=${
-            trip.startDate.getMonth() + 1
-          }`
-        );
+      .then(() => {
+        router.push("/");
       })
       .catch((e) => {
         toast.error(`Error updating trip: ${e}`);
@@ -81,15 +77,7 @@ export default function CreateTrip() {
     deleteTrip(params.id)
       .then(() => {
         toast.success("Trip deleted");
-        if (initialValues?.startDate) {
-          router.push(
-            `/?year=${initialValues?.startDate.getFullYear()}&month=${
-              initialValues?.startDate.getMonth() + 1
-            }`
-          );
-        } else {
-          router.push("/");
-        }
+        router.push("/");
       })
       .catch((e) => {
         toast.error(`Error deleting trip: ${e}`);
@@ -108,12 +96,7 @@ export default function CreateTrip() {
       >
         <div className="flex items-center">
           <h1 className="text-lg flex-1">Update Trip</h1>
-          <Link
-            href={`/?year=${initialValues.startDate.getFullYear()}&month=${
-              initialValues.startDate.getMonth() + 1
-            }`}
-            className="btn btn-square flex-0"
-          >
+          <Link href="/" className="btn btn-square flex-0">
             x
           </Link>
         </div>

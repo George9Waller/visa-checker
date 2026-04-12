@@ -7,6 +7,7 @@ import SignOut from "./components/SignOut";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Suspense } from "react";
+import BottomNav from "./components/BottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,10 +33,13 @@ export default function RootLayout({
               </Link>
             </div>
             <div className="flex-none flex flex-row gap-2">
-              <Link href="/" className="btn btn-accent">
-                Calendar
+              <Link href="/" className="btn btn-accent hidden md:inline-flex">
+                Trips
               </Link>
-              <Link href="/visas" className="btn btn-primary">
+              <Link
+                href="/visas"
+                className="btn btn-primary hidden md:inline-flex"
+              >
                 Visas
               </Link>
               <SignOut />
@@ -46,6 +50,8 @@ export default function RootLayout({
               {children}
             </main>
           </Suspense>
+          {/* mobile bottom nav */}
+          <BottomNav />
         </NextAuthProvider>
         <ToastContainer />
       </body>

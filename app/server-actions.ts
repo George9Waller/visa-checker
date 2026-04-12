@@ -3,23 +3,21 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "./constants-server";
 import { authOptions } from "./api/auth/[...nextauth]/options";
-import { Trip } from "../generated/prisma/client";
+import { Visa } from "../generated/prisma/client";
 import { convertDateToString } from "./utils";
 import { visaInfoForDate } from "./visas/server-actions";
 
-export type TripDay = Pick<
-  Trip,
-  "id" | "countryCode" | "colour" | "name" | "visaRequired"
-> & {
-  first: boolean;
-  last: boolean;
-  hasVisa: boolean;
+export type TimelineTrip = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  name: string | null;
+  colour: string;
+  countryCode: string;
+  visaRequired: boolean;
   visaValid: boolean;
-};
-
-export type CalendarDay = {
-  date: string;
-  trips: TripDay[];
+  durationDays: number;
+  visa: Pick<Visa, "id" | "name"> | null;
 };
 
 export const isVisaValidForTrip = async (
@@ -56,108 +54,105 @@ export const getDaysBetweenDates = async (
   return includeStartAndEnd ? count + 1 : count;
 };
 
-const getDayList = async (
-  year: number,
-  month: number
-): Promise<CalendarDay[]> => {
-  const firstDayOfMonth = await getDateWithOffset(new Date(year, month - 1, 1));
-  const lastDayOfMonth = await getDateWithOffset(new Date(year, month, 0));
-
-  const calendarDates = [];
-  let currentDate = new Date(firstDayOfMonth);
-
-  if (currentDate.getDay() > 1 || currentDate.getDay() === 0) {
-    currentDate = await getDateWithOffset(new Date(year, month - 1, 0));
-    while (currentDate.getDay() >= 1) {
-      calendarDates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() - 1);
-    }
-  }
-
-  // Add dates from the current month
-  currentDate = new Date(firstDayOfMonth);
-  while (currentDate < lastDayOfMonth) {
-    calendarDates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  // Add dates from the next month to the last week
-  while (currentDate.getDay() !== 0) {
-    calendarDates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-  calendarDates.push(new Date(currentDate));
-
-  return calendarDates
-    .sort((a, b) => a.getTime() - b.getTime())
-    .map((date) => ({ date: convertDateToString(date), trips: [] }));
-};
-
-export const getCalendarDates = async (year: number, month: number) => {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    throw Error("Authentication required");
-  }
-
-  const dayList = await getDayList(year, month);
-  const firstDay = new Date(dayList[0].date);
-  const lastDay = new Date(dayList[dayList.length - 1].date);
-
-  const coveredTrips = await prisma.trip.findMany({
-    where: {
-      user_id: (session.user as any).id,
-      OR: [
-        {
-          AND: [
-            { startDate: { gt: firstDay } },
-            { startDate: { lt: lastDay } },
-          ],
-        },
-        {
-          AND: [{ endDate: { gt: firstDay } }, { endDate: { lt: lastDay } }],
-        },
-      ],
-    },
-    select: {
-      id: true,
-      startDate: true,
-      endDate: true,
-      countryCode: true,
-      colour: true,
-      name: true,
-      visaRequired: true,
-      VisaTrip: true,
-    },
-    orderBy: [{ startDate: "asc" }],
-  });
-
-  for await (const trip of coveredTrips) {
-    let first = true;
+async function enrichTrips(
+  rawTrips: {
+    id: string;
+    startDate: Date;
+    endDate: Date;
+    name: string | null;
+    colour: string;
+    countryCode: string;
+    visaRequired: boolean;
+    VisaTrip: { Visa: { id: string; name: string } }[];
+  }[]
+): Promise<TimelineTrip[]> {
+  const result: TimelineTrip[] = [];
+  for (const trip of rawTrips) {
     const hasVisa = trip.VisaTrip.length > 0;
+    const visa = hasVisa ? trip.VisaTrip[0].Visa : null;
     const visaValid =
       hasVisa &&
       (await isVisaValidForTrip(
-        trip.VisaTrip[0].visaId,
+        trip.VisaTrip[0].Visa.id,
         trip.id,
         trip.endDate
       ));
-    dayList.forEach((day) => {
-      const date = new Date(day.date);
-      if (date >= trip.startDate && date <= trip.endDate) {
-        day.trips.push({
-          id: trip.id,
-          countryCode: trip.countryCode,
-          colour: trip.colour,
-          name: trip.name,
-          hasVisa,
-          visaValid,
-          visaRequired: trip.visaRequired,
-          first,
-          last: date.toLocaleDateString() == trip.endDate.toLocaleDateString(),
-        });
-        first = false;
-      }
+    const durationDays = await getDaysBetweenDates(
+      trip.startDate,
+      trip.endDate,
+      true
+    );
+    result.push({
+      id: trip.id,
+      startDate: convertDateToString(trip.startDate),
+      endDate: convertDateToString(trip.endDate),
+      name: trip.name,
+      colour: trip.colour,
+      countryCode: trip.countryCode,
+      visaRequired: trip.visaRequired,
+      visa,
+      visaValid,
+      durationDays,
     });
   }
-  return dayList;
+  return result;
+}
+
+const TRIP_SELECT = {
+  id: true,
+  startDate: true,
+  endDate: true,
+  name: true,
+  colour: true,
+  countryCode: true,
+  visaRequired: true,
+  VisaTrip: {
+    select: { Visa: { select: { id: true, name: true } } },
+  },
+} as const;
+
+// Fetch trips whose startDate < cursor, returning up to `limit` in ascending order.
+export const getTripsBefore = async (
+  cursor: string,
+  limit: number
+): Promise<{ trips: TimelineTrip[]; hasMore: boolean }> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+
+  const raw = await prisma.trip.findMany({
+    where: {
+      user_id: (session.user as any).id,
+      startDate: { lt: new Date(cursor) },
+    },
+    select: TRIP_SELECT,
+    orderBy: { startDate: "desc" },
+    take: limit + 1,
+  });
+
+  const hasMore = raw.length > limit;
+  const page = raw.slice(0, limit).reverse();
+  return { trips: await enrichTrips(page), hasMore };
+};
+
+// Fetch trips whose startDate >= cursor, returning up to `limit` in ascending order.
+export const getTripsFrom = async (
+  cursor: string,
+  limit: number
+): Promise<{ trips: TimelineTrip[]; hasMore: boolean }> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+
+  const raw = await prisma.trip.findMany({
+    where: {
+      user_id: (session.user as any).id,
+      startDate: { gte: new Date(cursor) },
+    },
+    select: TRIP_SELECT,
+    orderBy: { startDate: "asc" },
+    take: limit + 1,
+  });
+
+  const hasMore = raw.length > limit;
+  const page = raw.slice(0, limit);
+  return { trips: await enrichTrips(page), hasMore };
 };
