@@ -52,7 +52,9 @@ export default async function Home({
     },
     {
       title: "Expiry",
-      content: visa.expires ? visa.expires.toLocaleDateString("en-GB") : "Never",
+      content: visa.expires
+        ? visa.expires.toLocaleDateString("en-GB")
+        : "Never",
     },
   ].filter((detail) => detail.content);
 
@@ -60,11 +62,11 @@ export default async function Home({
 
   const tripLabels = visaTripInfo.trips
     ? Object.fromEntries(
-      visaTripInfo.trips.map((trip, index) => [
-        trip.trip.id,
-        { index: index + 1, colour: trip.trip.colour },
-      ])
-    )
+        visaTripInfo.trips.map((trip, index) => [
+          trip.trip.id,
+          { index: index + 1, colour: trip.trip.colour },
+        ])
+      )
     : {};
 
   const tripIdInRollingPeriod: string[] =
@@ -109,8 +111,9 @@ export default async function Home({
             </div>
           ))}
           <div
-            className={`collapse rounded border ${hasManyCountries ? "collapse-arrow col-span-2" : "collapse-open"
-              }`}
+            className={`collapse rounded border ${
+              hasManyCountries ? "collapse-arrow col-span-2" : "collapse-open"
+            }`}
           >
             <input type="checkbox" />
             <div className="collapse-title">
@@ -171,8 +174,9 @@ export default async function Home({
           {visaTripInfo.summary.items.map((item, index) => (
             <div
               key={index}
-              className={`rounded py-2 px-4 border ${visaTripInfo.summary.valid ? "border-success" : "border-error"
-                }`}
+              className={`rounded py-2 px-4 border ${
+                visaTripInfo.summary.valid ? "border-success" : "border-error"
+              }`}
             >
               <h2 className="font-semibold">{item.title}</h2>
               <p className="text-sm">{item.content}</p>
@@ -188,8 +192,9 @@ export default async function Home({
               {visaTripInfo.aggregateValidation.map((aggregate) => (
                 <div
                   key={aggregate.name}
-                  className={`rounded my-2 border p-4 flex items-start gap-4 ${aggregate.valid ? "border-success" : "border-error"
-                    }`}
+                  className={`rounded my-2 border p-4 flex items-start gap-4 ${
+                    aggregate.valid ? "border-success" : "border-error"
+                  }`}
                 >
                   <div className="flex-1 flex flex-col justify-between gap-2">
                     <div>
@@ -198,10 +203,11 @@ export default async function Home({
                     </div>
                     {(aggregate.remaining || aggregate.remaining === 0) && (
                       <h3
-                        className={`text-xs ${aggregate.remaining > 0
-                          ? "text-success"
-                          : "text-error"
-                          }`}
+                        className={`text-xs ${
+                          aggregate.remaining > 0
+                            ? "text-success"
+                            : "text-error"
+                        }`}
                       >
                         <span className="font-medium">Remaining:</span>{" "}
                         {aggregate.remaining}
@@ -279,8 +285,9 @@ export default async function Home({
                   {yearMarker(trip.trip.startDate.getFullYear())}
                   <div
                     key={trip.trip.id}
-                    className={`rounded my-2 border p-4 flex items-stretch gap-4 ${trip.valid ? "border-success" : "border-error"
-                      }`}
+                    className={`rounded my-2 border p-4 flex items-stretch gap-4 ${
+                      trip.valid ? "border-success" : "border-error"
+                    }`}
                   >
                     <div className="flex-1 flex flex-col justify-between gap-2">
                       <div>
@@ -316,13 +323,15 @@ export default async function Home({
                           {trip.results.map((result, index) => (
                             <div
                               key={result.name + index}
-                              className={`tooltip w-fit border p-1 rounded ${result.valid ? "border-success" : "border-error"
-                                }`}
+                              className={`tooltip w-fit border p-1 rounded ${
+                                result.valid ? "border-success" : "border-error"
+                              }`}
                               data-tip={result.description}
                             >
                               <p
-                                className={`text-xs ${result.valid ? "text-success" : "text-error"
-                                  }`}
+                                className={`text-xs ${
+                                  result.valid ? "text-success" : "text-error"
+                                }`}
                               >
                                 {result.name}
                               </p>

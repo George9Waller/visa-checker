@@ -217,11 +217,7 @@ export default function Home() {
               Does this visa have an expiry, if so when is it?
             </span>
           </div>
-          <input
-            name="expires"
-            type="date"
-            className="input w-full max-w-xs"
-          />
+          <input name="expires" type="date" className="input w-full max-w-xs" />
         </label>
         <label className="w-full max-w-xs">
           <div className="label">

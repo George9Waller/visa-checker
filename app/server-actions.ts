@@ -51,13 +51,15 @@ export const getDaysBetweenDates = async (
 ) => {
   const date1WithOffset = await getDateWithOffset(date1);
   const date2WithOffset = await getDateWithOffset(date2);
-  const time =
-    date2WithOffset.getTime() - date1WithOffset.getTime();
+  const time = date2WithOffset.getTime() - date1WithOffset.getTime();
   const count = Math.abs(Math.floor(time / 1000 / 60 / 60 / 24));
   return includeStartAndEnd ? count + 1 : count;
 };
 
-const getDayList = async (year: number, month: number): Promise<CalendarDay[]> => {
+const getDayList = async (
+  year: number,
+  month: number
+): Promise<CalendarDay[]> => {
   const firstDayOfMonth = await getDateWithOffset(new Date(year, month - 1, 1));
   const lastDayOfMonth = await getDateWithOffset(new Date(year, month, 0));
 

@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
- 
+
 // Mock Prisma and Next-auth before importing the module under test
 vi.mock("../constants", () => ({
   prisma: {
@@ -11,16 +11,16 @@ vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn(),
 }));
- 
+
 import { prisma } from "../constants-server";
 import { visaInfoForDate } from "./server-actions";
- 
+
 const mockFindUnique = prisma.visa.findUnique as ReturnType<typeof vi.fn>;
- 
+
 // ── Helpers ────────────────────────────────────────────────────────────────
- 
+
 const d = (iso: string) => new Date(iso + "T00:00:00.000Z");
- 
+
 /** Minimal valid visa stub; override fields per-test */
 const baseVisa = () => ({
   validFrom: d("2024-01-01"),
@@ -34,7 +34,7 @@ const baseVisa = () => ({
   includeEntryAndExitDates: false,
   VisaTrip: [] as { trip: Trip }[],
 });
- 
+
 type Trip = {
   id: string;
   startDate: Date;
@@ -45,7 +45,7 @@ type Trip = {
   visaRequired: boolean;
   user_id: string;
 };
- 
+
 const makeTrip = (overrides: Partial<Trip> = {}): Trip => ({
   id: "trip-1",
   startDate: d("2024-03-01"),
@@ -57,26 +57,29 @@ const makeTrip = (overrides: Partial<Trip> = {}): Trip => ({
   user_id: "user-1",
   ...overrides,
 });
- 
+
 // ── Tests ──────────────────────────────────────────────────────────────────
- 
+
 describe("visaInfoForDate — early exits", () => {
   beforeEach(() => vi.clearAllMocks());
- 
+
   it("returns error summary when visa is not found", async () => {
     mockFindUnique.mockResolvedValue(null);
     const result = await visaInfoForDate("non-existent", d("2024-06-01"));
     expect(result.summary?.valid).toBe(false);
     expect(result.summary?.items[0].title).toBe("Error");
   });
- 
+
   it("returns invalid when date is before visa validFrom", async () => {
-    mockFindUnique.mockResolvedValue({ ...baseVisa(), validFrom: d("2025-01-01") });
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      validFrom: d("2025-01-01"),
+    });
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     expect(result.summary?.valid).toBe(false);
     expect(result.summary?.items[0].title).toBe("Invalid");
   });
- 
+
   it("returns expired when date is after visa expires", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -86,17 +89,17 @@ describe("visaInfoForDate — early exits", () => {
     expect(result.summary?.valid).toBe(false);
     expect(result.summary?.items[0].title).toBe("Expired");
   });
- 
+
   it("returns valid with no trips message when VisaTrip is empty", async () => {
     mockFindUnique.mockResolvedValue(baseVisa());
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     expect(result.summary?.valid).toBe(true);
   });
 });
- 
+
 describe("visaInfoForDate — individual trip validation", () => {
   beforeEach(() => vi.clearAllMocks());
- 
+
   it("marks trip valid when country matches and dates are in range", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -106,7 +109,7 @@ describe("visaInfoForDate — individual trip validation", () => {
     expect(result.valid).toBe(true);
     expect(result.trips?.[0].valid).toBe(true);
   });
- 
+
   it("fails trip when country does not match visa countries", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -120,12 +123,19 @@ describe("visaInfoForDate — individual trip validation", () => {
     );
     expect(countryResult?.valid).toBe(false);
   });
- 
+
   it("fails trip when start date is before visa validFrom", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
       validFrom: d("2024-04-01"),
-      VisaTrip: [{ trip: makeTrip({ startDate: d("2024-03-01"), endDate: d("2024-03-07") }) }],
+      VisaTrip: [
+        {
+          trip: makeTrip({
+            startDate: d("2024-03-01"),
+            endDate: d("2024-03-07"),
+          }),
+        },
+      ],
     });
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     expect(result.trips?.[0].valid).toBe(false);
@@ -134,7 +144,7 @@ describe("visaInfoForDate — individual trip validation", () => {
     );
     expect(startDateResult?.valid).toBe(false);
   });
- 
+
   it("fails trip when single trip exceeds tripMaxLen", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -155,7 +165,7 @@ describe("visaInfoForDate — individual trip validation", () => {
     );
     expect(lengthResult?.valid).toBe(false);
   });
- 
+
   it("passes trip when single trip is within tripMaxLen", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -172,7 +182,7 @@ describe("visaInfoForDate — individual trip validation", () => {
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     expect(result.trips?.[0].valid).toBe(true);
   });
- 
+
   it("checks end date when mustExitBeforeExpiry is true", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -195,18 +205,36 @@ describe("visaInfoForDate — individual trip validation", () => {
     expect(endDateResult?.valid).toBe(false);
   });
 });
- 
+
 describe("visaInfoForDate — aggregate validation", () => {
   beforeEach(() => vi.clearAllMocks());
- 
+
   it("fails when number of valid trips exceeds maxNumTrips", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
       maxNumTrips: 2,
       VisaTrip: [
-        { trip: makeTrip({ id: "t1", startDate: d("2024-01-10"), endDate: d("2024-01-15") }) },
-        { trip: makeTrip({ id: "t2", startDate: d("2024-02-10"), endDate: d("2024-02-15") }) },
-        { trip: makeTrip({ id: "t3", startDate: d("2024-03-10"), endDate: d("2024-03-15") }) },
+        {
+          trip: makeTrip({
+            id: "t1",
+            startDate: d("2024-01-10"),
+            endDate: d("2024-01-15"),
+          }),
+        },
+        {
+          trip: makeTrip({
+            id: "t2",
+            startDate: d("2024-02-10"),
+            endDate: d("2024-02-15"),
+          }),
+        },
+        {
+          trip: makeTrip({
+            id: "t3",
+            startDate: d("2024-03-10"),
+            endDate: d("2024-03-15"),
+          }),
+        },
       ],
     });
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
@@ -217,14 +245,26 @@ describe("visaInfoForDate — aggregate validation", () => {
     expect(numTripsValidation?.valid).toBe(false);
     expect(numTripsValidation?.remaining).toBe(0);
   });
- 
+
   it("passes when number of trips is at the limit", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
       maxNumTrips: 2,
       VisaTrip: [
-        { trip: makeTrip({ id: "t1", startDate: d("2024-01-10"), endDate: d("2024-01-15") }) },
-        { trip: makeTrip({ id: "t2", startDate: d("2024-02-10"), endDate: d("2024-02-15") }) },
+        {
+          trip: makeTrip({
+            id: "t1",
+            startDate: d("2024-01-10"),
+            endDate: d("2024-01-15"),
+          }),
+        },
+        {
+          trip: makeTrip({
+            id: "t2",
+            startDate: d("2024-02-10"),
+            endDate: d("2024-02-15"),
+          }),
+        },
       ],
     });
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
@@ -235,7 +275,7 @@ describe("visaInfoForDate — aggregate validation", () => {
     expect(numTripsValidation?.valid).toBe(true);
     expect(numTripsValidation?.remaining).toBe(0);
   });
- 
+
   it("fails when total trip days exceed totalMaxLen", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -264,7 +304,7 @@ describe("visaInfoForDate — aggregate validation", () => {
     );
     expect(totalLenValidation?.valid).toBe(false);
   });
- 
+
   it("passes when total trip days are within totalMaxLen", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -293,7 +333,7 @@ describe("visaInfoForDate — aggregate validation", () => {
     );
     expect(totalLenValidation?.remaining).toBe(7);
   });
- 
+
   it("excludes trips outside the rolling period window", async () => {
     // Rolling period of 180 days; query date is 2024-06-01
     // Cutoff = 2023-12-04; trip in Nov 2023 is outside the window
@@ -324,7 +364,7 @@ describe("visaInfoForDate — aggregate validation", () => {
     // The old trip is excluded, so only 5 days counted — within limit of 10
     expect(result.aggregatesValid).toBe(true);
   });
- 
+
   it("shows remaining days correctly when some days have been used", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),

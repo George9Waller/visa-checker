@@ -44,4 +44,4 @@ export const SCHENGEN_COUNTRIES = [
   "ES", // Spain
   "SE", // Sweden
   "CH", // Switzerland
-]
+];

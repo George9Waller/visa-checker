@@ -59,11 +59,7 @@ export default function CreateTrip() {
         <div className="label">
           <span className="">Name</span>
         </div>
-        <input
-          name="name"
-          type="text"
-          className="input w-full max-w-xs"
-        />
+        <input name="name" type="text" className="input w-full max-w-xs" />
       </label>
       <label className="w-full max-w-xs">
         <div className="label">

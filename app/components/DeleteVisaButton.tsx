@@ -29,10 +29,7 @@ export default function DeleteVisaButton({ visaId }: { visaId: string }) {
       <button className="btn btn-error" onClick={onDeleteButtonClick}>
         Delete visa
       </button>
-      <dialog
-        ref={modal}
-        className="modal"
-      >
+      <dialog ref={modal} className="modal">
         <div className="modal-box">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}

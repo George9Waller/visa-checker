@@ -1,10 +1,6 @@
 import { COUNTRY_LABELS } from "../constants";
 
-const CountryInput = ({
-  defaultValue,
-}: {
-  defaultValue?: string;
-}) => (
+const CountryInput = ({ defaultValue }: { defaultValue?: string }) => (
   <label className="w-full max-w-xs">
     <div className="label">
       <span className="">Country</span>

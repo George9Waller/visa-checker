@@ -50,7 +50,8 @@ export default async function Home() {
               ) : (
                 <button className="btn btn-sm btn-outline btn-error">
                   ❌ Expired{" "}
-                  {visa.expires && new Date(visa.expires).toLocaleDateString("en-GB")}
+                  {visa.expires &&
+                    new Date(visa.expires).toLocaleDateString("en-GB")}
                 </button>
               )}
               <Link

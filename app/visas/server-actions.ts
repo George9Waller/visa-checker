@@ -202,73 +202,74 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
   const singleTripMaxLenIsValid = (numDays: number) =>
     visa.tripMaxLen ? numDays < visa.tripMaxLen : true;
 
-  const trips = await Promise.all(visa.VisaTrip.map(async (visaTrip) => {
-    const tripLen = await getDaysBetweenDates(
-      visaTrip.trip.startDate,
-      visaTrip.trip.endDate,
-      visa.includeEntryAndExitDates
-    );
-    const startDateValid = dateIsValid(visaTrip.trip.startDate);
-    const endDateValid = dateIsValid(visaTrip.trip.endDate);
-    const countryValid = countryIsValid(visaTrip.trip.countryCode);
-    const singleTripMaxLenValid = singleTripMaxLenIsValid(tripLen);
+  const trips = await Promise.all(
+    visa.VisaTrip.map(async (visaTrip) => {
+      const tripLen = await getDaysBetweenDates(
+        visaTrip.trip.startDate,
+        visaTrip.trip.endDate,
+        visa.includeEntryAndExitDates
+      );
+      const startDateValid = dateIsValid(visaTrip.trip.startDate);
+      const endDateValid = dateIsValid(visaTrip.trip.endDate);
+      const countryValid = countryIsValid(visaTrip.trip.countryCode);
+      const singleTripMaxLenValid = singleTripMaxLenIsValid(tripLen);
 
-    const results = [
-      {
-        name: "Country",
-        valid: countryValid,
-        description: countryValid
-          ? "Country is valid"
-          : "Country is invalid, this visa does not cover this country",
-      },
-      {
-        name: "Start Date",
-        valid: startDateValid,
-        description: startDateValid
-          ? "Valid start date"
-          : "Start date invalid, trips starts before or after visa validity",
-      },
-    ];
-    if (visa.mustExitBeforeExpiry) {
-      results.push({
-        name: "End Date",
-        valid: endDateValid,
-        description: endDateValid
-          ? "Valid end date"
-          : "End date invalid, trip ends before or after visa validity",
-      });
-    }
-    if (visa.tripMaxLen) {
-      results.push({
-        name: "Maximum Single Trip Length",
-        valid: singleTripMaxLenValid,
-        description: singleTripMaxLenValid
-          ? `Maximum single trip length is valid: ${tripLen} days (max: ${visa.tripMaxLen} days)`
-          : `Maximum single trip length invalid: ${tripLen} days (max: ${visa.tripMaxLen} days)`,
-      });
-    }
+      const results = [
+        {
+          name: "Country",
+          valid: countryValid,
+          description: countryValid
+            ? "Country is valid"
+            : "Country is invalid, this visa does not cover this country",
+        },
+        {
+          name: "Start Date",
+          valid: startDateValid,
+          description: startDateValid
+            ? "Valid start date"
+            : "Start date invalid, trips starts before or after visa validity",
+        },
+      ];
+      if (visa.mustExitBeforeExpiry) {
+        results.push({
+          name: "End Date",
+          valid: endDateValid,
+          description: endDateValid
+            ? "Valid end date"
+            : "End date invalid, trip ends before or after visa validity",
+        });
+      }
+      if (visa.tripMaxLen) {
+        results.push({
+          name: "Maximum Single Trip Length",
+          valid: singleTripMaxLenValid,
+          description: singleTripMaxLenValid
+            ? `Maximum single trip length is valid: ${tripLen} days (max: ${visa.tripMaxLen} days)`
+            : `Maximum single trip length invalid: ${tripLen} days (max: ${visa.tripMaxLen} days)`,
+        });
+      }
 
-    return {
-      valid: results.map((result) => result.valid).every(Boolean),
-      trip: {
-        id: visaTrip.trip.id,
-        startDate: visaTrip.trip.startDate,
-        endDate: visaTrip.trip.endDate,
-        name: visaTrip.trip.name,
-        country: visaTrip.trip.countryCode,
-        colour: visaTrip.trip.colour,
-        tripLen: tripLen,
-      },
-      results,
-    };
-  }));
+      return {
+        valid: results.map((result) => result.valid).every(Boolean),
+        trip: {
+          id: visaTrip.trip.id,
+          startDate: visaTrip.trip.startDate,
+          endDate: visaTrip.trip.endDate,
+          name: visaTrip.trip.name,
+          country: visaTrip.trip.countryCode,
+          colour: visaTrip.trip.colour,
+          tripLen: tripLen,
+        },
+        results,
+      };
+    })
+  );
 
   const dateWithOffset = await getDateWithOffset(date);
   const rollingCutOff = visa.rollingPeriodLen
     ? new Date(
-      dateWithOffset.getTime() -
-      visa.rollingPeriodLen * 24 * 60 * 60 * 1000
-    )
+        dateWithOffset.getTime() - visa.rollingPeriodLen * 24 * 60 * 60 * 1000
+      )
     : undefined;
 
   // Aggregate trip validation
@@ -286,30 +287,26 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
     ? validTrips.length <= visa.maxNumTrips
     : true;
 
-  const tripLengths = await Promise.all(validTrips.map(async (trip) => {
-    const startDateWithOffset = await getDateWithOffset(trip.trip.startDate);
-    const endDateWithOffset = await getDateWithOffset(trip.trip.endDate);
-    const start = rollingCutOff
-      ? Math.max(
-        startDateWithOffset.getTime(),
-        rollingCutOff.getTime()
-      )
-      : startDateWithOffset.getTime();
-    const end = Math.min(
-      endDateWithOffset.getTime(),
-      date.getTime()
-    );
-    const numDays = await getDaysBetweenDates(
-      new Date(start),
-      new Date(end),
-      visa.includeEntryAndExitDates
-    );
-    return {
-      tripId: trip.trip.id,
-      count: numDays,
-      descriptor: "days",
-    };
-  }));
+  const tripLengths = await Promise.all(
+    validTrips.map(async (trip) => {
+      const startDateWithOffset = await getDateWithOffset(trip.trip.startDate);
+      const endDateWithOffset = await getDateWithOffset(trip.trip.endDate);
+      const start = rollingCutOff
+        ? Math.max(startDateWithOffset.getTime(), rollingCutOff.getTime())
+        : startDateWithOffset.getTime();
+      const end = Math.min(endDateWithOffset.getTime(), date.getTime());
+      const numDays = await getDaysBetweenDates(
+        new Date(start),
+        new Date(end),
+        visa.includeEntryAndExitDates
+      );
+      return {
+        tripId: trip.trip.id,
+        count: numDays,
+        descriptor: "days",
+      };
+    })
+  );
   const totalTripLength = tripLengths
     .map((trip) => trip.count)
     .reduce((previousValue, currentValue) => previousValue + currentValue, 0);
@@ -323,8 +320,9 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
     aggregateValidation.push({
       name: "Rolling Period",
       valid: true,
-      description: `${visa.rollingPeriodLen
-        } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
+      description: `${
+        visa.rollingPeriodLen
+      } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
       data: validTrips.map((trip) => ({
         tripId: trip.trip.id,
         count: "",
