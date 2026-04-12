@@ -41,7 +41,7 @@ export const getDateWithOffset = (date: Date) => {
   if (offset > 0) {
     return new Date(date.getTime() + offset * 60 * 1000);
   } else if (offset < 0) {
-    return new Date(date.getTime() - offset * 60 * 1000);
+    return new Date(date.getTime() + offset * 60 * 1000);
   }
   return date;
 };

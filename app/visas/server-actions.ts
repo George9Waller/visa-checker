@@ -193,7 +193,7 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
   // Individual trip validation
 
   const dateIsValid = (tripStartDate: Date) =>
-    tripStartDate >= visa.validFrom ||
+    tripStartDate >= visa.validFrom &&
     (visa.expires ? tripStartDate <= visa.expires : true);
 
   const countryIsValid = (tripCountryCode: string) =>
