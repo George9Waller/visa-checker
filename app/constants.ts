@@ -1,7 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-
-export const prisma = new PrismaClient();
-
 export const COUNTRY_LABELS: Record<string, string> = {
   AD: "Andorra 🇦🇩",
   AE: "United Arab Emirates 🇦🇪",

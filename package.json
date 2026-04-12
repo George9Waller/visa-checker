@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@tailwindcss/postcss": "^4.2.2",
     "dotenv": "^17.4.1",
