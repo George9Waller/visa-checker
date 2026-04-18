@@ -152,12 +152,16 @@ export function TripCard({
         {/* ── Footer: visa status ── */}
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex gap-0.5 items-center">
-            <span className="material-symbols-outlined text-[16px] leading-none">
-              passport
-            </span>
-            <span className="text-[12px] font-semibold text-[#4a5d75]">
-              {trip.visa?.name ?? cfg.subLabel}
-            </span>
+            {trip.visaRequired && (
+              <>
+                <span className="material-symbols-outlined text-[16px] leading-none">
+                  passport
+                </span>
+                <span className="text-[12px] font-semibold text-[#4a5d75]">
+                  {trip.visa?.name ?? cfg.subLabel}
+                </span>
+              </>
+            )}
           </div>
           <span
             className={`flex items-center gap-1.5 text-[12px] font-bold ${cfg.textClass}`}
