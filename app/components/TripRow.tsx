@@ -111,7 +111,7 @@ export function TimelineRow({
             {trip.visa && (
               <>
                 <Text as="span" color="faint" style={{ margin: "0 6px" }}>·</Text>
-                <Text as="span" variant="body" style={{ letterSpacing: "normal" }}>{trip.visa.name}</Text>
+                <Text as="span" variant="mono-small" style={{ letterSpacing: "normal" }}>{trip.visa.name}</Text>
               </>
             )}
           </Text>

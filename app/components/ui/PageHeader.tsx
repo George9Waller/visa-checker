@@ -38,7 +38,7 @@ export function PageHeader({
       p="lg"
       px="lg"
       style={{
-        top: 52,
+        // top: 52,
         zIndex: 20,
         backgroundColor: "var(--bg)",
         borderBottom: "1px solid var(--border)",

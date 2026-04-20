@@ -51,17 +51,17 @@ export function WizardShell({
     <Flex
       variant="column"
       style={{
-        minHeight: "calc(100dvh - 52px)",
+        minHeight: "100dvh",
         backgroundColor: "var(--bg)",
       }}
     >
       {/* Header */}
       <Flex
-        variant="row-center"
+        variant="row-between"
         gap="md"
-        p="md"
-        px="lg"
+        p="none"
         style={{
+          padding: "16px 20px 12px",
           borderBottom: "1px solid var(--border)",
         }}
       >
@@ -77,14 +77,14 @@ export function WizardShell({
           <Text
             variant="mono"
             color="muted"
-            style={{ fontWeight: 700, display: "block" }}
+            style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}
             truncate
           >
-            {kicker ? `${kicker} · ${step}/${totalSteps}` : `${step}/${totalSteps}`}
+            {kicker ? `${kicker} · ${step + 1}/${totalSteps}` : `${step + 1}/${totalSteps}`}
           </Text>
           <Heading
             variant="h2"
-            style={{ fontSize: 22, display: "block" }}
+            style={{ fontSize: 18, fontWeight: "var(--w-display)", letterSpacing: "var(--track-display)", display: "block" }}
             truncate
           >
             {title}
@@ -99,10 +99,8 @@ export function WizardShell({
       {/* Progress bar */}
       <Flex
         gap="xs"
-        px="lg"
-        py="xs"
         style={{
-          borderBottom: "1px solid var(--border)",
+          padding: "8px 20px 0",
         }}
       >
         {Array.from({ length: totalSteps }).map((_, i) => (
@@ -112,7 +110,7 @@ export function WizardShell({
               flex: 1,
               height: 3,
               borderRadius: 2,
-              backgroundColor: i < step ? "var(--accent)" : "var(--border)",
+              backgroundColor: i < step ? "var(--fg)" : "var(--border)",
               transition: "background-color 0.2s",
             }}
           />
@@ -144,6 +142,7 @@ export function WizardShell({
         style={{
           bottom: 0,
           borderTop: "1px solid var(--border)",
+          padding: "14px 20px calc(14px + env(safe-area-inset-bottom))",
           background: "color-mix(in oklch, var(--bg) 90%, transparent)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
@@ -153,7 +152,12 @@ export function WizardShell({
         <Btn variant="ghost" onClick={onCancel}>
           Cancel
         </Btn>
-        <Btn variant="accent" size="md" onClick={onNext} disabled={nextDisabled}>
+        <Btn
+          variant={nextLabel.toLowerCase().includes("create") ? "accent" : "primary"}
+          size="lg"
+          onClick={onNext}
+          disabled={nextDisabled}
+        >
           {nextLabel}
           <Icon name="arrow_forward" size="sm" />
         </Btn>

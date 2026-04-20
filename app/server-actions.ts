@@ -174,6 +174,7 @@ export const getCurrentTrip = async (): Promise<TimelineTrip[]> => {
         endDate: { gte: new Date(todayStr) },
       },
       select: TRIP_SELECT,
+      orderBy: { startDate: "asc" },
     })
     .then(enrichTrips);
 };

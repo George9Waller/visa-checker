@@ -49,7 +49,7 @@ export const Box = React.forwardRef<any, BoxProps>(
     } else if (variant === "ghost") {
       variantStyle = { background: "transparent" };
     } else if (variant === "page-container") {
-      variantStyle = { maxWidth: "42rem", margin: "0 auto", width: "100%", paddingBottom: "8rem" };
+      variantStyle = { maxWidth: "42rem", margin: "0 auto", width: "100%", paddingBottom: "8rem", minHeight: "100vh%" };
     }
 
     const spacingStyle: React.CSSProperties = {};
@@ -82,7 +82,7 @@ export const Box = React.forwardRef<any, BoxProps>(
     };
 
     return (
-      <Component ref={ref} style={combinedStyle} className={className} {...props} />
+      <Component ref={ref} style={combinedStyle} className={className} href={href} {...props} />
     );
   }
 );

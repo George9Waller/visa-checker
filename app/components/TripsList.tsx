@@ -17,6 +17,7 @@ export function TripsList({
   fetcher,
   initialCursor,
   skeletonCount,
+  isPast = false,
   children,
 }: {
   title: string;
@@ -26,6 +27,7 @@ export function TripsList({
   ) => Promise<{ trips: TimelineTrip[]; hasMore: boolean; count: number }>;
   initialCursor: string;
   skeletonCount: number;
+  isPast?: boolean;
   children?: React.ReactNode;
 }) {
   const [count, setCount] = useState(0);
@@ -124,7 +126,7 @@ export function TripsList({
               <TimelineRow
                 key={trip.id}
                 trip={trip}
-                isPast={false}
+                isPast={isPast}
                 isLast
                 onClick={() => router.push(`/trips/${trip.id}`)}
                 t={t}

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Box } from "./ui/layout/Box";
@@ -23,10 +25,10 @@ export function ProfileAvatar() {
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 99,
-        fontWeight: "bold",
+        fontWeight: 600,
         width: 36,
         height: 36,
-        fontSize: 13,
+        fontSize: 11,
         fontFamily: "var(--font-body)",
         backgroundColor: "var(--fg)",
         color: "var(--bg)",

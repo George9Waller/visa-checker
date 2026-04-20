@@ -31,7 +31,10 @@ layer(base);
   --muted: #8a8370;
 
   /* Radius */
-  --r: 8px;
+  --radius: 4px;
+  --radius-lg: 8px;
+  --r: 4px;
+  --r-lg: 8px;
   --r-s: 4px;
   --r-xs: 2px;
 
@@ -60,7 +63,10 @@ layer(base);
 
   /* Typography weights & tracking */
   --w-display: 400;
+  --w-body: 400;
+  --w-bold: 600;
   --track-display: -0.02em;
+  --track-body: 0;
 
   /* Font families */
   --font-display: "Instrument Serif", "Source Serif Pro", Georgia, serif;

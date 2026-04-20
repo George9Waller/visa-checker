@@ -119,7 +119,7 @@ function totalSteps(type: VisaTypeKey): number {
 export default function CreateVisaWizard() {
   const t = useTranslations("visa");
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData2>(INITIAL);
   const [countrySearch, setCountrySearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -178,13 +178,14 @@ export default function CreateVisaWizard() {
   const handleCancel = () => router.push("/visas");
 
   /* ── Step 1: Visa type ── */
-  if (step === 1) {
+  if (step === 0) {
     return (
       <WizardShell
-        step={1}
+        step={0}
         totalSteps={maxSteps}
+        kicker={t("create")}
         title={t("typeQuestion")}
-        onNext={() => setStep(2)}
+        onNext={() => setStep(1)}
         nextLabel={t("continue")}
         nextDisabled={!form.type}
         onCancel={handleCancel}
@@ -213,14 +214,15 @@ export default function CreateVisaWizard() {
   }
 
   /* ── Step 2: Identity ── */
-  if (step === 2) {
+  if (step === 1) {
     return (
       <WizardShell
-        step={2}
+        step={1}
         totalSteps={maxSteps}
+        kicker={t("create")}
         title={t("nameStep")}
         onBack={handleBack}
-        onNext={() => setStep(3)}
+        onNext={() => setStep(2)}
         nextLabel={t("continue")}
         nextDisabled={!form.name.trim()}
         onCancel={handleCancel}
@@ -321,15 +323,16 @@ export default function CreateVisaWizard() {
   }
 
   /* ── Step 4: Validity ── */
-  if (step === 4) {
-    const isLastStep = step === maxSteps;
+  if (step === 3) {
+    const isLastStep = step === maxSteps - 1;
     return (
       <WizardShell
-        step={4}
+        step={3}
         totalSteps={maxSteps}
+        kicker={t("create")}
         title={t("validityStep")}
         onBack={handleBack}
-        onNext={() => (isLastStep ? handleSubmit() : setStep(5))}
+        onNext={() => (isLastStep ? handleSubmit() : setStep(4))}
         nextLabel={submitting ? "…" : isLastStep ? t("create") : t("continue")}
         nextDisabled={!form.validFrom || submitting}
         onCancel={handleCancel}
