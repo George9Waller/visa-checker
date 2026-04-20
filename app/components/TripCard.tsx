@@ -1,5 +1,6 @@
 import { TimelineTrip } from "@/app/server-actions";
 import { COLOURS, COUNTRY_LABELS } from "@/app/constants";
+import { splitCountryLabel } from "./utils/countries";
 
 type VisaStatus = "covered" | "no-visa" | "invalid" | "not-required";
 
@@ -8,13 +9,6 @@ function getVisaStatus(trip: TimelineTrip): VisaStatus {
   if (!trip.visa) return "no-visa";
   if (!trip.visaValid) return "invalid";
   return "covered";
-}
-
-// COUNTRY_LABELS format is "Country Name 🇫🇷" — flag is always the last token
-function splitCountryLabel(label = "") {
-  const lastSpace = label.lastIndexOf(" ");
-  if (lastSpace === -1) return { flag: "", name: label };
-  return { flag: label.slice(lastSpace + 1), name: label.slice(0, lastSpace) };
 }
 
 function formatDates(start: string, end: string): string {

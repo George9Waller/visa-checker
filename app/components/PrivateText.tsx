@@ -11,13 +11,23 @@ export default function PrivateText({
 
   return (
     <div
-      className="inline-flex justify-center items-center cursor-pointer transition-all"
+      className="inline-flex justify-center items-center cursor-pointer"
       onClick={() => setVisible(!visible)}
     >
-      <div className="relative z-0 bg-base-200 rounded">
+      <div
+        className="relative"
+        style={{ borderRadius: "var(--r-s)", backgroundColor: "var(--bg-raised)" }}
+      >
         <div>{children}</div>
         {!visible && (
-          <div className="absolute inset-0 flex justify-center items-center z-10 bg-white/30 backdrop-blur-sm rounded"></div>
+          <div
+            className="absolute inset-0 flex justify-center items-center"
+            style={{
+              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(255,255,255,0.1)",
+              borderRadius: "var(--r-s)",
+            }}
+          />
         )}
       </div>
     </div>

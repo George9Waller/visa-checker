@@ -3,67 +3,75 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getVisas } from "./server-actions";
 import PrivateText from "../components/PrivateText";
+import { StatusBadge } from "../components/ui/StatusBadge";
+import { VISA_TYPES_DISPLAY_MAP } from "./constants";
+import { getTranslations } from "next-intl/server";
+import { PageShell } from "../components/ui/PageShell";
+import { PageHeader, IconBtn } from "../components/ui/PageHeader";
+import { ContentWell } from "../components/ui/ContentWell";
+import { SelectableRow } from "../components/ui/SelectableRow";
+import { EmptyState } from "../components/ui/EmptyState";
+import { Btn } from "../components/ui/Btn";
 
-export default async function Home() {
+export default async function VisasPage() {
+  const t = await getTranslations("visa");
+  const tStatus = await getTranslations("status");
   const visas = await getVisas();
 
   return (
-    <div className="card bg-base-100 p-6 w-full flex flex-col gap-4">
-      <div className="flex items-center">
-        <h1 className="text-lg flex-1">Visas</h1>
-        <div className="flex-0 flex flex-row gap-2">
-          <Link href="/visas/create" className="btn btn-primary">
-            Create visa
-          </Link>
-          <Link href={"/"} className="btn btn-square flex-0">
-            x
-          </Link>
-        </div>
-      </div>
-      <hr />
-      <div className="flex flex-col">
-        {visas.length === 0 && <p>You have no visas created</p>}
-        {visas.map((visa) => (
-          <div
-            key={visa.id}
-            className="rounded shadow-md p-4 flex flex-row items-center"
-          >
-            <h2 className="flex-1">
-              {visa.name}
-              {visa.visaNumber && (
-                <>
-                  {" "}
-                  ·{" "}
-                  <PrivateText>
-                    <span className="font-mono">{visa.visaNumber}</span>
-                  </PrivateText>
-                </>
-              )}
-            </h2>
-            <div className="flex-0 flex items-center gap-2">
-              {!visa.expires || (visa.expires && visa.expires > new Date()) ? (
-                <button className="btn btn-sm btn-outline btn-success">
-                  ✅ In date
-                  {visa.expires &&
-                    ` until ${new Date(visa.expires).toLocaleDateString("en-GB")}`}
-                </button>
-              ) : (
-                <button className="btn btn-sm btn-outline btn-error">
-                  ❌ Expired{" "}
-                  {visa.expires &&
-                    new Date(visa.expires).toLocaleDateString("en-GB")}
-                </button>
-              )}
-              <Link
-                href={`/visas/${visa.id}`}
-                className="btn btn-sm btn-outline"
-              >
-                Info
+    <PageShell>
+      <PageHeader
+        variant="detail"
+        backHref="/"
+        title="Visas"
+        actions={
+          <IconBtn href="/visas/create" icon="add" label={t("create")} />
+        }
+      />
+
+      <ContentWell>
+        {visas.length === 0 && (
+          <EmptyState
+            icon="passport"
+            message="No visas created yet"
+            action={
+              <Link href="/visas/create" style={{ textDecoration: "none" }}>
+                <Btn variant="primary">{t("create")}</Btn>
               </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+            }
+          />
+        )}
+
+        {visas.map((visa) => {
+          const isExpired = visa.expires && visa.expires < new Date();
+          const tone = isExpired ? ("danger" as const) : ("ok" as const);
+
+          const subtitle = [
+            VISA_TYPES_DISPLAY_MAP[visa.type],
+            visa.expires
+              ? `${isExpired ? "Expired" : "Until"} ${visa.expires.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+
+          return (
+            <SelectableRow
+              key={visa.id}
+              href={`/visas/${visa.id}`}
+              title={visa.name}
+              subtitle={subtitle}
+              trailing={
+                <StatusBadge
+                  tone={tone}
+                  label={isExpired ? tStatus("expired") : tStatus("valid")}
+                  size="xs"
+                />
+              }
+            />
+          );
+        })}
+      </ContentWell>
+    </PageShell>
   );
 }

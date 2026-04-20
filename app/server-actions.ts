@@ -115,38 +115,42 @@ const TRIP_SELECT = {
 export const getTripsBefore = async (
   cursor: string,
   limit: number
-): Promise<{ trips: TimelineTrip[]; hasMore: boolean }> => {
+): Promise<{ trips: TimelineTrip[]; hasMore: boolean; count: number }> => {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Authentication required");
 
+  const where = {
+    user_id: (session.user as any).id,
+    startDate: { lt: new Date(cursor) },
+  };
+  const count = await prisma.trip.count({ where });
   const raw = await prisma.trip.findMany({
-    where: {
-      user_id: (session.user as any).id,
-      startDate: { lt: new Date(cursor) },
-    },
+    where,
     select: TRIP_SELECT,
     orderBy: { startDate: "desc" },
     take: limit + 1,
   });
 
   const hasMore = raw.length > limit;
-  const page = raw.slice(0, limit).reverse();
-  return { trips: await enrichTrips(page), hasMore };
+  const page = raw.slice(0, limit);
+  return { trips: await enrichTrips(page), hasMore, count };
 };
 
 // Fetch trips whose startDate >= cursor, returning up to `limit` in ascending order.
 export const getTripsFrom = async (
   cursor: string,
   limit: number
-): Promise<{ trips: TimelineTrip[]; hasMore: boolean }> => {
+): Promise<{ trips: TimelineTrip[]; hasMore: boolean; count: number }> => {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Authentication required");
 
+  const where = {
+    user_id: (session.user as any).id,
+    startDate: { gte: new Date(cursor) },
+  };
+  const count = await prisma.trip.count({ where });
   const raw = await prisma.trip.findMany({
-    where: {
-      user_id: (session.user as any).id,
-      startDate: { gte: new Date(cursor) },
-    },
+    where,
     select: TRIP_SELECT,
     orderBy: { startDate: "asc" },
     take: limit + 1,
@@ -154,5 +158,62 @@ export const getTripsFrom = async (
 
   const hasMore = raw.length > limit;
   const page = raw.slice(0, limit);
-  return { trips: await enrichTrips(page), hasMore };
+  return { trips: await enrichTrips(page), hasMore, count };
+};
+
+export const getCurrentTrip = async (): Promise<TimelineTrip[]> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  return await prisma.trip
+    .findMany({
+      where: {
+        user_id: (session.user as any).id,
+        startDate: { lte: new Date(todayStr) },
+        endDate: { gte: new Date(todayStr) },
+      },
+      select: TRIP_SELECT,
+    })
+    .then(enrichTrips);
+};
+
+export const getRollingWindowVisas = async (): Promise<Visa[]> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+
+  return await prisma.visa.findMany({
+    where: {
+      user_id: (session.user as any).id,
+    },
+  });
+};
+
+export type Warning = {
+  title: string;
+  description: string;
+  action: string;
+  link: string;
+};
+
+export const getWarnings = async (): Promise<Warning[]> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+
+  const upcomingTrips = await getTripsFrom(
+    new Date().toISOString().split("T")[0],
+    1000
+  );
+  const tripWarnings: Warning[] = upcomingTrips.trips
+    .filter((trip) => trip.visaRequired && !trip.visaValid)
+    .map((trip) => ({
+      title: trip.name || "Unnamed trip",
+      description: Boolean(trip.visa) ? "Visa invalid" : "Missing visa",
+      action: Boolean(trip.visa) ? "Fix visa" : "Add visa",
+      link: `/trips/${trip.id}`,
+    }));
+
+  // TODO: visa warnings
+
+  return [...tripWarnings];
 };

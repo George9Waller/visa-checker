@@ -1,96 +1,205 @@
 "use client";
 
-import CountryInput from "@/app/components/CountryInput";
-import { FormEvent } from "react";
-import { createTrip } from "../server-actions";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { createTrip } from "../server-actions";
+import { COUNTRY_LABELS } from "@/app/constants";
+import { Field, Input } from "@/app/components/ui/Field";
+import { Btn } from "@/app/components/ui/Btn";
+import { useTranslations } from "next-intl";
+import { WizardShell } from "@/app/components/ui/WizardShell";
+import { SelectableRow } from "@/app/components/ui/SelectableRow";
+import { CheckableRow } from "@/app/components/ui/CheckableRow";
+import { splitCountryLabel } from "@/app/components/utils/countries";
+import { Flex } from "@/app/components/ui/layout/Flex";
+import { Grid } from "@/app/components/ui/layout/Grid";
+import { Text } from "@/app/components/ui/typography/Text";
 
-export default function CreateTrip() {
+const TOTAL_STEPS = 3;
+
+export default function CreateTripWizard() {
+  const t = useTranslations("trip");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const today = new Date();
-  const initialStartDate = new Date(
-    searchParams.get("start") || today.toDateString()
+
+  const [step, setStep] = useState(1);
+  const [country, setCountry] = useState("");
+  const [search, setSearch] = useState("");
+  const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [visaRequired, setVisaRequired] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const sortedCountries = useMemo(
+    () =>
+      Object.keys(COUNTRY_LABELS)
+        .map((code) => ({ code, label: COUNTRY_LABELS[code] }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    []
   );
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const filteredCountries = useMemo(() => {
+    const q = search.toLowerCase();
+    return q
+      ? sortedCountries.filter(
+          (c) =>
+            c.label.toLowerCase().includes(q) ||
+            c.code.toLowerCase().includes(q)
+        )
+      : sortedCountries;
+  }, [search, sortedCountries]);
 
-    createTrip(
-      formData.get("startDate") as string,
-      formData.get("endDate") as string,
-      formData.get("country") as string,
-      (formData.get("visaRequired") as string) === "on",
-      formData.get("name") as string | null
-    )
-      .then(() => {
-        router.push("/");
-      })
-      .catch((e) => {
-        toast.error(`Error creating trip: ${e}`);
-      });
+  const durationDays = useMemo(() => {
+    if (!startDate || !endDate) return null;
+    const s = new Date(startDate + "T00:00:00");
+    const e = new Date(endDate + "T00:00:00");
+    const diff = Math.round((e.getTime() - s.getTime()) / 86400000) + 1;
+    return diff > 0 ? diff : null;
+  }, [startDate, endDate]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await createTrip(startDate, endDate, country, visaRequired, name || null);
+      router.push("/");
+    } catch (e) {
+      toast.error(`Error creating trip: ${e}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  const handleBack = () => setStep((s) => s - 1);
+  const handleCancel = () => router.push("/");
+
+  /* ── Step 1: Destination ── */
+  if (step === 1) {
+    return (
+      <WizardShell
+        kicker={t("create")}
+        step={1}
+        totalSteps={TOTAL_STEPS}
+        title={t("destination")}
+        onNext={() => setStep(2)}
+        nextLabel={t("continue")}
+        nextDisabled={!country}
+        onCancel={handleCancel}
+      >
+        <Input
+          placeholder={t("searchCountry")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="mb-4"
+        />
+        <Flex direction="column" gap={2}>
+          {filteredCountries.map(({ code, label }) => {
+            const { flag, name: cName } = splitCountryLabel(label);
+            return (
+              <SelectableRow
+                key={code}
+                selected={country === code}
+                indicator="check"
+                icon={<span style={{ fontSize: 20 }}>{flag}</span>}
+                title={cName}
+                subtitle={code}
+                onClick={() => setCountry(code)}
+              />
+            );
+          })}
+        </Flex>
+      </WizardShell>
+    );
+  }
+
+  /* ── Step 2: Dates & Name ── */
+  if (step === 2) {
+    const today = new Date().toISOString().split("T")[0];
+    return (
+      <WizardShell
+        kicker={t("create")}
+        step={2}
+        totalSteps={TOTAL_STEPS}
+        title={t("details")}
+        onBack={handleBack}
+        onNext={() => setStep(3)}
+        nextLabel={t("continue")}
+        nextDisabled={!startDate || !endDate}
+        onCancel={handleCancel}
+      >
+        <Flex direction="column" gap={20}>
+          <Field label={t("name")} hint={`${name.length} / 40`}>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value.slice(0, 40))}
+              placeholder={t("namePlaceholder")}
+            />
+          </Field>
+
+          <Grid templateColumns="1fr 1fr" gap={12}>
+            <Field label={t("startDate")} required>
+              <Input
+                type="date"
+                value={startDate}
+                min={today}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </Field>
+            <Field label={t("endDate")} required>
+              <Input
+                type="date"
+                value={endDate}
+                min={startDate || today}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </Field>
+          </Grid>
+
+          {durationDays !== null && (
+            <Flex
+              align="center"
+              justify="center"
+              borderRadius="var(--r-s)"
+              p="8px 12px"
+              bg="var(--bg-sunken)"
+              border="1px solid var(--border)"
+            >
+              <Text variant="mono" weight={700} transform="uppercase" size="var(--text-xs)" color="var(--fg-muted)" letterSpacing="0.1em">
+                {t("length")} · {durationDays} {t("days")}
+              </Text>
+            </Flex>
+          )}
+        </Flex>
+      </WizardShell>
+    );
+  }
+
+  /* ── Step 3: Visa ── */
   return (
-    <form
-      className="card bg-base-100 p-6 w-full flex flex-col gap-4"
-      onSubmit={onSubmit}
+    <WizardShell
+      kicker={t("create")}
+      step={3}
+      totalSteps={TOTAL_STEPS}
+      title={t("visa")}
+      onBack={handleBack}
+      onNext={handleSubmit}
+      nextLabel={submitting ? "…" : t("create")}
+      nextDisabled={submitting}
+      onCancel={handleCancel}
     >
-      <div className="flex items-center">
-        <h1 className="text-lg flex-1">Create Trip</h1>
-        <Link href="/" className="btn btn-square flex-0">
-          x
-        </Link>
-      </div>
-      <hr />
-      <label className="w-full max-w-xs">
-        <div className="label">
-          <span className="">Name</span>
-        </div>
-        <input name="name" type="text" className="input w-full max-w-xs" />
-      </label>
-      <label className="w-full max-w-xs">
-        <div className="label">
-          <span className="">Start date</span>
-        </div>
-        <input
-          type="date"
-          name="startDate"
-          className="input w-full max-w-xs"
-          defaultValue={searchParams.get("start") || today.toDateString()}
-          required
+      <Flex direction="column" gap={16}>
+        <CheckableRow
+          checked={visaRequired}
+          onChange={() => setVisaRequired((v) => !v)}
+          label={t("requiresVisa")}
+          hint={t("requiresVisaHint")}
         />
-      </label>
-      <label className="w-full max-w-xs">
-        <div className="label">
-          <span className="">End date</span>
-        </div>
-        <input
-          type="date"
-          name="endDate"
-          className="input w-full max-w-xs"
-          defaultValue={searchParams.get("end") || undefined}
-          required
-        />
-      </label>
-      <CountryInput />
-      <label className="w-full max-w-xs">
-        <div className="label">
-          <span className="">Visa required?</span>
-        </div>
-        <input
-          type="checkbox"
-          name="visaRequired"
-          className="checkbox"
-          defaultChecked={true}
-        />
-      </label>
-      <button type="submit" className="btn btn-primary w-fit">
-        Create
-      </button>
-    </form>
+        <Text as="p" variant="mono" size="var(--text-xs)" color="var(--fg-muted)" m={0}>
+          {visaRequired
+            ? t("requiresVisaHint")
+            : "You can link a visa later from the trip detail page."}
+        </Text>
+      </Flex>
+    </WizardShell>
   );
 }
