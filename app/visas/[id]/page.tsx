@@ -22,6 +22,10 @@ import { AlertStrip } from "@/app/components/ui/AlertStrip";
 import { TagPill } from "@/app/components/ui/TagPill";
 import { EmptyState } from "@/app/components/ui/EmptyState";
 import { splitCountryLabel } from "@/app/components/utils/countries";
+import { Flex } from "@/app/components/ui/layout/Flex";
+import { Box } from "@/app/components/ui/layout/Box";
+import { Text } from "@/app/components/ui/typography/Text";
+import { Grid } from "@/app/components/ui/layout/Grid";
 
 export default async function VisaDetail({
   params,
@@ -105,31 +109,27 @@ export default async function VisaDetail({
         {visaTripInfo.summary && !visaTripInfo.summary.valid && (
           <AlertStrip tone="danger">
             {visaTripInfo.summary.items.map((item, i) => (
-              <div key={i}>
+              <Box key={i}>
                 <AlertStrip.Title>{item.title}</AlertStrip.Title>
                 <AlertStrip.Body>{item.content}</AlertStrip.Body>
-              </div>
+              </Box>
             ))}
           </AlertStrip>
         )}
 
         {/* §01 Simulation */}
-        <div>
+        <Box>
           <SectionHeading number="01" title={t("simulation")} />
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--fg-muted)", lineHeight: 1.6, marginBottom: 12 }}>
+          <Text variant="caption" color="muted" as="p" mb="md" style={{ lineHeight: 1.6 }}>
             {t("simulationDesc")}
-          </p>
+          </Text>
           {isSimulating && (
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-xs)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                color: "var(--warn)",
-                marginBottom: 12,
-              }}
+            <Text
+              variant="mono"
+              color="warn"
+              style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }}
+              mb="md"
+              as="p"
             >
               ⚠ {t("simulating")}:{" "}
               {date.toLocaleDateString(undefined, {
@@ -137,18 +137,20 @@ export default async function VisaDetail({
                 month: "long",
                 year: "numeric",
               })}
-            </p>
+            </Text>
           )}
-          <form action={`/visas/${id}`} method="GET" style={{ display: "flex", gap: 8 }}>
+          <Flex as="form" action={`/visas/${id}`} method="GET" gap="sm">
             <input type="hidden" name="show_outside_rolling_range" value={show_outside_rolling_range?.toString()} />
-            <input
+            <Box
+              as="input"
               name="date"
               type="date"
               defaultValue={convertDateToString(date)}
+              width="full"
               style={{
                 flex: 1,
                 padding: "8px 12px",
-                fontSize: "var(--text-base)",
+                fontSize: 15,
                 fontFamily: "var(--font-body)",
                 backgroundColor: "var(--bg-raised)",
                 color: "var(--fg)",
@@ -157,12 +159,13 @@ export default async function VisaDetail({
                 outline: "none",
               }}
             />
-            <button
+            <Box
+              as="button"
               type="submit"
               style={{
                 height: 36,
                 padding: "0 14px",
-                fontSize: "var(--text-base)",
+                fontSize: 14,
                 fontFamily: "var(--font-body)",
                 fontWeight: 600,
                 backgroundColor: "var(--fg)",
@@ -173,14 +176,15 @@ export default async function VisaDetail({
               }}
             >
               Go
-            </button>
+            </Box>
             {isSimulating && (
-              <Link
+              <Box
+                as={Link}
                 href={`/visas/${id}`}
                 style={{
                   height: 36,
                   padding: "0 14px",
-                  fontSize: "var(--text-base)",
+                  fontSize: 14,
                   fontWeight: 600,
                   color: "var(--fg-muted)",
                   border: "1px solid var(--border)",
@@ -191,16 +195,16 @@ export default async function VisaDetail({
                 }}
               >
                 {t("reset")}
-              </Link>
+              </Box>
             )}
-          </form>
-        </div>
+          </Flex>
+        </Box>
 
         {/* §02 Aggregates */}
         {visaTripInfo.aggregateValidation && visaTripInfo.aggregateValidation.length > 0 && (
-          <div>
+          <Box>
             <SectionHeading number="02" title={t("aggregates")} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Flex variant="column" gap="md">
               {visaTripInfo.aggregateValidation.map((agg) => {
                 const used = agg.data?.reduce((s, d) => s + Number(d.count), 0) ?? 0;
                 const max = used + (agg.remaining ?? 0);
@@ -213,23 +217,23 @@ export default async function VisaDetail({
 
                 return (
                   <FactsCard key={agg.name} cols={2}>
-                    <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                      <div>
-                        <p style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+                    <Flex variant="row-between" style={{ gridColumn: "1 / -1", alignItems: "flex-start" }}>
+                      <Box>
+                        <Text style={{ fontWeight: 600, display: "block" }}>
                           {agg.name}
-                        </p>
-                        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--fg-muted)", margin: 0 }}>
+                        </Text>
+                        <Text variant="mono" color="muted" style={{ fontSize: 11 }}>
                           {agg.description}
-                        </p>
-                      </div>
+                        </Text>
+                      </Box>
                       <StatusBadge
                         tone={aggTone}
                         label={agg.valid ? tStatus("valid") : tStatus("expired")}
                         size="xs"
                       />
-                    </div>
+                    </Flex>
                     {max > 0 && (
-                      <div style={{ gridColumn: "1 / -1" }}>
+                      <Box style={{ gridColumn: "1 / -1" }}>
                         <UsageBar
                           value={used}
                           max={max}
@@ -241,20 +245,20 @@ export default async function VisaDetail({
                               : undefined
                           }
                         />
-                      </div>
+                      </Box>
                     )}
                   </FactsCard>
                 );
               })}
-            </div>
-          </div>
+            </Flex>
+          </Box>
         )}
 
         {/* §03 Trips */}
         {visaTripInfo.trips && visaTripInfo.trips.length > 0 ? (
-          <div>
+          <Box>
             <SectionHeading number="03" title={t("trips")} count={visaTripInfo.trips.length} />
-            <div
+            <Box
               style={{
                 border: "1px solid var(--border)",
                 borderRadius: "var(--r)",
@@ -275,88 +279,91 @@ export default async function VisaDetail({
                   const { flag, name: tripName } = splitCountryLabel(COUNTRY_LABELS[trip.trip.country] || "");
                   const displayName = trip.trip.name || tripName || COUNTRY_LABELS[trip.trip.country] || "";
                   return (
-                    <Link
+                    <Grid
+                      as={Link}
                       key={trip.trip.id}
                       href={`/trips/${trip.trip.id}`}
+                      templateColumns="auto 1fr auto"
+                      gap="md"
+                      alignItems="center"
+                      p="md"
                       style={{
-                        display: "grid",
-                        gridTemplateColumns: "auto 1fr auto",
-                        gap: 12,
-                        alignItems: "center",
-                        padding: "12px 14px",
                         textDecoration: "none",
                         borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none",
                       }}
                     >
-                      <span style={{ fontSize: 18 }}>{flag}</span>
-                      <div style={{ minWidth: 0 }}>
-                        <p style={{ fontWeight: 600, fontSize: "var(--text-base)", color: "var(--fg)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <Text style={{ fontSize: 18 }}>{flag}</Text>
+                      <Box style={{ minWidth: 0 }}>
+                        <Text style={{ fontWeight: 600, display: "block" }} truncate>
                           {displayName}
-                        </p>
-                        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--fg-muted)", margin: 0, marginTop: 2 }}>
-                          {trip.trip.startDate.toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                          {" – "}
-                          {trip.trip.endDate.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
-                          {" · "}
-                          {trip.trip.tripLen}D
+                        </Text>
+                        <Flex variant="row-center" gap="xs" mt="xs">
+                          <Text variant="mono" color="muted" style={{ fontSize: 11 }}>
+                            {trip.trip.startDate.toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                            {" – "}
+                            {trip.trip.endDate.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+                            {" · "}
+                            {trip.trip.tripLen}D
+                          </Text>
                           {inWindow && (
-                            <span style={{ color: "var(--accent)", marginLeft: 6 }}>
+                            <Text variant="mono" color="accent" style={{ fontSize: 11, fontWeight: 700 }}>
                               · {t("inWindow")}
-                            </span>
+                            </Text>
                           )}
-                        </p>
-                      </div>
+                        </Flex>
+                      </Box>
                       <StatusPip tone={tripTone} size={8} />
-                    </Link>
+                    </Grid>
                   );
                 })}
-            </div>
+            </Box>
             {tripIdInRollingPeriod.length > 0 && (
-              <form action={`/visas/${id}`} style={{ display: "flex", marginTop: 4 }}>
+              <Flex as="form" action={`/visas/${id}`} mt="xs">
                 <input type="hidden" name="date" value={convertDateToString(date)} />
                 <input
                   type="hidden"
                   name="show_outside_rolling_range"
                   value={show_outside_rolling_range ? "" : "true"}
                 />
-                <button
+                <Box
+                  as="button"
                   type="submit"
+                  p="xs"
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "var(--text-xs)",
+                    fontSize: 11,
                     color: "var(--fg-faint)",
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    padding: "4px 0",
                   }}
                 >
                   {show_outside_rolling_range ? "hide trips outside window" : "show all trips"}
-                </button>
-              </form>
+                </Box>
+              </Flex>
             )}
-          </div>
+          </Box>
         ) : (
-          <div>
+          <Box>
             <SectionHeading number="03" title={t("trips")} />
             <EmptyState icon="flight" message={t("noTrips")} />
-          </div>
+          </Box>
         )}
 
         {/* §04 Coverage */}
-        <div>
+        <Box>
           <SectionHeading number="04" title={t("coverage")} />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <Flex wrap="wrap" gap="xs">
             {visa.countries.map((code) => {
               const { flag, name } = splitCountryLabel(COUNTRY_LABELS[code] || code);
               return <TagPill key={code} flag={flag} label={name || code} />;
             })}
-          </div>
-        </div>
+          </Flex>
+        </Box>
 
         {/* §05 Documents */}
         {(visa.visaNumber || visa.documentNumber) && (
-          <div>
+          <Box>
             <SectionHeading number="05" title="Documents" />
             <FactsCard cols={2}>
               {visa.visaNumber && (
@@ -364,9 +371,9 @@ export default async function VisaDetail({
                   label="Visa number"
                   value={
                     <PrivateText>
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
+                      <Text variant="mono" style={{ fontSize: 13 }}>
                         {visa.visaNumber}
-                      </span>
+                      </Text>
                     </PrivateText>
                   }
                 />
@@ -376,15 +383,15 @@ export default async function VisaDetail({
                   label="Document number"
                   value={
                     <PrivateText>
-                      <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)" }}>
+                      <Text variant="mono" style={{ fontSize: 13 }}>
                         {visa.documentNumber}
-                      </span>
+                      </Text>
                     </PrivateText>
                   }
                 />
               )}
             </FactsCard>
-          </div>
+          </Box>
         )}
       </ContentWell>
     </PageShell>

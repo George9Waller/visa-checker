@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { Grid } from "./layout/Grid";
+import { Box } from "./layout/Box";
+import { Text } from "./typography/Text";
 
 function SelectableGridItem({
   selected,
@@ -14,49 +17,43 @@ function SelectableGridItem({
   label: string;
 }) {
   return (
-    <button
+    <Box
+      as="button"
       type="button"
       onClick={onClick}
+      p="sm"
+      width="full"
       style={{
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "8px 12px",
         borderRadius: "var(--r-s)",
         border: `1px solid ${selected ? "var(--border-strong)" : "transparent"}`,
         backgroundColor: selected ? "var(--bg-sunken)" : "transparent",
         cursor: "pointer",
         textAlign: "left",
-        width: "100%",
       }}
     >
-      {leading && <span style={{ flexShrink: 0 }}>{leading}</span>}
-      <span
+      {leading && <Box style={{ flexShrink: 0 }}>{leading}</Box>}
+      <Text
+        variant="caption"
         style={{
-          fontSize: "var(--text-sm)",
           color: "var(--fg)",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          display: "block",
         }}
+        truncate
       >
         {label}
-      </span>
-    </button>
+      </Text>
+    </Box>
   );
 }
 
 function SelectableGridBase({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: 4,
-      }}
-    >
+    <Grid columns={2} gap="xs">
       {children}
-    </div>
+    </Grid>
   );
 }
 

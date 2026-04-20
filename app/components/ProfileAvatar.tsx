@@ -1,7 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Box } from "./ui/layout/Box";
 
 export function ProfileAvatar() {
   const { data: session } = useSession();
@@ -16,10 +15,15 @@ export function ProfileAvatar() {
     : "?";
 
   return (
-    <Link
+    <Box
+      as={Link}
       href="/settings"
-      className="flex items-center justify-center rounded-full font-bold transition-opacity hover:opacity-75"
       style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 99,
+        fontWeight: "bold",
         width: 36,
         height: 36,
         fontSize: 13,
@@ -32,6 +36,6 @@ export function ProfileAvatar() {
       aria-label="Settings"
     >
       {initials}
-    </Link>
+    </Box>
   );
 }

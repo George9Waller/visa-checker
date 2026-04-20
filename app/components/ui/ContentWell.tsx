@@ -1,16 +1,10 @@
 import React from "react";
+import { Flex } from "./layout/Flex";
 
 export function ContentWell({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 24,
-      }}
-    >
+    <Flex variant="column" gap="lg" p="lg">
       {children}
-    </div>
+    </Flex>
   );
 }

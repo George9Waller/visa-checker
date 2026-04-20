@@ -1,15 +1,17 @@
 import React, { InputHTMLAttributes } from "react";
+import { Box } from "./layout/Box";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ style, className, ...props }, ref) => {
     return (
-      <input
+      <Box
+        as="input"
         ref={ref}
+        width="full"
         style={{
-          width: "100%",
-          boxSizing: "border-box",
+          boxSizing: "border-box" as const,
           padding: "12px 14px",
           background: "var(--bg-raised)",
           color: "var(--fg)",
@@ -19,10 +21,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           fontSize: 15,
           letterSpacing: "var(--track-body)",
           outline: "none",
+          transition: "border-color 0.15s",
           ...style,
         }}
-        className={`focus:border-[var(--fg)] transition-colors ${className || ""}`}
-        {...props}
+        className={className}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = "var(--fg)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = "var(--border)";
+        }}
+        {...(props as any)}
       />
     );
   }

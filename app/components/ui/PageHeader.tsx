@@ -4,6 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "./typography/Icon";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
+import { Heading } from "./typography/Heading";
 
 interface PageHeaderProps {
   variant?: "detail" | "list";
@@ -28,9 +32,12 @@ export function PageHeader({
   };
 
   return (
-    <div
+    <Box
+      as="header"
+      position="sticky"
+      p="lg"
+      px="lg"
       style={{
-        position: "sticky",
         top: 52,
         zIndex: 20,
         backgroundColor: "var(--bg)",
@@ -38,11 +45,11 @@ export function PageHeader({
         display: "flex",
         alignItems: "flex-start",
         gap: 12,
-        padding: "16px 20px",
       }}
     >
       {variant === "detail" && (
-        <button
+        <Box
+          as="button"
           onClick={handleBack}
           aria-label="Go back"
           style={{
@@ -59,47 +66,27 @@ export function PageHeader({
             cursor: "pointer",
           }}
         >
-          <Icon name="arrow_back" size="md" />
-        </button>
+          <Icon name="arrow_back" size="md" color="muted" />
+        </Box>
       )}
 
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <Box style={{ flex: 1, minWidth: 0 }}>
         {kicker && (
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-label)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              color: "var(--fg-muted)",
-              marginBottom: 2,
-            }}
-          >
+          <Text variant="mono" color="muted" mb="none" as="p" style={{ fontSize: 10, fontWeight: 700 }}>
             {kicker}
-          </p>
+          </Text>
         )}
-        <div
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-2xl)",
-            lineHeight: 1.1,
-            color: "var(--fg)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <Heading variant="h2" style={{ fontSize: 24, lineHeight: 1.1 }} truncate>
           {title}
-        </div>
-      </div>
+        </Heading>
+      </Box>
 
       {actions && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+        <Flex variant="row-center" gap="xs" style={{ flexShrink: 0 }}>
           {actions}
-        </div>
+        </Flex>
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -133,15 +120,15 @@ export function IconBtn({
 
   if (href) {
     return (
-      <Link href={href} aria-label={label} style={style}>
-        <Icon name={icon} size="md" />
-      </Link>
+      <Box as={Link} href={href} aria-label={label} style={style}>
+        <Icon name={icon} size="md" color={danger ? "danger" : "muted"} />
+      </Box>
     );
   }
 
   return (
-    <button onClick={onClick} aria-label={label} style={style}>
-      <Icon name={icon} size="md" />
-    </button>
+    <Box as="button" onClick={onClick} aria-label={label} style={style}>
+      <Icon name={icon} size="md" color={danger ? "danger" : "muted"} />
+    </Box>
   );
 }

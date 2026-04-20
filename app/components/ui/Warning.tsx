@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Flex } from "./layout/Flex";
 import { Text } from "./typography/Text";
 import { Box } from "./layout/Box";
+import { Icon } from "./typography/Icon";
 
 export function Warning({
   title,
@@ -17,31 +18,31 @@ export function Warning({
   return (
     <Link href={link} style={{ textDecoration: "none", width: "100%", display: "block" }}>
       <Flex
-        w="100%"
-        align="center"
-        justify="space-between"
-        bg="var(--bg-warn)"
-        border="1px solid var(--warn)"
-        p="10px 14px"
-        borderRadius="var(--r)"
+        variant="row-between"
+        width="full"
+        py="sm"
+        px="md"
+        style={{ 
+          background: "var(--bg-warn)", 
+          border: "1px solid var(--warn)", 
+          borderRadius: "var(--r)" 
+        }}
       >
-        <Flex align="center" gap={16}>
-          <Box w={8} h={8} borderRadius="99px" bg="var(--warn)" shrink={0} />
-          <Flex direction="column" minW={0}>
-            <Text size={13} weight={600} color="var(--fg)" truncate minW={0}>
+        <Flex variant="row-center" gap="md">
+          <Box style={{ width: 8, height: 8, borderRadius: "99px", background: "var(--warn)", flexShrink: 0 }} />
+          <Flex variant="column" minW={0}>
+            <Text variant="body" style={{ fontSize: 13, fontWeight: 600, minWidth: 0 }} truncate>
               {title}
             </Text>
-            <Text size={12} weight={400} mt={2} color="var(--fg-muted)" truncate minW={0}>
+            <Text variant="body" color="muted" mt="xs" style={{ fontSize: 12, fontWeight: 400, minWidth: 0 }} truncate>
               {description}
             </Text>
           </Flex>
         </Flex>
 
-        <Text variant="mono" size={11} color="var(--fg-muted)" letterSpacing="0.04em" shrink={0}>
+        <Text variant="mono" color="muted" style={{ fontSize: 11, letterSpacing: "0.04em", flexShrink: 0 }}>
           {action}{" "}
-          <Text as="span" className="material-symbols-outlined" size={16} style={{ verticalAlign: "middle" }}>
-            arrow_forward
-          </Text>
+          <Icon name="arrow_forward" size="sm" color="muted" style={{ verticalAlign: "middle", marginLeft: 4 }} />
         </Text>
       </Flex>
     </Link>

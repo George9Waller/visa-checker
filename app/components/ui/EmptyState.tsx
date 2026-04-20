@@ -1,5 +1,7 @@
 import React from "react";
 import { Icon } from "./typography/Icon";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
 
 export function EmptyState({
   icon,
@@ -11,31 +13,25 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div
+    <Flex
+      variant="column-center"
+      p="section"
+      gap="md"
+      textAlign="center"
       style={{
         border: "1px dashed var(--border)",
         borderRadius: "var(--r)",
-        padding: "48px 20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        gap: 12,
       }}
     >
-      <Icon name={icon} size="xl" color="var(--fg-faint)" />
-      <p
-        style={{
-          fontSize: "var(--text-base)",
-          color: "var(--fg-muted)",
-          fontWeight: 500,
-          margin: 0,
-        }}
+      <Icon name={icon} size="xl" color="faint" />
+      <Text
+        variant="body"
+        color="muted"
+        style={{ fontWeight: 500 }}
       >
         {message}
-      </p>
+      </Text>
       {action}
-    </div>
+    </Flex>
   );
 }

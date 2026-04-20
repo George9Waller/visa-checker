@@ -1,3 +1,5 @@
+import { Box } from "./layout/Box";
+
 type Tone = "ok" | "warn" | "danger" | "muted";
 
 const TONE_COLOR: Record<Tone, string> = {
@@ -17,12 +19,16 @@ export function StatusPip({
   className?: string;
 }) {
   return (
-    <span
-      className={`inline-block shrink-0 rounded-full ${className}`}
+    <Box
+      as="span"
+      className={className}
       style={{
+        display: "inline-block",
+        flexShrink: 0,
         width: size,
         height: size,
         backgroundColor: TONE_COLOR[tone],
+        borderRadius: "50%",
       }}
     />
   );

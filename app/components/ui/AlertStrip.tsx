@@ -1,38 +1,40 @@
 import React from "react";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
 
 type Tone = "ok" | "warn" | "danger" | "muted";
 
 function AlertStripTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+    <Text style={{ fontSize: 13, fontWeight: 600, display: "block" }}>
       {children}
-    </p>
+    </Text>
   );
 }
 
 function AlertStripBody({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontSize: "var(--text-sm)", color: "var(--fg-muted)", margin: 0 }}>
+    <Text variant="caption" color="muted" as="p">
       {children}
-    </p>
+    </Text>
   );
 }
 
 function AlertStripBase({ tone, children }: { tone: Tone; children: React.ReactNode }) {
   return (
-    <div
+    <Flex
+      variant="column"
+      gap="xs"
+      p="md"
       style={{
         borderLeft: `3px solid var(--${tone})`,
         backgroundColor: `color-mix(in oklch, var(--${tone}) 8%, transparent)`,
         borderRadius: "var(--r-s)",
-        padding: "12px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
       }}
     >
       {children}
-    </div>
+    </Flex>
   );
 }
 

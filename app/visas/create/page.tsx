@@ -189,7 +189,7 @@ export default function CreateVisaWizard() {
         nextDisabled={!form.type}
         onCancel={handleCancel}
       >
-        <Flex direction="column" gap={8}>
+        <Flex variant="column" gap="sm">
           {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
             const meta = VISA_TYPE_META[key];
             return (
@@ -225,7 +225,7 @@ export default function CreateVisaWizard() {
         nextDisabled={!form.name.trim()}
         onCancel={handleCancel}
       >
-        <Flex direction="column" gap={20}>
+        <Flex variant="column" gap="lg">
           <Field label={t("name")} required>
             <Input
               value={form.name}
@@ -272,8 +272,8 @@ export default function CreateVisaWizard() {
         nextLabel={t("continue")}
         onCancel={handleCancel}
       >
-        <Flex direction="column" gap={12}>
-          <Flex align="center" gap={8}>
+        <Flex variant="column" gap="md">
+          <Flex variant="row-center" gap="sm">
             <Btn
               variant="outline"
               size="sm"
@@ -288,7 +288,7 @@ export default function CreateVisaWizard() {
             >
               {t("clear")}
             </Btn>
-            <Text variant="mono" size="var(--text-xs)" weight={700} ml="auto" color="var(--fg-muted)">
+            <Text variant="mono" color="muted" style={{ fontSize: "var(--text-xs)", fontWeight: "bold", marginLeft: "auto" }}>
               {form.countries.length} selected
             </Text>
           </Flex>
@@ -299,7 +299,7 @@ export default function CreateVisaWizard() {
             onChange={(e) => setCountrySearch(e.target.value)}
           />
 
-          <Box maxH={360} overflow="auto">
+          <Box style={{ maxHeight: 360, overflow: "auto" }}>
             <SelectableGrid>
               {filteredCountries.map(({ code, label }) => {
                 const { flag, name: cName } = splitCountryLabel(label);
@@ -334,7 +334,7 @@ export default function CreateVisaWizard() {
         nextDisabled={!form.validFrom || submitting}
         onCancel={handleCancel}
       >
-        <Flex direction="column" gap={20}>
+        <Flex variant="column" gap="lg">
           <Field label={t("validFrom")} required>
             <Input
               type="date"
@@ -380,9 +380,9 @@ export default function CreateVisaWizard() {
       nextDisabled={submitting}
       onCancel={handleCancel}
     >
-      <Flex direction="column" gap={20}>
+      <Flex variant="column" gap="lg">
         {showRolling && (
-          <Grid templateColumns="1fr 1fr" gap={12}>
+          <Grid columns={2} gap="md">
             <Field label={t("rollingLimit")}>
               <Input
                 type="number"
@@ -417,7 +417,7 @@ export default function CreateVisaWizard() {
             />
           </Field>
         )}
-        <Grid templateColumns="1fr 1fr" gap={12}>
+        <Grid columns={2} gap="md">
           <Field label={t("maxTrips")}>
             <Input
               type="number"

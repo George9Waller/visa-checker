@@ -1,9 +1,10 @@
 import React from "react";
+import { Flex } from "./layout/Flex";
 
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", paddingBottom: 128 }}>
+    <Flex variant="column" pb="section">
       {children}
-    </div>
+    </Flex>
   );
 }

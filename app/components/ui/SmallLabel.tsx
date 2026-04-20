@@ -5,12 +5,11 @@ export function SmallLabel({ text, muted }: { text: string; muted: boolean }) {
     <Text
       as="div"
       variant="mono"
-      size={12}
-      color={muted ? "var(--fg-faint)" : "var(--fg-muted)"}
-      letterSpacing="0.15em"
-      pl={4}
-      mb={8}
-      pt={4}
+      color={muted ? "faint" : "muted"}
+      pl="xs"
+      pt="xs"
+      mb="sm"
+      style={{ fontSize: 12, letterSpacing: "0.15em" }}
     >
       {text}
     </Text>

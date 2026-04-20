@@ -1,6 +1,8 @@
-"use client";
-
 import React from "react";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
+import { Icon } from "./typography/Icon";
 
 export function CheckableRow({
   checked,
@@ -14,9 +16,12 @@ export function CheckableRow({
   hint?: string;
 }) {
   return (
-    <button
+    <Box
+      as="button"
       type="button"
       onClick={onChange}
+      p="none"
+      width="full"
       style={{
         display: "flex",
         alignItems: "flex-start",
@@ -25,17 +30,13 @@ export function CheckableRow({
         background: "none",
         border: "none",
         textAlign: "left",
-        width: "100%",
-        padding: 0,
       }}
     >
-      <div
+      <Flex
+        variant="row-center"
         style={{
           width: 20,
           height: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           borderRadius: 4,
           border: `1.5px solid ${checked ? "var(--fg)" : "var(--border-strong)"}`,
           backgroundColor: checked ? "var(--fg)" : "transparent",
@@ -44,24 +45,19 @@ export function CheckableRow({
         }}
       >
         {checked && (
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: 13, color: "var(--bg)" }}
-          >
-            check
-          </span>
+          <Icon name="check" size="xs" color="inverse" />
         )}
-      </div>
-      <div>
-        <p style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--fg)", margin: 0 }}>
+      </Flex>
+      <Box>
+        <Text style={{ fontWeight: 600, display: "block" }}>
           {label}
-        </p>
+        </Text>
         {hint && (
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--fg-muted)", margin: 0, marginTop: 2 }}>
+          <Text variant="caption" color="muted" mt="xs" as="p">
             {hint}
-          </p>
+          </Text>
         )}
-      </div>
-    </button>
+      </Box>
+    </Box>
   );
 }

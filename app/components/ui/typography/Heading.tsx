@@ -1,32 +1,65 @@
 import React from "react";
 import { Box, BoxProps } from "../layout/Box";
+import { TextColor } from "./Text";
 
-export interface HeadingProps extends BoxProps {
+export interface HeadingProps extends Omit<BoxProps, "variant"> {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  size?: number | string;
-  weight?: string | number;
-  color?: string;
-  letterSpacing?: string | number;
-  lineHeight?: string | number;
+  variant?: "h1" | "h2" | "h3" | "h4";
+  color?: TextColor;
+  truncate?: boolean;
 }
 
+const COLOR_MAP: Record<TextColor, string> = {
+  default: "var(--fg)",
+  muted: "var(--fg-muted)",
+  faint: "var(--fg-faint)",
+  inverse: "var(--bg)",
+  danger: "var(--danger)",
+  warn: "var(--warn)",
+  ok: "var(--ok)",
+  accent: "var(--accent)",
+};
+
 export const Heading = React.forwardRef<HTMLElement, HeadingProps>(
-  ({ level = 2, size, weight, color, letterSpacing, lineHeight, style, ...props }, ref) => {
+  ({ level = 2, variant, color, truncate, style, className, ...props }, ref) => {
     const Component = `h${level}` as React.ElementType;
+    
+    const actualVariant = variant || `h${level}` as "h1" | "h2" | "h3" | "h4";
+    
+    let variantStyle: React.CSSProperties = {
+      fontFamily: "var(--font-display)",
+      fontWeight: "var(--w-display)",
+      color: "var(--fg)",
+      letterSpacing: "var(--track-display)",
+      margin: 0,
+    };
+    
+    if (actualVariant === "h1") {
+      variantStyle = { ...variantStyle, fontSize: 44, lineHeight: 1 };
+    } else if (actualVariant === "h2") {
+      variantStyle = { ...variantStyle, fontSize: 38, lineHeight: 1.02 };
+    } else if (actualVariant === "h3") {
+      variantStyle = { ...variantStyle, fontSize: 28, lineHeight: 1.05 };
+    } else if (actualVariant === "h4") {
+      variantStyle = { ...variantStyle, fontSize: 20, lineHeight: 1.1 };
+    }
+
+    if (color) {
+      variantStyle.color = COLOR_MAP[color];
+    }
+
     return (
       <Box
         as={Component}
         ref={ref}
         style={{
-          fontFamily: "var(--font-display)",
-          fontSize: size,
-          fontWeight: weight || "var(--w-display)",
-          color: color || "var(--fg)",
-          letterSpacing: letterSpacing || "var(--track-display)",
-          lineHeight: lineHeight || 1.1,
-          margin: 0,
+          ...variantStyle,
+          whiteSpace: truncate ? "nowrap" : undefined,
+          overflow: truncate ? "hidden" : undefined,
+          textOverflow: truncate ? "ellipsis" : undefined,
           ...style,
         }}
+        className={className}
         {...props}
       />
     );

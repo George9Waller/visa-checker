@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Box } from "./ui/layout/Box";
+import { Flex } from "./ui/layout/Flex";
 
 export default function PrivateText({
   children,
@@ -10,26 +12,38 @@ export default function PrivateText({
   const [visible, setVisible] = useState(false);
 
   return (
-    <div
-      className="inline-flex justify-center items-center cursor-pointer"
+    <Box
+      as="span"
       onClick={() => setVisible(!visible)}
+      style={{
+        display: "inline-flex",
+        justifyContent: "center",
+        alignItems: "center",
+        cursor: "pointer",
+      }}
     >
-      <div
-        className="relative"
+      <Box
+        position="relative"
         style={{ borderRadius: "var(--r-s)", backgroundColor: "var(--bg-raised)" }}
       >
-        <div>{children}</div>
+        <Box>{children}</Box>
         {!visible && (
-          <div
-            className="absolute inset-0 flex justify-center items-center"
+          <Flex
+            position="absolute"
+            variant="row-center"
             style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: "center",
               backdropFilter: "blur(6px)",
               backgroundColor: "rgba(255,255,255,0.1)",
               borderRadius: "var(--r-s)",
             }}
           />
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

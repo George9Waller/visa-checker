@@ -4,6 +4,12 @@ import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { deleteVisa } from "../visas/server-actions";
 import { toast } from "react-toastify";
+import { Box } from "./ui/layout/Box";
+import { Flex } from "./ui/layout/Flex";
+import { Icon } from "./ui/typography/Icon";
+import { Text } from "./ui/typography/Text";
+import { Heading } from "./ui/typography/Heading";
+import { Btn } from "./ui/Btn";
 
 export default function DeleteVisaButton({ visaId }: { visaId: string }) {
   const router = useRouter();
@@ -22,12 +28,16 @@ export default function DeleteVisaButton({ visaId }: { visaId: string }) {
 
   return (
     <>
-      <button
+      <Box
+        as="button"
         onClick={() => modal.current?.showModal()}
-        className="flex items-center justify-center rounded-[var(--r-s)] transition-colors"
         style={{
           width: 32,
           height: 32,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "var(--r-s)",
           color: "var(--danger)",
           border: "1px solid var(--border)",
           background: "none",
@@ -35,10 +45,8 @@ export default function DeleteVisaButton({ visaId }: { visaId: string }) {
         }}
         aria-label="Delete visa"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 17 }}>
-          delete
-        </span>
-      </button>
+        <Icon name="delete" style={{ fontSize: 17 }} />
+      </Box>
 
       <dialog
         ref={modal}
@@ -53,52 +61,22 @@ export default function DeleteVisaButton({ visaId }: { visaId: string }) {
           width: "calc(100vw - 48px)",
         }}
       >
-        <div style={{ padding: "24px 24px 20px" }}>
-          <h3
-            className="font-semibold"
-            style={{ fontSize: 16, color: "var(--fg)", marginBottom: 8 }}
-          >
+        <Box p="lg">
+          <Heading variant="h4" mb="xs">
             Delete this visa?
-          </h3>
-          <p style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 20 }}>
+          </Heading>
+          <Text color="muted" mb="lg" as="p">
             This will permanently delete the visa and unlink it from any trips.
-          </p>
-          <div className="flex gap-2 justify-end">
-            <button
-              onClick={() => modal.current?.close()}
-              style={{
-                height: 34,
-                padding: "0 14px",
-                fontSize: 13,
-                fontFamily: "var(--font-body)",
-                color: "var(--fg-muted)",
-                backgroundColor: "transparent",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--r-s)",
-                cursor: "pointer",
-              }}
-            >
+          </Text>
+          <Flex variant="row" gap="sm" style={{ justifyContent: "flex-end" }}>
+            <Btn variant="ghost" onClick={() => modal.current?.close()}>
               Cancel
-            </button>
-            <button
-              onClick={deleteVisaHandler}
-              style={{
-                height: 34,
-                padding: "0 14px",
-                fontSize: 13,
-                fontFamily: "var(--font-body)",
-                fontWeight: 600,
-                color: "#fff",
-                backgroundColor: "var(--danger)",
-                border: "none",
-                borderRadius: "var(--r-s)",
-                cursor: "pointer",
-              }}
-            >
+            </Btn>
+            <Btn variant="danger" onClick={deleteVisaHandler}>
               Delete visa
-            </button>
-          </div>
-        </div>
+            </Btn>
+          </Flex>
+        </Box>
       </dialog>
     </>
   );

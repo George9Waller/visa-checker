@@ -1,19 +1,15 @@
 "use client";
 
 import React from "react";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
 
 function ModalTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p
-      style={{
-        fontSize: "var(--text-md)",
-        fontWeight: 600,
-        color: "var(--fg)",
-        margin: 0,
-      }}
-    >
+    <Text style={{ fontSize: 16, fontWeight: 600, display: "block" }}>
       {children}
-    </p>
+    </Text>
   );
 }
 
@@ -29,9 +25,9 @@ function ModalBase({
   if (!open) return null;
 
   return (
-    <div
+    <Box
+      position="fixed"
       style={{
-        position: "fixed",
         inset: 0,
         zIndex: 50,
         display: "flex",
@@ -44,22 +40,21 @@ function ModalBase({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
+      <Flex
+        variant="column"
+        gap="md"
+        p="xl"
+        width="full"
         style={{
           backgroundColor: "var(--bg-raised)",
           border: "1px solid var(--border)",
           borderRadius: "var(--r)",
-          padding: 24,
           maxWidth: 360,
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
         }}
       >
         {children}
-      </div>
-    </div>
+      </Flex>
+    </Box>
   );
 }
 

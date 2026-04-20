@@ -3,6 +3,10 @@
 import React from "react";
 import { Btn } from "./Btn";
 import { Icon } from "./typography/Icon";
+import { Flex } from "./layout/Flex";
+import { Box } from "./layout/Box";
+import { Text } from "./typography/Text";
+import { Heading } from "./typography/Heading";
 
 interface WizardShellProps {
   step: number;
@@ -44,82 +48,65 @@ export function WizardShell({
   };
 
   return (
-    <div
+    <Flex
+      variant="column"
       style={{
-        display: "flex",
-        flexDirection: "column",
         minHeight: "calc(100dvh - 52px)",
         backgroundColor: "var(--bg)",
       }}
     >
       {/* Header */}
-      <div
+      <Flex
+        variant="row-center"
+        gap="md"
+        p="md"
+        px="lg"
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "16px 20px",
           borderBottom: "1px solid var(--border)",
         }}
       >
         {onBack ? (
-          <button onClick={onBack} style={iconBtnStyle} aria-label="Back">
+          <Box as="button" onClick={onBack} style={iconBtnStyle} aria-label="Back">
             <Icon name="arrow_back" size="md" />
-          </button>
+          </Box>
         ) : (
-          <div style={{ width: 32, flexShrink: 0 }} />
+          <Box style={{ width: 32, flexShrink: 0 }} />
         )}
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-label)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              color: "var(--fg-muted)",
-              margin: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            variant="mono"
+            color="muted"
+            style={{ fontWeight: 700, display: "block" }}
+            truncate
           >
             {kicker ? `${kicker} · ${step}/${totalSteps}` : `${step}/${totalSteps}`}
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-xl)",
-              color: "var(--fg)",
-              letterSpacing: "var(--track-display)",
-              margin: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+          </Text>
+          <Heading
+            variant="h2"
+            style={{ fontSize: 22, display: "block" }}
+            truncate
           >
             {title}
-          </p>
-        </div>
+          </Heading>
+        </Box>
 
-        <button onClick={onCancel} style={iconBtnStyle} aria-label="Cancel">
+        <Box as="button" onClick={onCancel} style={iconBtnStyle} aria-label="Cancel">
           <Icon name="close" size="md" />
-        </button>
-      </div>
+        </Box>
+      </Flex>
 
       {/* Progress bar */}
-      <div
+      <Flex
+        gap="xs"
+        px="lg"
+        py="xs"
         style={{
-          display: "flex",
-          gap: 4,
-          padding: "8px 20px 0",
           borderBottom: "1px solid var(--border)",
-          paddingBottom: 8,
         }}
       >
         {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
+          <Box
             key={i}
             style={{
               flex: 1,
@@ -130,37 +117,37 @@ export function WizardShell({
             }}
           />
         ))}
-      </div>
+      </Flex>
 
       {/* Body */}
-      <div
+      <Box
         style={{
           flex: 1,
-          overflowY: "auto",
+          overflowY: "auto" as const,
           padding: "22px 20px 120px",
           maxWidth: 560,
           margin: "0 auto",
           width: "100%",
-          boxSizing: "border-box",
+          boxSizing: "border-box" as const,
         }}
       >
         {children}
-      </div>
+      </Box>
 
       {/* Footer */}
-      <div
+      <Flex
+        variant="row-between"
+        gap="md"
+        p="md"
+        px="lg"
+        position="sticky"
         style={{
-          position: "sticky",
           bottom: 0,
           borderTop: "1px solid var(--border)",
-          padding: "14px 20px",
           background: "color-mix(in oklch, var(--bg) 90%, transparent)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 10,
+          zIndex: 10,
         }}
       >
         <Btn variant="ghost" onClick={onCancel}>
@@ -170,7 +157,7 @@ export function WizardShell({
           {nextLabel}
           <Icon name="arrow_forward" size="sm" />
         </Btn>
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 }

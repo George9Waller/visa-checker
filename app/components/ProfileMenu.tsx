@@ -5,6 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type ColorScheme, getSavedScheme, saveScheme } from "./ThemeProvider";
 import { useTranslations } from "next-intl";
+import { Box } from "./ui/layout/Box";
+import { Flex } from "./ui/layout/Flex";
+import { Text } from "./ui/typography/Text";
+import { Icon } from "./ui/typography/Icon";
+import { Heading } from "./ui/typography/Heading";
 
 const LOCALES = [
   { code: "en", label: "English" },
@@ -55,12 +60,17 @@ export function ProfileMenu({ locale }: { locale: string }) {
     : "?";
 
   return (
-    <div className="relative" ref={menuRef}>
+    <Box position="relative" ref={menuRef}>
       {/* Avatar button */}
-      <button
+      <Box
+        as="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-center rounded-full font-bold transition-opacity hover:opacity-80"
         style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 99,
+          fontWeight: "bold",
           width: 36,
           height: 36,
           fontSize: 13,
@@ -73,13 +83,17 @@ export function ProfileMenu({ locale }: { locale: string }) {
         aria-label="Open settings"
       >
         {initials}
-      </button>
+      </Box>
 
       {/* Dropdown menu */}
       {open && (
-        <div
-          className="absolute right-0 top-10 z-50 flex flex-col"
+        <Flex
+          variant="column"
+          position="absolute"
           style={{
+            right: 0,
+            top: 40,
+            zIndex: 50,
             width: 220,
             backgroundColor: "var(--bg-raised)",
             border: "1px solid var(--border)",
@@ -88,30 +102,41 @@ export function ProfileMenu({ locale }: { locale: string }) {
           }}
         >
           {/* Appearance */}
-          <div
-            className="px-4 py-3"
+          <Box
+            px="md"
+            py="sm"
             style={{ borderBottom: "1px solid var(--border)" }}
           >
-            <p
-              className="font-mono font-bold uppercase tracking-wider mb-2"
-              style={{ fontSize: 10, color: "var(--fg-muted)" }}
+            <Text
+              variant="mono"
+              color="muted"
+              mb="xs"
+              as="p"
+              style={{ fontWeight: "bold", fontSize: 10 }}
             >
               {t("appearance")}
-            </p>
-            <div
-              className="flex rounded-[var(--r-s)] overflow-hidden"
+            </Text>
+            <Flex
+              variant="row"
               style={{
+                borderRadius: "var(--r-s)",
+                overflow: "hidden",
                 border: "1px solid var(--border)",
                 backgroundColor: "var(--bg-sunken)",
               }}
             >
               {(["light", "system", "dark"] as ColorScheme[]).map((s) => (
-                <button
+                <Box
+                  as="button"
                   key={s}
                   onClick={() => handleScheme(s)}
-                  className="flex-1 flex items-center justify-center gap-1 transition-colors"
                   style={{
+                    flex: 1,
                     height: 30,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4,
                     fontSize: 12,
                     fontFamily: "var(--font-body)",
                     fontWeight: scheme === s ? 600 : 400,
@@ -127,29 +152,39 @@ export function ProfileMenu({ locale }: { locale: string }) {
                     {s === "light" ? "☀" : s === "dark" ? "☾" : "⊙"}
                   </span>
                   <span>{t(s)}</span>
-                </button>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Flex>
+          </Box>
 
           {/* Language */}
-          <div
-            className="px-4 py-3"
+          <Box
+            px="md"
+            py="sm"
             style={{ borderBottom: "1px solid var(--border)" }}
           >
-            <p
-              className="font-mono font-bold uppercase tracking-wider mb-2"
-              style={{ fontSize: 10, color: "var(--fg-muted)" }}
+            <Text
+              variant="mono"
+              color="muted"
+              mb="xs"
+              as="p"
+              style={{ fontWeight: "bold", fontSize: 10 }}
             >
               {t("language")}
-            </p>
-            <div className="flex flex-col gap-1">
+            </Text>
+            <Flex variant="column" gap="xs">
               {LOCALES.map((l) => (
-                <button
+                <Box
+                  as="button"
                   key={l.code}
                   onClick={() => handleLocale(l.code)}
-                  className="flex items-center justify-between rounded-[var(--r-xs)] px-2 py-1.5 transition-colors text-left"
                   style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderRadius: "var(--r-xs)",
+                    padding: "6px 8px",
+                    textAlign: "left",
                     fontSize: 13,
                     fontFamily: "var(--font-body)",
                     color: "var(--fg)",
@@ -172,23 +207,28 @@ export function ProfileMenu({ locale }: { locale: string }) {
                 >
                   {l.label}
                   {locale === l.code && (
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 14, color: "var(--ok)" }}
-                    >
-                      check
-                    </span>
+                    <Icon
+                      name="check"
+                      size="xs"
+                      color="ok"
+                    />
                   )}
-                </button>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Flex>
+          </Box>
 
           {/* Sign out */}
-          <button
+          <Box
+            as="button"
             onClick={() => signOut()}
-            className="flex items-center gap-2 px-4 py-3 w-full text-left transition-colors"
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 16px",
+              width: "100%",
+              textAlign: "left",
               fontSize: 13,
               fontFamily: "var(--font-body)",
               color: "var(--danger)",
@@ -205,16 +245,14 @@ export function ProfileMenu({ locale }: { locale: string }) {
               e.currentTarget.style.backgroundColor = "transparent";
             }}
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 16 }}
-            >
-              logout
-            </span>
+            <Icon
+              name="logout"
+              size="sm"
+            />
             {t("signOut")}
-          </button>
-        </div>
+          </Box>
+        </Flex>
       )}
-    </div>
+    </Box>
   );
 }

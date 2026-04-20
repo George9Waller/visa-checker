@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Box } from "./ui/layout/Box";
+import { Flex } from "./ui/layout/Flex";
+import { Text } from "./ui/typography/Text";
 
 export function FAB() {
   const t = useTranslations("fab");
@@ -20,28 +23,16 @@ export function FAB() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const itemStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "14px 18px",
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    color: "var(--fg)",
-    textAlign: "left",
-    fontFamily: "var(--font-body)",
-    fontSize: 15,
-    textDecoration: "none",
-  };
-
   return (
-    <div ref={ref} className="fixed right-5 z-50" style={{ bottom: 24 }}>
+    <Box 
+      ref={ref} 
+      position="fixed" 
+      style={{ right: 20, zIndex: 50, bottom: 24 }}
+    >
       {open && (
-        <div
+        <Box
+          position="absolute"
           style={{
-            position: "absolute",
             bottom: "calc(100% + 10px)",
             right: 0,
             width: 244,
@@ -52,32 +43,37 @@ export function FAB() {
             overflow: "hidden",
           }}
         >
-          <Link href="/trips/create" onClick={() => setOpen(false)} style={itemStyle}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 8h12M8 2v12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600 }}>{t("trip")}</div>
-              <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>{t("tripDesc")}</div>
-            </div>
-          </Link>
+          <Box as={Link} href="/trips/create" onClick={() => setOpen(false)} p="none" style={{ textDecoration: "none", display: "block" }}>
+            <Flex variant="row" p="md" gap="md" style={{ background: "transparent", color: "var(--fg)", textAlign: "left" }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginTop: 2 }}>
+                <path d="M2 8h12M8 2v12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <Box style={{ flex: 1 }}>
+                <Text style={{ fontWeight: 600, display: "block" }}>{t("trip")}</Text>
+                <Text variant="caption" color="muted" style={{ display: "block" }}>{t("tripDesc")}</Text>
+              </Box>
+            </Flex>
+          </Box>
 
-          <div style={{ height: 1, background: "var(--border)" }} />
+          <Box style={{ height: 1, background: "var(--border)" }} />
 
-          <Link href="/visas/create" onClick={() => setOpen(false)} style={itemStyle}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
-              <path d="M2 6h12" stroke="currentColor" strokeWidth="1.3" />
-            </svg>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600 }}>{t("visa")}</div>
-              <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>{t("visaDesc")}</div>
-            </div>
-          </Link>
-        </div>
+          <Box as={Link} href="/visas/create" onClick={() => setOpen(false)} p="none" style={{ textDecoration: "none", display: "block" }}>
+            <Flex variant="row" p="md" gap="md" style={{ background: "transparent", color: "var(--fg)", textAlign: "left" }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginTop: 2 }}>
+                <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M2 6h12" stroke="currentColor" strokeWidth="1.3" />
+              </svg>
+              <Box style={{ flex: 1 }}>
+                <Text style={{ fontWeight: 600, display: "block" }}>{t("visa")}</Text>
+                <Text variant="caption" color="muted" style={{ display: "block" }}>{t("visaDesc")}</Text>
+              </Box>
+            </Flex>
+          </Box>
+        </Box>
       )}
 
-      <button
+      <Box
+        as="button"
         onClick={() => setOpen((v) => !v)}
         style={{
           width: 56,
@@ -99,7 +95,7 @@ export function FAB() {
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
           <path d="M3 11h16M11 3v16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
-      </button>
-    </div>
+      </Box>
+    </Box>
   );
 }

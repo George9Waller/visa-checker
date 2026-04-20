@@ -18,22 +18,20 @@ export function SectionHeading({
 }) {
   return (
     <Flex
-      className={className}
-      align="baseline"
-      gap={4}
-      m="28px 0 10px"
-      wrap="nowrap"
-      minW={0}
-      style={style}
+      variant="row"
+      mt="lg"
+      mb="sm"
+      gap="xs"
+      style={{ alignItems: "baseline", flexWrap: "nowrap", minWidth: 0, ...style }}
     >
-      <Text variant="mono" size={14} color="var(--fg-faint)" letterSpacing="0.15em" shrink={0}>
+      <Text variant="mono" color="faint" style={{ fontSize: 14, letterSpacing: "0.15em", flexShrink: 0 }}>
         {number}
       </Text>
-      <Heading size={20} color="var(--fg)" minW={0} className="font-display">
+      <Heading variant="h4" style={{ fontSize: 20, minWidth: 0 }}>
         {title}
       </Heading>
       {count !== undefined && (
-        <Text as="span" variant="mono" size={11} color="var(--fg-faint)" letterSpacing="0.03em" shrink={0} style={{ whiteSpace: "nowrap" }}>
+        <Text as="span" variant="mono" color="faint" style={{ fontSize: 11, letterSpacing: "0.03em", flexShrink: 0, whiteSpace: "nowrap" }}>
           · {String(count).padStart(2, "0")}
         </Text>
       )}

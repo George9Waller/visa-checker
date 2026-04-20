@@ -3,6 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { Icon } from "./typography/Icon";
+import { Flex } from "./layout/Flex";
+import { Box } from "./layout/Box";
+import { Text } from "./typography/Text";
 
 interface SelectableRowProps {
   selected?: boolean;
@@ -25,101 +28,88 @@ export function SelectableRow({
   onClick,
   href,
 }: SelectableRowProps) {
-  const containerStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 16px",
-    borderRadius: "var(--r)",
-    border: `1px solid ${selected ? "var(--border-strong)" : "var(--border)"}`,
-    backgroundColor: selected ? "var(--bg-sunken)" : "var(--bg-raised)",
-    cursor: "pointer",
-    textDecoration: "none",
-    width: "100%",
-    textAlign: "left",
+  const commonProps = {
+    p: "md" as const,
+    gap: "md" as const,
+    style: {
+      borderRadius: "var(--r)",
+      border: `1px solid ${selected ? "var(--border-strong)" : "var(--border)"}`,
+      backgroundColor: selected ? "var(--bg-sunken)" : "var(--bg-raised)",
+      cursor: "pointer",
+      textDecoration: "none",
+      textAlign: "left" as const,
+    },
   };
 
   const content = (
-    <>
+    <Flex variant="row-center" width="full" gap="md">
       {icon && (
-        <span style={{ flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+        <Box style={{ flexShrink: 0, lineHeight: 1 }}>{icon}</Box>
       )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p
+      <Box style={{ flex: 1, minWidth: 0 }}>
+        <Text
           style={{
-            fontSize: "var(--text-base)",
             fontWeight: 600,
-            color: "var(--fg)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            margin: 0,
+            display: "block",
           }}
+          truncate
         >
           {title}
-        </p>
+        </Text>
         {subtitle && (
-          <p
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              color: "var(--fg-muted)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              margin: 0,
-              marginTop: 2,
-            }}
+          <Text
+            variant="mono"
+            color="muted"
+            style={{ fontSize: 11, display: "block" }}
+            mt="xs"
+            truncate
           >
             {subtitle}
-          </p>
+          </Text>
         )}
-      </div>
-      {trailing && <span style={{ flexShrink: 0 }}>{trailing}</span>}
+      </Box>
+      {trailing && <Box style={{ flexShrink: 0 }}>{trailing}</Box>}
       {indicator === "radio" && (
-        <span
+        <Flex
+          variant="row-center"
           style={{
             width: 18,
             height: 18,
             borderRadius: "50%",
             border: `2px solid ${selected ? "var(--fg)" : "var(--border-strong)"}`,
             backgroundColor: selected ? "var(--fg)" : "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             flexShrink: 0,
           }}
         >
           {selected && (
-            <span
+            <Box
               style={{
                 width: 7,
                 height: 7,
                 borderRadius: "50%",
                 backgroundColor: "var(--bg)",
-                display: "block",
               }}
             />
           )}
-        </span>
+        </Flex>
       )}
       {indicator === "check" && selected && (
-        <Icon name="check" size="sm" color="var(--accent)" />
+        <Icon name="check" size="sm" color="accent" />
       )}
-    </>
+    </Flex>
   );
 
   if (href) {
     return (
-      <Link href={href} style={containerStyle}>
+      <Box as={Link} href={href} {...commonProps}>
         {content}
-      </Link>
+      </Box>
     );
   }
 
   return (
-    <button type="button" onClick={onClick} style={containerStyle}>
+    <Box as="button" type="button" onClick={onClick} width="full" {...commonProps}>
       {content}
-    </button>
+    </Box>
   );
 }

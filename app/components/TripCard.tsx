@@ -1,6 +1,11 @@
 import { TimelineTrip } from "@/app/server-actions";
 import { COLOURS, COUNTRY_LABELS } from "@/app/constants";
 import { splitCountryLabel } from "./utils/countries";
+import { Box } from "./ui/layout/Box";
+import { Flex } from "./ui/layout/Flex";
+import { Text } from "./ui/typography/Text";
+import { Icon } from "./ui/typography/Icon";
+import { Heading } from "./ui/typography/Heading";
 
 type VisaStatus = "covered" | "no-visa" | "invalid" | "not-required";
 
@@ -27,40 +32,39 @@ function formatDates(start: string, end: string): string {
   return `${sDay} – ${eDay} ${eMon}`;
 }
 
-// Strip uses warning colours when there's a visa issue; trip colour otherwise
 function getStripColor(trip: TimelineTrip, status: VisaStatus): string {
-  if (status === "no-visa") return "#d97706";
-  if (status === "invalid") return "#dc2626";
+  if (status === "no-visa") return "var(--warn)";
+  if (status === "invalid") return "var(--danger)";
   return COLOURS[trip.colour];
 }
 
 const STATUS_CONFIG: Record<
   VisaStatus,
-  { label: string; subLabel: string; dotClass: string; textClass: string }
+  { label: string; subLabel: string; dotColor: string; textColor: string }
 > = {
   covered: {
     label: "Validated",
     subLabel: "Visa required",
-    dotClass: "bg-emerald-500",
-    textClass: "text-emerald-600",
+    dotColor: "var(--ok)",
+    textColor: "var(--ok)",
   },
   "no-visa": {
     label: "No visa assigned",
     subLabel: "Visa required",
-    dotClass: "bg-amber-500",
-    textClass: "text-amber-600",
+    dotColor: "var(--warn)",
+    textColor: "var(--warn)",
   },
   invalid: {
     label: "Visa invalid",
     subLabel: "Visa required",
-    dotClass: "bg-red-500",
-    textClass: "text-red-600",
+    dotColor: "var(--danger)",
+    textColor: "var(--danger)",
   },
   "not-required": {
     label: "No visa needed",
     subLabel: "Visa not required",
-    dotClass: "bg-slate-300",
-    textClass: "text-slate-400",
+    dotColor: "var(--fg-faint)",
+    textColor: "var(--fg-muted)",
   },
 };
 
@@ -81,92 +85,99 @@ export function TripCard({
   );
 
   return (
-    <div
+    <Box
+      as="button"
       onClick={onClick}
-      className={`
-        relative flex rounded-[18px] bg-white border border-[#dde4ef]
-        shadow-[0_2px_12px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04)]
-        hover:shadow-[0_4px_20px_rgba(0,0,0,0.10)] hover:border-[#c8d3e2]
-        transition-all duration-150 cursor-pointer overflow-hidden
-        ${isPast ? "opacity-50" : ""}
-      `}
+      variant="card"
+      p="none"
+      width="full"
+      style={{
+        display: "flex",
+        textAlign: "left",
+        opacity: isPast ? 0.5 : 1,
+        transition: "all 0.15s",
+        overflow: "hidden",
+        border: "1px solid var(--border)",
+      }}
     >
-      {/* Coloured left strip — visa status colour when there's an issue */}
-      <div className="w-1 shrink-0" style={{ backgroundColor: stripColor }} />
+      {/* Coloured left strip */}
+      <Box style={{ width: 4, flexShrink: 0, backgroundColor: stripColor }} />
 
-      <div className="flex-1 min-w-0">
-        {/* ── Top section: trip info ── */}
-        <div className="flex items-start justify-between gap-4 px-5 pt-[18px] pb-4">
-          <div className="flex-1 min-w-0">
-            {/* Flag + country name */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xl leading-none">{flag}</span>
-              <span className="text-[19px] font-black tracking-tight text-[#0d1829] leading-tight truncate">
+      <Flex variant="column" style={{ flex: 1, minWidth: 0 }}>
+        {/* Top section */}
+        <Flex variant="row-between" p="lg" pb="md" gap="md" style={{ alignItems: "flex-start" }}>
+          <Box style={{ flex: 1, minWidth: 0 }}>
+            <Flex variant="row-center" gap="sm" mb="xs">
+              <Text style={{ fontSize: 20, lineHeight: 1 }}>{flag}</Text>
+              <Text style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.02em" }} truncate>
                 {countryName}
-              </span>
-            </div>
+              </Text>
+            </Flex>
 
-            {/* Optional trip name */}
             {trip.name && (
-              <div className="text-[11px] text-[#8899ae] italic mb-2 truncate">
+              <Text variant="caption" color="muted" mb="sm" style={{ fontStyle: "italic" }} truncate>
                 {trip.name}
-              </div>
+              </Text>
             )}
 
-            {/* Date range */}
-            <div className="text-[18px] font-black tracking-tight text-[#0d1829] leading-none mt-2">
+            <Text style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.02em" }}>
               {formatDates(trip.startDate, trip.endDate)}
-            </div>
-          </div>
+            </Text>
+          </Box>
 
           {/* Duration circle */}
-          <div className="shrink-0 flex flex-col items-center justify-center w-[52px] h-[52px] rounded-full bg-[#f3f6fa] border border-[#dde4ef]">
-            <span className="text-[17px] font-black tracking-tight text-[#0d1829] leading-none">
+          <Flex
+            variant="column-center"
+            style={{
+              width: 52,
+              height: 52,
+              flexShrink: 0,
+              borderRadius: 99,
+              backgroundColor: "var(--bg-sunken)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <Text style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.02em" }}>
               {trip.durationDays}
-            </span>
-            <span className="text-[9px] font-bold text-[#8899ae] uppercase tracking-wide mt-0.5">
+            </Text>
+            <Text variant="mono-small" color="muted" style={{ fontWeight: "bold" }}>
               days
-            </span>
-          </div>
-        </div>
+            </Text>
+          </Flex>
+        </Flex>
 
-        {/* ── Tear line ── */}
-        <div
-          className="relative h-px"
+        {/* Tear line */}
+        <Box
+          position="relative"
           style={{
-            backgroundImage:
-              "repeating-linear-gradient(to right, #dde4ef 0, #dde4ef 6px, transparent 6px, transparent 14px)",
+            height: 1,
+            backgroundImage: "repeating-linear-gradient(to right, var(--border) 0, var(--border) 6px, transparent 6px, transparent 14px)",
           }}
         >
-          {/* Semicircle notches — clipped by parent overflow-hidden */}
-          <div className="absolute -left-[10px] -top-[9px] w-5 h-5 rounded-full bg-[#e8edf5] border border-[#c8d3e2] z-10" />
-          <div className="absolute -right-[10px] -top-[9px] w-5 h-5 rounded-full bg-[#e8edf5] border border-[#c8d3e2] z-10" />
-        </div>
+          <Box position="absolute" style={{ left: -10, top: -9, width: 20, height: 20, borderRadius: 99, backgroundColor: "var(--bg)", border: "1px solid var(--border)", zIndex: 10 }} />
+          <Box position="absolute" style={{ right: -10, top: -9, width: 20, height: 20, borderRadius: 99, backgroundColor: "var(--bg)", border: "1px solid var(--border)", zIndex: 10 }} />
+        </Box>
 
-        {/* ── Footer: visa status ── */}
-        <div className="flex items-center justify-between px-5 py-3">
-          <div className="flex gap-0.5 items-center">
+        {/* Footer */}
+        <Flex variant="row-between" px="lg" py="sm" style={{ alignItems: "center" }}>
+          <Flex variant="row-center" gap="xs">
             {trip.visaRequired && (
               <>
-                <span className="material-symbols-outlined text-[16px] leading-none">
-                  passport
-                </span>
-                <span className="text-[12px] font-semibold text-[#4a5d75]">
+                <Icon name="passport" size="sm" />
+                <Text style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-muted)" }}>
                   {trip.visa?.name ?? cfg.subLabel}
-                </span>
+                </Text>
               </>
             )}
-          </div>
-          <span
-            className={`flex items-center gap-1.5 text-[12px] font-bold ${cfg.textClass}`}
-          >
-            <span
-              className={`w-[7px] h-[7px] rounded-full shrink-0 ${cfg.dotClass}`}
-            />
-            {cfg.label}
-          </span>
-        </div>
-      </div>
-    </div>
+          </Flex>
+          <Flex variant="row-center" gap="sm">
+            <Box style={{ width: 7, height: 7, borderRadius: 99, backgroundColor: cfg.dotColor }} />
+            <Text style={{ fontSize: 12, fontWeight: "bold", color: cfg.textColor }}>
+              {cfg.label}
+            </Text>
+          </Flex>
+        </Flex>
+      </Flex>
+    </Box>
   );
 }

@@ -1,10 +1,14 @@
+import { Flex } from "./layout/Flex";
+import { Box } from "./layout/Box";
+import { Text } from "./typography/Text";
+
 type Tone = "ok" | "warn" | "danger" | "muted";
 
 const TONE_COLOR: Record<Tone, string> = {
   ok: "var(--fg)",
   warn: "var(--warn)",
   danger: "var(--danger)",
-  muted: "var(--muted)",
+  muted: "var(--fg-muted)",
 };
 
 export function UsageBar({
@@ -25,39 +29,40 @@ export function UsageBar({
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
 
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <Flex variant="column" gap="xs" className={className}>
       {(label || sublabel) && (
-        <div className="flex justify-between items-baseline">
+        <Flex variant="row-between" style={{ alignItems: "baseline" }}>
           {label && (
-            <span
-              className="font-mono font-bold"
-              style={{ fontSize: 11, color: "var(--fg)" }}
-            >
+            <Text variant="mono" style={{ fontSize: 11, fontWeight: "bold" }}>
               {label}
-            </span>
+            </Text>
           )}
           {sublabel && (
-            <span
-              className="font-mono"
-              style={{ fontSize: 10, color: "var(--fg-muted)" }}
-            >
+            <Text variant="mono" color="muted" style={{ fontSize: 10 }}>
               {sublabel}
-            </span>
+            </Text>
           )}
-        </div>
+        </Flex>
       )}
-      <div
-        className="w-full rounded-full overflow-hidden"
-        style={{ height: 4, backgroundColor: "var(--bg-sunken)" }}
+      <Box
+        width="full"
+        style={{
+          height: 4,
+          backgroundColor: "var(--bg-sunken)",
+          borderRadius: 99,
+          overflow: "hidden",
+        }}
       >
-        <div
-          className="h-full rounded-full transition-all duration-400 ease-in-out"
+        <Box
           style={{
+            height: "100%",
             width: `${pct}%`,
             backgroundColor: TONE_COLOR[tone],
+            borderRadius: 99,
+            transition: "width 0.4s ease-in-out",
           }}
         />
-      </div>
-    </div>
+      </Box>
+    </Flex>
   );
 }

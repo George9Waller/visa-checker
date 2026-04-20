@@ -13,6 +13,7 @@ import { SelectableRow } from "@/app/components/ui/SelectableRow";
 import { CheckableRow } from "@/app/components/ui/CheckableRow";
 import { splitCountryLabel } from "@/app/components/utils/countries";
 import { Flex } from "@/app/components/ui/layout/Flex";
+import { Box } from "@/app/components/ui/layout/Box";
 import { Grid } from "@/app/components/ui/layout/Grid";
 import { Text } from "@/app/components/ui/typography/Text";
 
@@ -86,13 +87,14 @@ export default function CreateTripWizard() {
         nextDisabled={!country}
         onCancel={handleCancel}
       >
-        <Input
-          placeholder={t("searchCountry")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="mb-4"
-        />
-        <Flex direction="column" gap={2}>
+        <Box mb="md">
+          <Input
+            placeholder={t("searchCountry")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Box>
+        <Flex variant="column" gap="xs">
           {filteredCountries.map(({ code, label }) => {
             const { flag, name: cName } = splitCountryLabel(label);
             return (
@@ -127,7 +129,7 @@ export default function CreateTripWizard() {
         nextDisabled={!startDate || !endDate}
         onCancel={handleCancel}
       >
-        <Flex direction="column" gap={20}>
+        <Flex variant="column" gap="lg">
           <Field label={t("name")} hint={`${name.length} / 40`}>
             <Input
               value={name}
@@ -136,7 +138,7 @@ export default function CreateTripWizard() {
             />
           </Field>
 
-          <Grid templateColumns="1fr 1fr" gap={12}>
+          <Grid columns={2} gap="md">
             <Field label={t("startDate")} required>
               <Input
                 type="date"
@@ -157,14 +159,16 @@ export default function CreateTripWizard() {
 
           {durationDays !== null && (
             <Flex
-              align="center"
-              justify="center"
-              borderRadius="var(--r-s)"
-              p="8px 12px"
-              bg="var(--bg-sunken)"
-              border="1px solid var(--border)"
+              variant="row-center"
+              p="sm"
+              style={{ 
+                justifyContent: "center", 
+                background: "var(--bg-sunken)", 
+                border: "1px solid var(--border)", 
+                borderRadius: "var(--r-s)" 
+              }}
             >
-              <Text variant="mono" weight={700} transform="uppercase" size="var(--text-xs)" color="var(--fg-muted)" letterSpacing="0.1em">
+              <Text variant="mono" color="muted" style={{ fontWeight: "bold", fontSize: "var(--text-xs)", letterSpacing: "0.1em" }}>
                 {t("length")} · {durationDays} {t("days")}
               </Text>
             </Flex>
@@ -187,14 +191,14 @@ export default function CreateTripWizard() {
       nextDisabled={submitting}
       onCancel={handleCancel}
     >
-      <Flex direction="column" gap={16}>
+      <Flex variant="column" gap="md">
         <CheckableRow
           checked={visaRequired}
           onChange={() => setVisaRequired((v) => !v)}
           label={t("requiresVisa")}
           hint={t("requiresVisaHint")}
         />
-        <Text as="p" variant="mono" size="var(--text-xs)" color="var(--fg-muted)" m={0}>
+        <Text as="p" variant="mono" color="muted" style={{ fontSize: "var(--text-xs)" }}>
           {visaRequired
             ? t("requiresVisaHint")
             : "You can link a visa later from the trip detail page."}

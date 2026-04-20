@@ -13,6 +13,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Flex } from "./components/ui/layout/Flex";
 import { Box } from "./components/ui/layout/Box";
 import { Text } from "./components/ui/typography/Text";
+import { Icon } from "./components/ui/typography/Icon";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,32 +41,29 @@ export default async function RootLayout({
             {/* ── Top navbar ── */}
             <Flex
               as="header"
+              variant="row"
               position="absolute"
-              top={20}
-              right={20}
-              zIndex={30}
-              align="center"
-              justify="flex-end"
-              h={36}
+              style={{ top: 20, right: 20, zIndex: 30, alignItems: "center", justifyContent: "flex-end", height: 36 }}
             >
               {/* Right side */}
-              <Flex align="center" gap={8}>
+              <Flex variant="row-center" gap="sm">
                 <Link href="/visas" style={{ textDecoration: "none" }}>
                   <Flex
-                    align="center"
-                    gap={6}
-                    h={34}
-                    px={14}
-                    bg="var(--bg-raised)"
-                    color="var(--fg)"
-                    border="1px solid var(--border)"
-                    borderRadius="99px"
-                    className="transition-colors"
+                    variant="row-center"
+                    style={{ 
+                      gap: 6, 
+                      height: 34, 
+                      paddingLeft: 14, 
+                      paddingRight: 14, 
+                      background: "var(--bg-raised)", 
+                      color: "var(--fg)", 
+                      border: "1px solid var(--border)", 
+                      borderRadius: 99,
+                      transition: "background-color 0.2s"
+                    }}
                   >
-                    <Text as="span" className="material-symbols-outlined" size={15}>
-                      passport
-                    </Text>
-                    <Text as="span" size={14} weight="semibold">
+                    <Icon name="passport" style={{ fontSize: 15 }} />
+                    <Text as="span" style={{ fontSize: 14, fontWeight: 600 }}>
                       Visas
                     </Text>
                   </Flex>
@@ -76,7 +74,7 @@ export default async function RootLayout({
             </Flex>
 
             <Suspense>
-              <Box as="main" className="max-w-2xl mx-auto w-xl px-0 pb-32">
+              <Box as="main" variant="page-container" p="none">
                 {children}
               </Box>
             </Suspense>

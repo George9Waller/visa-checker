@@ -15,6 +15,7 @@ import { Flex } from "./ui/layout/Flex";
 import { Heading } from "./ui/typography/Heading";
 import { Text } from "./ui/typography/Text";
 import { Btn } from "./ui/Btn";
+import { Icon } from "./ui/typography/Icon";
 
 export default function TripTimeline() {
   const t = useTranslations();
@@ -24,17 +25,14 @@ export default function TripTimeline() {
   const todayStr = new Date().toISOString().split("T")[0];
 
   return (
-    <Box w="100%" p="20px 20px 40px">
+    <Box width="full" px="lg" pt="lg" pb="xl">
       {/* Dashboard header */}
-      <Flex align="flex-end" justify="space-between" mb={24} gap={12}>
+      <Flex variant="row-between" mb="lg" gap="sm" style={{ alignItems: "flex-end" }}>
         <Box minW={0}>
           <Text
             variant="mono"
-            size={11}
-            color="var(--fg-muted)"
-            letterSpacing="0.1em"
-            transform="uppercase"
-            mb={4}
+            mb="xs"
+            color="muted"
             as="div"
           >
             {new Date().toLocaleDateString(undefined, {
@@ -44,14 +42,14 @@ export default function TripTimeline() {
               year: "numeric",
             })}
           </Text>
-          <Heading size={38} lineHeight={1.02} m={0}>
+          <Heading variant="h2">
             {t("dashboard.title")}
           </Heading>
         </Box>
       </Flex>
 
       {warnings && warnings.length > 0 && (
-        <Flex direction="column" gap={16} mb={32} w="100%">
+        <Flex variant="column" gap="md" mb="xl" width="full">
           {warnings.map((warning, index) => (
             <Warning key={index} {...warning} />
           ))}
@@ -59,41 +57,42 @@ export default function TripTimeline() {
       )}
 
       {currentTrip && (
-        <Flex
-          as={Link}
-          href={`/trips/${currentTrip.id}`}
-          direction="column"
-          w="100%"
-          textAlign="left"
-          mb={24}
-          p="18px 20px"
-          bg="var(--fg)"
-          color="var(--bg)"
-          border="none"
-          borderRadius="var(--r)"
-          gap={14}
-          className="no-underline"
-          position="relative"
-          overflow="hidden"
-        >
-          <Flex justify="space-between" align="center">
-            <Text variant="mono" size={10} letterSpacing="0.15em" transform="uppercase" opacity={0.5}>
-              Currently in
-            </Text>
-            <Text variant="mono" size={11} p="3px 8px" borderRadius={99} border="1px solid color-mix(in oklch, var(--bg) 25%, transparent)" opacity={0.7}>
-              LIVE
-            </Text>
-          </Flex>
-          <Flex align="center" gap={14}>
-            <Text size={44} lineHeight={1}>{currentTrip.countryCode}</Text>
-            <Box>
-              <Heading size={28} lineHeight={1.05} color="var(--bg)">{currentTrip.name}</Heading>
-              <Text size={13} opacity={0.6} mt={2} as="div">
-                In progress
+        <Link href={`/trips/${currentTrip.id}`} style={{ textDecoration: "none" }}>
+          <Flex
+            variant="column"
+            width="full"
+            mb="lg"
+            py="md"
+            px="lg"
+            gap="sm"
+            style={{ 
+              background: "var(--fg)", 
+              color: "var(--bg)", 
+              borderRadius: "var(--r)",
+              textAlign: "left",
+              position: "relative",
+              overflow: "hidden"
+            }}
+          >
+            <Flex variant="row-between">
+              <Text variant="mono-small">
+                Currently in
               </Text>
-            </Box>
+              <Text variant="mono" style={{ padding: "3px 8px", borderRadius: "99px", border: "1px solid color-mix(in oklch, var(--bg) 25%, transparent)", opacity: 0.7 }}>
+                LIVE
+              </Text>
+            </Flex>
+            <Flex variant="row-center" gap="md">
+              <Text style={{ fontSize: 44, lineHeight: 1 }}>{currentTrip.countryCode}</Text>
+              <Box>
+                <Heading variant="h3" color="inverse">{currentTrip.name}</Heading>
+                <Text variant="caption" mt="xs" as="div">
+                  In progress
+                </Text>
+              </Box>
+            </Flex>
           </Flex>
-        </Flex>
+        </Link>
       )}
 
       <TripsList
@@ -102,14 +101,9 @@ export default function TripTimeline() {
         initialCursor={todayStr}
         skeletonCount={1}
       >
-        <Flex direction="column" align="center" justify="center" py={80} gap={16} textAlign="center">
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: 48, color: "var(--fg-faint)" }}
-          >
-            flight_takeoff
-          </span>
-          <Text size={14} color="var(--fg-muted)" weight={500} as="p">
+        <Flex variant="column-center" py="section" gap="md" textAlign="center">
+          <Icon name="flight_takeoff" size="2xl" color="faint" />
+          <Text variant="body" color="muted" mb="md" as="p" style={{ fontWeight: 500 }}>
             {t("dashboard.noTrips")}
           </Text>
           <Link href="/trips/create" style={{ textDecoration: "none" }}>

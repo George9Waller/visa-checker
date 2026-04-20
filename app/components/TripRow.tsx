@@ -13,18 +13,25 @@ import { Heading } from "./ui/typography/Heading";
 
 export function SkeletonRow({ bottomBorder }: { bottomBorder: boolean }) {
   return (
-    <Grid templateColumns="44px 1fr auto" gap={14} alignItems="center" p="16px 2px" borderBottom={bottomBorder ? "1px solid var(--border)" : "none"}>
-      <Flex direction="column" align="center" gap={4}>
-        <Box w={24} h={26} bg="var(--bg-sunken)" borderRadius={2} />
-        <Box w={20} h={8} bg="var(--bg-sunken)" borderRadius={2} />
+    <Grid 
+      templateColumns="44px 1fr auto" 
+      gap="md" 
+      alignItems="center"
+      py="md"
+      px="xs"
+      style={{ borderBottom: bottomBorder ? '1px solid var(--border)' : 'none' }}
+    >
+      <Flex variant="column-center" gap="xs">
+        <Box style={{ width: 24, height: 26, background: "var(--bg-sunken)", borderRadius: 2 }} />
+        <Box style={{ width: 20, height: 8, background: "var(--bg-sunken)", borderRadius: 2 }} />
       </Flex>
-      <Flex direction="column" gap={6}>
-        <Box w="60%" h={14} bg="var(--bg-sunken)" borderRadius={2} />
-        <Box w="80%" h={10} bg="var(--bg-sunken)" borderRadius={2} />
+      <Flex variant="column" gap="xs">
+        <Box style={{ width: "60%", height: 14, background: "var(--bg-sunken)", borderRadius: 2 }} />
+        <Box style={{ width: "80%", height: 10, background: "var(--bg-sunken)", borderRadius: 2 }} />
       </Flex>
-      <Flex direction="column" align="flex-end" gap={4}>
-        <Box w={20} h={20} bg="var(--bg-sunken)" borderRadius={2} />
-        <Box w={32} h={8} bg="var(--bg-sunken)" borderRadius={2} />
+      <Flex variant="column" gap="xs" style={{ alignItems: "flex-end" }}>
+        <Box style={{ width: 20, height: 20, background: "var(--bg-sunken)", borderRadius: 2 }} />
+        <Box style={{ width: 32, height: 8, background: "var(--bg-sunken)", borderRadius: 2 }} />
       </Flex>
     </Grid>
   );
@@ -72,54 +79,56 @@ export function TimelineRow({
     <Box
       as="button"
       onClick={onClick}
-      className="w-full text-left"
-      opacity={isPast ? 0.55 : 1}
-      bg="transparent"
-      border="none"
-      borderBottom={isLast ? "none" : "1px solid var(--border)"}
-      cursor="pointer"
-      p={0}
+      width="full"
+      textAlign="left"
+      p="none"
+      style={{ 
+        background: "transparent", 
+        cursor: "pointer", 
+        opacity: isPast ? 0.55 : 1,
+        borderBottom: isLast ? 'none' : '1px solid var(--border)'
+      }}
     >
-      <Grid templateColumns="44px 1fr auto" gap={14} alignItems="center" p="12px 2px">
+      <Grid templateColumns="44px 1fr auto" gap="md" alignItems="center" py="md" px="xs">
         {/* Col 1 */}
-        <Flex direction="column" align="center">
-          <Heading size={22} lineHeight={1} color="var(--fg)">{day}</Heading>
-          <Text variant="mono" size={10} color="var(--fg-muted)" letterSpacing="0.1em" mt={3} as="div">
+        <Flex variant="column-center">
+          <Heading variant="h4" style={{ fontSize: 22, lineHeight: 1 }}>{day}</Heading>
+          <Text variant="mono" mt="xs" color="muted" as="div" style={{ fontSize: 10 }}>
             {month}
           </Text>
         </Flex>
 
         {/* Col 2 */}
-        <Flex direction="column" gap={4} minW={0}>
-          <Flex align="center" gap={8} minW={0}>
-            <Text as="span" size={14} shrink={0}>{flag}</Text>
-            <Text as="span" size={15} weight={600} color="var(--fg)" truncate minW={0}>
+        <Flex variant="column" gap="xs" minW={0}>
+          <Flex variant="row-center" gap="sm" minW={0}>
+            <Text as="span" style={{ fontSize: 14, flexShrink: 0 }}>{flag}</Text>
+            <Text as="span" style={{ fontSize: 15, fontWeight: 600, minWidth: 0 }} truncate>
               {trip.name || countryName}
             </Text>
           </Flex>
-          <Text variant="mono" size={11} color="var(--fg-muted)" letterSpacing="0.04em" truncate as="div">
+          <Text variant="mono" color="muted" as="div" style={{ fontSize: 11, letterSpacing: "0.04em" }} truncate>
             {fmtDateRange(trip.startDate, trip.endDate)}
             {trip.visa && (
               <>
-                <Text as="span" color="var(--fg-faint)" mx={6}>·</Text>
-                <Text as="span" variant="body" letterSpacing={0}>{trip.visa.name}</Text>
+                <Text as="span" color="faint" style={{ margin: "0 6px" }}>·</Text>
+                <Text as="span" variant="body" style={{ letterSpacing: "normal" }}>{trip.visa.name}</Text>
               </>
             )}
           </Text>
         </Flex>
 
         {/* Col 3 */}
-        <Flex direction="column" align="flex-end" gap={6} shrink={0}>
-          <Flex direction="column" align="center">
-            <Heading size={20} lineHeight={1} color="var(--fg)">{trip.durationDays}</Heading>
-            <Text variant="mono" size={10} color="var(--fg-muted)" letterSpacing="0.1em" mt={3} as="div">
+        <Flex variant="column" gap="xs" style={{ alignItems: "flex-end", flexShrink: 0 }}>
+          <Flex variant="column-center">
+            <Heading variant="h4" style={{ fontSize: 20, lineHeight: 1 }}>{trip.durationDays}</Heading>
+            <Text variant="mono" mt="xs" color="muted" as="div" style={{ fontSize: 10 }}>
               {trip.durationDays === 1 ? "DAY" : t("trip.days").toUpperCase()}
             </Text>
           </Flex>
           {status !== "not-required" && (
-            <Flex align="center" gap={5}>
+            <Flex variant="row-center" gap="xs">
               <StatusPip tone={tone} size={6} />
-              <Text as="span" variant="mono" size={10} color={toneColor} letterSpacing="0.08em" transform="uppercase">
+              <Text as="span" variant="mono" style={{ fontSize: 10, letterSpacing: "0.08em", color: toneColor }}>
                 {STATUS_LABEL[status]}
               </Text>
             </Flex>

@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type ColorScheme, getSavedScheme, saveScheme } from "../components/ThemeProvider";
 import { useTranslations } from "next-intl";
+import { Box } from "../components/ui/layout/Box";
+import { Flex } from "../components/ui/layout/Flex";
+import { Text } from "../components/ui/typography/Text";
+import { Heading } from "../components/ui/typography/Heading";
+import { Icon } from "../components/ui/typography/Icon";
+import { Btn } from "../components/ui/Btn";
 
 const LOCALES = [
   { code: "en", label: "English" },
@@ -14,12 +20,15 @@ const LOCALES = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p
-      className="font-mono font-bold uppercase tracking-wider"
-      style={{ fontSize: 10, color: "var(--fg-muted)", marginBottom: 10 }}
+    <Text
+      variant="mono"
+      color="muted"
+      mb="sm"
+      as="p"
+      style={{ fontSize: 10, fontWeight: "bold" }}
     >
       {children}
-    </p>
+    </Text>
   );
 }
 
@@ -57,107 +66,129 @@ export default function SettingsPage() {
     : "?";
 
   return (
-    <div className="flex flex-col pb-32">
+    <Flex variant="column" pb="xl">
       {/* Header */}
-      <div
-        className="z-20 flex items-center gap-3 px-5 py-5"
+      <Flex
+        variant="row-center"
+        gap="md"
+        px="lg"
+        py="lg"
         style={{
           backgroundColor: "var(--bg)",
           borderBottom: "1px solid var(--border)",
+          zIndex: 20,
         }}
       >
-        <Link
+        <Box
+          as={Link}
           href="/"
-          className="flex items-center justify-center rounded-[var(--r-s)] shrink-0"
           style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             width: 32,
             height: 32,
+            flexShrink: 0,
             color: "var(--fg-muted)",
             border: "1px solid var(--border)",
+            borderRadius: "var(--r-s)",
             textDecoration: "none",
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-            arrow_back
-          </span>
-        </Link>
-        <h1
-          className="font-display flex-1"
-          style={{ fontSize: 22, color: "var(--fg)" }}
-        >
+          <Icon name="arrow_back" size="md" />
+        </Box>
+        <Heading variant="h2" style={{ flex: 1, fontSize: 22 }}>
           {t("title")}
-        </h1>
-      </div>
+        </Heading>
+      </Flex>
 
-      <div className="px-5 py-6 flex flex-col gap-8">
+      <Flex variant="column" px="lg" py="xl" gap="xl">
         {/* Profile */}
         {session?.user && (
-          <div>
+          <Box>
             <SectionLabel>Account</SectionLabel>
-            <div
-              className="flex items-center gap-3 p-4 rounded-[var(--r)]"
+            <Flex
+              variant="row-center"
+              p="md"
+              gap="md"
               style={{
                 backgroundColor: "var(--bg-raised)",
                 border: "1px solid var(--border)",
+                borderRadius: "var(--r)",
               }}
             >
-              <div
-                className="flex items-center justify-center rounded-full font-bold shrink-0"
+              <Box
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   width: 44,
                   height: 44,
+                  flexShrink: 0,
+                  borderRadius: 99,
+                  fontWeight: "bold",
                   fontSize: 16,
                   backgroundColor: "var(--fg)",
                   color: "var(--bg)",
                 }}
               >
                 {initials}
-              </div>
-              <div className="min-w-0">
+              </Box>
+              <Box style={{ minWidth: 0 }}>
                 {session.user.name && (
-                  <p
-                    className="font-semibold truncate"
-                    style={{ fontSize: 15, color: "var(--fg)" }}
+                  <Text
+                    style={{ fontSize: 15, fontWeight: 600, display: "block" }}
+                    truncate
                   >
                     {session.user.name}
-                  </p>
+                  </Text>
                 )}
                 {session.user.email && (
-                  <p
-                    className="font-mono truncate"
-                    style={{ fontSize: 11, color: "var(--fg-muted)" }}
+                  <Text
+                    variant="mono"
+                    color="muted"
+                    style={{ fontSize: 11, display: "block" }}
+                    truncate
                   >
                     {session.user.email}
-                  </p>
+                  </Text>
                 )}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Flex>
+          </Box>
         )}
 
         {/* Appearance */}
-        <div>
+        <Box>
           <SectionLabel>{t("appearance")}</SectionLabel>
-          <div
-            className="p-4 rounded-[var(--r)]"
+          <Box
+            p="md"
             style={{
               backgroundColor: "var(--bg-raised)",
               border: "1px solid var(--border)",
+              borderRadius: "var(--r)",
             }}
           >
-            <div
-              className="flex rounded-[var(--r-s)] overflow-hidden"
+            <Flex
+              variant="row"
               style={{
+                borderRadius: "var(--r-s)",
+                overflow: "hidden",
                 border: "1px solid var(--border)",
                 backgroundColor: "var(--bg-sunken)",
               }}
             >
               {(["light", "system", "dark"] as ColorScheme[]).map((s) => (
-                <button
+                <Box
+                  as="button"
                   key={s}
                   onClick={() => handleScheme(s)}
-                  className="flex-1 flex items-center justify-center gap-1.5 transition-colors"
                   style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
                     height: 40,
                     fontSize: 13,
                     fontFamily: "var(--font-body)",
@@ -167,6 +198,7 @@ export default function SettingsPage() {
                     color: scheme === s ? "var(--fg)" : "var(--fg-muted)",
                     border: "none",
                     cursor: "pointer",
+                    transition: "background-color 0.2s",
                   }}
                   aria-pressed={scheme === s}
                 >
@@ -174,28 +206,35 @@ export default function SettingsPage() {
                     {s === "light" ? "☀" : s === "dark" ? "☾" : "⊙"}
                   </span>
                   <span>{t(s)}</span>
-                </button>
+                </Box>
               ))}
-            </div>
-          </div>
-        </div>
+            </Flex>
+          </Box>
+        </Box>
 
         {/* Language */}
-        <div>
+        <Box>
           <SectionLabel>{t("language")}</SectionLabel>
-          <div
-            className="rounded-[var(--r)] overflow-hidden"
+          <Box
             style={{
               backgroundColor: "var(--bg-raised)",
               border: "1px solid var(--border)",
+              borderRadius: "var(--r)",
+              overflow: "hidden",
             }}
           >
             {LOCALES.map((l, i) => (
-              <button
+              <Box
+                as="button"
                 key={l.code}
                 onClick={() => handleLocale(l.code)}
-                className="flex items-center justify-between w-full px-4 py-3 text-left transition-colors"
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  padding: "12px 16px",
+                  textAlign: "left",
                   fontSize: 14,
                   fontFamily: "var(--font-body)",
                   color: "var(--fg)",
@@ -206,6 +245,7 @@ export default function SettingsPage() {
                   border: "none",
                   borderTop: i > 0 ? "1px solid var(--border)" : "none",
                   cursor: "pointer",
+                  transition: "background-color 0.2s",
                 }}
                 onMouseEnter={(e) => {
                   if (currentLocale !== l.code)
@@ -218,32 +258,38 @@ export default function SettingsPage() {
               >
                 {l.label}
                 {currentLocale === l.code && (
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 16, color: "var(--ok)" }}
-                  >
-                    check
-                  </span>
+                  <Icon
+                    name="check"
+                    size="sm"
+                    color="ok"
+                  />
                 )}
-              </button>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* Sign out */}
-        <div>
+        <Box>
           <SectionLabel>Session</SectionLabel>
-          <div
-            className="rounded-[var(--r)] overflow-hidden"
+          <Box
             style={{
               backgroundColor: "var(--bg-raised)",
               border: "1px solid var(--border)",
+              borderRadius: "var(--r)",
+              overflow: "hidden",
             }}
           >
-            <button
+            <Box
+              as="button"
               onClick={() => signOut()}
-              className="flex items-center gap-2.5 w-full px-4 py-3 text-left transition-colors"
               style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                width: "100%",
+                padding: "12px 16px",
+                textAlign: "left",
                 fontSize: 14,
                 fontFamily: "var(--font-body)",
                 fontWeight: 500,
@@ -251,6 +297,7 @@ export default function SettingsPage() {
                 backgroundColor: "transparent",
                 border: "none",
                 cursor: "pointer",
+                transition: "background-color 0.2s",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
@@ -260,17 +307,15 @@ export default function SettingsPage() {
                 e.currentTarget.style.backgroundColor = "transparent";
               }}
             >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 18 }}
-              >
-                logout
-              </span>
+              <Icon
+                name="logout"
+                size="md"
+              />
               {t("signOut")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </Box>
+        </Box>
+      </Flex>
+    </Flex>
   );
 }

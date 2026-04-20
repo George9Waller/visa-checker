@@ -2,6 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
+import { Heading } from "./typography/Heading";
+import { Icon } from "./typography/Icon";
 
 export function DetailHeader({
   kicker,
@@ -25,57 +30,59 @@ export function DetailHeader({
   };
 
   return (
-    <div
-      className="flex items-start gap-3 px-5 py-4 sticky top-0 z-20"
+    <Box
+      as="header"
+      position="sticky"
+      p="lg"
+      px="lg"
       style={{
+        top: 0,
+        zIndex: 20,
         backgroundColor: "var(--bg)",
         borderBottom: "1px solid var(--border)",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 12,
       }}
     >
-      <button
+      <Box
+        as="button"
         onClick={handleBack}
-        className="shrink-0 flex items-center justify-center rounded-[var(--r-s)] transition-colors"
+        aria-label="Go back"
         style={{
           width: 32,
           height: 32,
-          color: "var(--fg-muted)",
-          backgroundColor: "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          borderRadius: "var(--r-s)",
           border: "1px solid var(--border)",
+          background: "transparent",
+          color: "var(--fg-muted)",
+          cursor: "pointer",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "var(--bg-sunken)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "transparent";
-        }}
-        aria-label="Go back"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-          arrow_back
-        </span>
-      </button>
+        <Icon name="arrow_back" size="md" color="muted" />
+      </Box>
 
-      <div className="flex-1 min-w-0">
+      <Box style={{ flex: 1, minWidth: 0 }}>
         {kicker && (
-          <p
-            className="font-mono font-bold uppercase tracking-wider mb-0.5"
-            style={{ fontSize: 10, color: "var(--fg-muted)" }}
-          >
+          <Text variant="mono" color="muted" mb="none" as="p" style={{ fontSize: 10, fontWeight: 700 }}>
             {kicker}
-          </p>
+          </Text>
         )}
-        <div
-          className="font-display leading-tight truncate"
-          style={{ fontSize: 22, color: "var(--fg)" }}
-        >
+        <Heading variant="h2" style={{ fontSize: 22, lineHeight: 1.1 }} truncate>
           {title}
-        </div>
-      </div>
+        </Heading>
+      </Box>
 
       {actions && (
-        <div className="shrink-0 flex items-center gap-1.5">{actions}</div>
+        <Flex variant="row-center" gap="xs" style={{ flexShrink: 0 }}>
+          {actions}
+        </Flex>
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -91,29 +98,24 @@ export function IconBtn({
   onClick?: () => void;
 }) {
   return (
-    <button
+    <Box
+      as="button"
       onClick={onClick}
       aria-label={label}
-      className="flex items-center justify-center rounded-[var(--r-s)] transition-colors"
       style={{
         width: 30,
         height: 30,
-        color: danger ? "var(--danger)" : "var(--fg-muted)",
-        backgroundColor: "transparent",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "var(--r-s)",
         border: "1px solid var(--border)",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = danger
-          ? "color-mix(in oklch, var(--danger) 10%, transparent)"
-          : "var(--bg-sunken)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
+        background: "transparent",
+        color: danger ? "var(--danger)" : "var(--fg-muted)",
+        cursor: "pointer",
       }}
     >
-      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-        {icon}
-      </span>
-    </button>
+      <Icon name={icon} size="sm" color={danger ? "danger" : "muted"} />
+    </Box>
   );
 }

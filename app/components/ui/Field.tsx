@@ -1,4 +1,7 @@
 import { ReactNode } from "react";
+import { Box } from "./layout/Box";
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
 
 export function Field({
   label,
@@ -14,23 +17,25 @@ export function Field({
   className?: string;
 }) {
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      <label
-        className="font-mono font-bold uppercase tracking-wider"
-        style={{ fontSize: 11, color: "var(--fg-muted)" }}
+    <Flex variant="column" gap="xs" className={className}>
+      <Text
+        as="label"
+        variant="mono"
+        color="muted"
+        style={{ fontSize: 11, fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.04em" }}
       >
         {label}
         {required && (
-          <span style={{ color: "var(--danger)", marginLeft: 3 }}>*</span>
+          <Box as="span" style={{ color: "var(--danger)", marginLeft: 3 }}>*</Box>
         )}
-      </label>
+      </Text>
       {children}
       {hint && (
-        <p style={{ fontSize: 12, color: "var(--fg-faint)", lineHeight: 1.5 }}>
+        <Text variant="caption" color="faint" as="p">
           {hint}
-        </p>
+        </Text>
       )}
-    </div>
+    </Flex>
   );
 }
 
@@ -39,8 +44,10 @@ export function Input({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { className?: string }) {
   return (
-    <input
-      className={`w-full rounded-[var(--r-s)] outline-none transition-colors ${className}`}
+    <Box
+      as="input"
+      className={className}
+      width="full"
       style={{
         padding: "10px 12px",
         fontSize: 15,
@@ -48,6 +55,9 @@ export function Input({
         backgroundColor: "var(--bg-raised)",
         color: "var(--fg)",
         border: "1px solid var(--border)",
+        borderRadius: "var(--r-s)",
+        outline: "none",
+        transition: "border-color 0.15s",
       }}
       onFocus={(e) => {
         e.currentTarget.style.borderColor = "var(--fg)";
@@ -55,7 +65,7 @@ export function Input({
       onBlur={(e) => {
         e.currentTarget.style.borderColor = "var(--border)";
       }}
-      {...props}
+      {...(props as any)}
     />
   );
 }
@@ -65,8 +75,10 @@ export function Textarea({
   ...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { className?: string }) {
   return (
-    <textarea
-      className={`w-full rounded-[var(--r-s)] outline-none transition-colors resize-none ${className}`}
+    <Box
+      as="textarea"
+      className={className}
+      width="full"
       style={{
         padding: "10px 12px",
         fontSize: 15,
@@ -74,6 +86,10 @@ export function Textarea({
         backgroundColor: "var(--bg-raised)",
         color: "var(--fg)",
         border: "1px solid var(--border)",
+        borderRadius: "var(--r-s)",
+        outline: "none",
+        transition: "border-color 0.15s",
+        resize: "none",
       }}
       onFocus={(e) => {
         e.currentTarget.style.borderColor = "var(--fg)";
@@ -81,7 +97,7 @@ export function Textarea({
       onBlur={(e) => {
         e.currentTarget.style.borderColor = "var(--border)";
       }}
-      {...props}
+      {...(props as any)}
     />
   );
 }

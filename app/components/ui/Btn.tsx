@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, ReactNode } from "react";
+import { Box } from "./layout/Box";
 
 type Variant = "primary" | "accent" | "ghost" | "outline" | "danger";
 type Size = "sm" | "md" | "lg";
@@ -31,10 +32,10 @@ const VARIANT_STYLE: Record<Variant, { bg: string; color: string; border: string
   },
 };
 
-const SIZE_STYLE: Record<Size, { padding: string; fontSize: string; height: string }> = {
-  sm: { padding: "0 12px", fontSize: "13px", height: "30px" },
-  md: { padding: "0 16px", fontSize: "14px", height: "36px" },
-  lg: { padding: "0 22px", fontSize: "15px", height: "44px" },
+const SIZE_STYLE: Record<Size, { px: "md" | "lg" | "xl"; fontSize: number; height: number }> = {
+  sm: { px: "md", fontSize: 13, height: 30 },
+  md: { px: "lg", fontSize: 14, height: 36 },
+  lg: { px: "xl", fontSize: 15, height: 44 },
 };
 
 export function Btn({
@@ -53,20 +54,30 @@ export function Btn({
   const s = SIZE_STYLE[size];
 
   return (
-    <button
-      className={`inline-flex items-center justify-center gap-2 font-semibold rounded-[var(--r-s)] cursor-pointer transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+    <Box
+      as="button"
+      className={className}
+      px={s.px}
       style={{
         height: s.height,
-        padding: s.padding,
         fontSize: s.fontSize,
         fontFamily: "var(--font-body)",
+        fontWeight: 600,
         backgroundColor: v.bg,
         color: v.color,
         border: `1px solid ${v.border}`,
+        borderRadius: "var(--r-s)",
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        transition: "all 0.15s",
+        ...props.disabled && { opacity: 0.4, cursor: "not-allowed" },
       }}
-      {...props}
+      {...(props as any)}
     >
       {children}
-    </button>
+    </Box>
   );
 }

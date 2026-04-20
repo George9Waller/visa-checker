@@ -71,7 +71,7 @@ export default function TripDetail() {
       .catch((e) => toast.error(`Error fetching visas: ${e}`));
   }, []);
 
-  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+  const handleSave = (event: FormEvent<any>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     updateTrip(
@@ -98,14 +98,15 @@ export default function TripDetail() {
 
   if (!trip) {
     return (
-      <Flex align="center" justify="center" py="96px">
+      <Flex variant="row-center" py="xl" style={{ justifyContent: "center" }}>
         <div
-          className="animate-spin rounded-full border-2"
-          style={{
-            width: 20,
-            height: 20,
-            borderColor: "var(--fg-faint)",
-            borderTopColor: "var(--fg-muted)",
+          style={{ 
+            width: 20, 
+            height: 20, 
+            borderRadius: 99, 
+            border: "2px solid var(--border)", 
+            borderTopColor: "var(--fg)",
+            animation: "spin 1s linear infinite"
           }}
         />
       </Flex>
@@ -151,7 +152,7 @@ export default function TripDetail() {
           }
         />
 
-        <form style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 20 }} onSubmit={handleSave}>
+        <Flex as="form" variant="column" p="lg" px="md" gap="md" onSubmit={handleSave}>
           <Field label={t("name")}>
             <Input
               name="name"
@@ -160,7 +161,7 @@ export default function TripDetail() {
             />
           </Field>
 
-          <Grid templateColumns="1fr 1fr" gap={12}>
+          <Grid columns={2} gap="md">
             <Field label={t("startDate")} required>
               <Input
                 type="date"
@@ -204,7 +205,7 @@ export default function TripDetail() {
           </Field>
 
           <Field label="Colour">
-            <Flex gap={8}>
+            <Flex variant="row" gap="sm">
               {Object.keys(COLOURS).map((colourId) => (
                 <ColorSwatch
                   key={colourId}
@@ -216,7 +217,7 @@ export default function TripDetail() {
             </Flex>
           </Field>
 
-          <input type="checkbox" name="visaRequired" checked={trip.visaRequired} className="sr-only" readOnly />
+          <input type="checkbox" name="visaRequired" checked={trip.visaRequired} style={{ position: "absolute", opacity: 0, pointerEvents: "none" }} readOnly />
           <CheckableRow
             checked={trip.visaRequired}
             onChange={() => {
@@ -226,17 +227,17 @@ export default function TripDetail() {
             label={t("requiresVisa")}
           />
 
-          <Flex gap={8} pt={8}>
+          <Flex variant="row" gap="sm" pt="sm">
             <Btn type="submit" variant="primary">{t("save")}</Btn>
             <Btn type="button" variant="danger" onClick={() => setShowDeleteConfirm(true)}>
               {t("delete")}
             </Btn>
           </Flex>
-        </form>
+        </Flex>
 
         <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
           <Modal.Title>{t("deleteConfirm")}</Modal.Title>
-          <Flex gap={8}>
+          <Flex variant="row" gap="sm">
             <Btn variant="ghost" onClick={() => setShowDeleteConfirm(false)}>Cancel</Btn>
             <Btn variant="danger" onClick={handleDelete}>{t("delete")}</Btn>
           </Flex>
@@ -298,11 +299,11 @@ export default function TripDetail() {
         </AlertStrip>
 
         {trip.visaRequired && visas.length > 0 && (
-          <Flex direction="column" gap={8}>
-            <Text as="p" variant="mono" size="var(--text-label)" weight={700} transform="uppercase" color="var(--fg-muted)" letterSpacing="0.12em" mb={8}>
+          <Flex variant="column" gap="sm">
+            <Text as="p" variant="mono" color="muted" mb="sm" style={{ fontWeight: "bold", fontSize: "var(--text-label)", letterSpacing: "0.12em" }}>
               {t("visa")}
             </Text>
-            <Flex direction="column" gap={8}>
+            <Flex variant="column" gap="sm">
               {visas.map((visa) => {
                 const isSelected = visa.VisaTrip.length > 0;
                 const vTone = visa.validForTrip ? ("ok" as const) : ("danger" as const);

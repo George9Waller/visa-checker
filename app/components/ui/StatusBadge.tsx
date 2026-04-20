@@ -1,3 +1,5 @@
+import { Flex } from "./layout/Flex";
+import { Text } from "./typography/Text";
 import { StatusPip } from "./StatusPip";
 
 type Tone = "ok" | "warn" | "danger" | "muted";
@@ -17,9 +19,9 @@ const TONE_COLOR: Record<Tone, string> = {
   muted: "var(--fg-muted)",
 };
 
-const SIZE_STYLE: Record<Size, { padding: string; fontSize: string }> = {
-  xs: { padding: "2px 7px", fontSize: "10px" },
-  sm: { padding: "3px 9px", fontSize: "11px" },
+const SIZE_STYLE: Record<Size, { px: "xs" | "sm"; py: "none"; fontSize: number }> = {
+  xs: { px: "xs", py: "none", fontSize: 10 },
+  sm: { px: "sm", py: "none", fontSize: 11 },
 };
 
 export function StatusBadge({
@@ -33,23 +35,31 @@ export function StatusBadge({
   size?: Size;
   className?: string;
 }) {
-  const { padding, fontSize } = SIZE_STYLE[size];
+  const { px, py, fontSize } = SIZE_STYLE[size];
   const color = TONE_COLOR[tone];
+  
   return (
-    <span
-      className={`inline-flex items-center gap-1 font-mono uppercase whitespace-nowrap rounded-full ${className}`}
+    <Flex
+      as="span"
+      variant="row-center"
+      gap="xs"
+      px={px}
+      py={py}
+      className={className}
       style={{
-        padding,
+        display: "inline-flex",
         fontSize,
         fontWeight: 500,
-        letterSpacing: "0.04em",
         backgroundColor: TONE_BG[tone],
         border: `0.5px solid color-mix(in oklch, ${color} 30%, transparent)`,
+        borderRadius: 99,
         color,
       }}
     >
       <StatusPip tone={tone} size={6} />
-      {label}
-    </span>
+      <Text variant="mono" style={{ textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "inherit", color: "inherit" }}>
+        {label}
+      </Text>
+    </Flex>
   );
 }
