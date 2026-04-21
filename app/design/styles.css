@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════
+   DESIGN TOKENS — Tailwind @theme
+════════════════════════════════════════════ */
+
+@theme {
+  /* Surfaces */
+  --color-bg: #f6f1e8;
+  --color-bg-sunken: #ede6d8;
+  --color-bg-raised: #fcf9f3;
+
+  /* Typography */
+  --color-fg: #1a1814;
+  --color-fg-muted: #6b6558;
+  --color-fg-faint: #a39e92;
+
+  /* Borders */
+  --color-border: #e0d8c6;
+  --color-border-strong: #c6bda8;
+
+  /* Status & accent */
+  --color-ok: oklch(0.55 0.13 150);
+  --color-warn: oklch(0.65 0.15 60);
+  --color-danger: oklch(0.55 0.20 25);
+  --color-muted: #8a8370;
+  --color-accent: oklch(0.58 0.16 18);
+  --color-accent-fg: #fff;
+
+  /* Radius */
+  --radius: 4px;
+  --radius-lg: 8px;
+
+  /* Spacing (8px base) */
+  --spacing-0: 0;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+
+  /* Typography sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 22px;
+  --font-size-display: 28px;
+  --font-size-hero: 38px;
+
+  /* Fonts */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* ════════════════════════════════════════════
+   DARK MODE OVERRIDES
+════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --color-bg: #14120e;
+  --color-bg-sunken: #0d0b08;
+  --color-bg-raised: #1e1b15;
+  --color-fg: #f5efe2;
+  --color-fg-muted: #a89f8a;
+  --color-fg-faint: #6b6555;
+  --color-border: #2a2620;
+  --color-border-strong: #3d382d;
+  --color-ok: oklch(0.65 0.14 150);
+  --color-warn: oklch(0.70 0.15 60);
+  --color-danger: oklch(0.62 0.20 25);
+  --color-muted: #706860;
+  --color-accent: oklch(0.68 0.16 30);
+}
+
+/* ════════════════════════════════════════════
+   CUSTOM COMPONENT CLASSES
+════════════════════════════════════════════ */
+
+/* Status badges with color-mix tints */
+.ds-badge-ok {
+  @apply border border-transparent rounded-full px-2 py-1 text-xs font-mono font-medium uppercase tracking-wider;
+  background: color-mix(in oklch, var(--color-ok) 15%, var(--color-bg));
+  color: var(--color-ok);
+}
+
+.ds-badge-warn {
+  @apply border border-transparent rounded-full px-2 py-1 text-xs font-mono font-medium uppercase tracking-wider;
+  background: color-mix(in oklch, var(--color-warn) 20%, var(--color-bg));
+  color: var(--color-warn);
+}
+
+.ds-badge-danger {
+  @apply border border-transparent rounded-full px-2 py-1 text-xs font-mono font-medium uppercase tracking-wider;
+  background: color-mix(in oklch, var(--color-danger) 18%, var(--color-bg));
+  color: var(--color-danger);
+}
+
+/* Alert boxes with left border */
+.ds-alert-ok {
+  @apply border border-l-4 rounded-sm p-3;
+  background: color-mix(in oklch, var(--color-ok) 7%, var(--color-bg-raised));
+  border-left-color: var(--color-ok);
+}
+
+.ds-alert-warn {
+  @apply border border-l-4 rounded-sm p-3;
+  background: color-mix(in oklch, var(--color-warn) 7%, var(--color-bg-raised));
+  border-left-color: var(--color-warn);
+}
+
+.ds-alert-danger {
+  @apply border border-l-4 rounded-sm p-3;
+  background: color-mix(in oklch, var(--color-danger) 7%, var(--color-bg-raised));
+  border-left-color: var(--color-danger);
+}
+
+/* Focus ring utility */
+.ds-focus-ring {
+  @apply outline-2 outline-offset-2;
+  outline-color: var(--color-accent);
+}
+
+/* Usage bar fill animation */
+.ds-usage-fill {
+  @apply transition-all duration-400 ease-out;
+}
