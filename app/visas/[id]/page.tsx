@@ -46,6 +46,7 @@ export default async function VisaDetail({
   const visa = await getVisa(id);
   const dateWithOffset = await getDateWithOffset(date);
   const visaTripInfo = await visaInfoForDate(id, dateWithOffset);
+  console.log(visaTripInfo)
 
   if (!visa) redirect("/visas");
 

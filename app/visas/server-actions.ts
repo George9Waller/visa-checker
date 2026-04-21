@@ -372,3 +372,8 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
     valid: tripsValid && aggregatesValid,
   };
 };
+
+// TODO: overhaul this to use constants rather than strings to describe errors
+// TODO: properly design trip / visa warnings & errors with constants describing errors
+// TODO: Also have more descriptive trip predictive warnings
+// TODO: write system for visa cards

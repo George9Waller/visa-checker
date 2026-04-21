@@ -179,6 +179,24 @@ export const getCurrentTrip = async (): Promise<TimelineTrip[]> => {
     .then(enrichTrips);
 };
 
+export const getNextTrip = async (): Promise<TimelineTrip | null> => {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Authentication required");
+  
+  const todayStr = new Date().toISOString().split("T")[0];
+  const trips = await prisma.trip.findMany({
+    where: {
+      user_id: (session.user as any).id,
+      startDate: { gt: new Date(todayStr) },
+    },
+    select: TRIP_SELECT,
+    orderBy: { startDate: "asc" },
+    take: 1,
+  }).then(enrichTrips);
+
+  return trips.length > 0 ? trips[0] : null;
+}
+
 export const getRollingWindowVisas = async (): Promise<Visa[]> => {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Authentication required");

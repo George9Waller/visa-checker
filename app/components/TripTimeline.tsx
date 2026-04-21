@@ -4,6 +4,7 @@ import {
   getTripsFrom,
   getWarnings,
   getCurrentTrip,
+  getNextTrip,
 } from "@/app/server-actions";
 import { FAB } from "./FAB";
 import { useTranslations } from "next-intl";
@@ -19,11 +20,14 @@ import { Icon } from "./ui/typography/Icon";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { splitCountryLabel } from "./utils/countries";
 import { COUNTRY_LABELS } from "@/app/constants";
+import { Grid } from "./ui/layout/Grid";
+import { NextTripCard } from "./cards/NextTrip";
 
 export default function TripTimeline() {
   const t = useTranslations();
   const warnings = use(getWarnings());
   const currentTrips = use(getCurrentTrip());
+  const nextTrip = use(getNextTrip());
   const todayStr = new Date().toISOString().split("T")[0];
 
   return (
@@ -84,7 +88,7 @@ export default function TripTimeline() {
       </Flex>
 
       {currentTrips.map(currentTrip => (
-        <Link href={`/trips/${currentTrip.id}`} style={{ textDecoration: "none" }} key={currentTrip.id}>
+        <Link href={`/trips/${currentTrip.id}`} key={currentTrip.id}>
           <Flex
             variant="column"
             width="full"
@@ -126,6 +130,11 @@ export default function TripTimeline() {
           </Flex>
         </Link>
       ))}
+
+      {/* Cards */}
+      <Grid columns={2} mb="lg" gap="md">
+        {nextTrip && <NextTripCard trip={nextTrip} />}
+      </Grid>
 
       {warnings && warnings.length > 0 && (
         <Flex variant="column" gap="md" mb="xl" width="full">

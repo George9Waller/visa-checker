@@ -30,7 +30,8 @@
     "currentlyIn": "Currently in",
     "live": "Live",
     "dayOf": "Day {day}",
-    "daysToGo": "{days} days to go"
+    "daysToGo": "{days} days to go",
+    "nextTrip": "Next trip"
   },
   "trip": {
     "create": "New trip",

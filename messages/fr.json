@@ -30,7 +30,8 @@
     "currentlyIn": "Actuellement en",
     "live": "En direct",
     "dayOf": "Jour {day}",
-    "daysToGo": "{days} jours restants"
+    "daysToGo": "{days} jours restants",
+    "nextTrip": "Prochain voyage"
   },
   "trip": {
     "create": "Nouveau voyage",
