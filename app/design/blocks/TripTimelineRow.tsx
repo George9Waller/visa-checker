@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Link from 'next/link';
 import { cn } from '../cn';
 import { Density, Tone } from '../tokens';
 import { StatusPip } from '../primitives/StatusPip';
@@ -19,6 +20,7 @@ export interface TripTimelineRowProps {
   isPast?: boolean;
   isLast?: boolean;
   onClick?: () => void;
+  href?: string;
 }
 
 export function TripTimelineRow({
@@ -34,22 +36,19 @@ export function TripTimelineRow({
   isPast,
   isLast,
   onClick,
+  href,
 }: TripTimelineRowProps) {
   const dateStr = String(date.getDate()).padStart(2, '0');
+  const classes = cn(
+    'w-full text-left grid gap-4 items-center',
+    'px-1 py-4 border-b border-border transition-opacity',
+    isLast && 'border-b-0',
+    isPast && 'opacity-55',
+    density === 'compact' ? 'px-0 py-3' : 'px-1 py-4',
+  );
 
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full text-left grid gap-4 items-center',
-        'px-1 py-4 border-b border-border transition-opacity',
-        isLast && 'border-b-0',
-        isPast && 'opacity-55',
-        density === 'compact' ? 'px-0 py-3' : 'px-1 py-4',
-      )}
-      style={{ gridTemplateColumns: '44px 1fr auto' }}
-    >
-      {/* Date tile */}
+  const content = (
+    <>
       <div className="flex flex-col items-center">
         <Display level={4} className="text-fg">
           {dateStr}
@@ -57,7 +56,6 @@ export function TripTimelineRow({
         <Kicker className="mt-0.5">{month.toUpperCase()}</Kicker>
       </div>
 
-      {/* Title + meta */}
       <div className="min-w-0">
         <div className="flex items-center gap-2 min-w-0 mb-1">
           <Flag size="sm">{flag}</Flag>
@@ -68,7 +66,6 @@ export function TripTimelineRow({
         </Kicker>
       </div>
 
-      {/* Length + status */}
       <div className="flex flex-col items-end gap-1.5">
         <div className="flex flex-col items-center">
           <Display level={4} className="text-fg">
@@ -83,6 +80,28 @@ export function TripTimelineRow({
           <Kicker className="text-xs uppercase">{statusLabel}</Kicker>
         </div>
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={classes}
+        style={{ gridTemplateColumns: '44px 1fr auto' }}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={classes}
+      style={{ gridTemplateColumns: '44px 1fr auto' }}
+    >
+      {content}
     </button>
   );
 }

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Link from 'next/link';
 import { cn } from '../cn';
 import { Kicker } from '../primitives/Kicker';
 import { Display } from '../primitives/Display';
@@ -11,6 +12,7 @@ export interface TripHeroCardProps {
   livePill?: boolean;
   subtitle?: string;
   onClick?: () => void;
+  href?: string;
   className?: string;
 }
 
@@ -21,19 +23,19 @@ export function TripHeroCard({
   livePill,
   subtitle,
   onClick,
+  href,
   className,
 }: TripHeroCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full text-left mb-6 p-5 rounded-lg',
-        'bg-fg text-bg',
-        'hover:opacity-90 transition-opacity',
-        'flex flex-col gap-4',
-        className,
-      )}
-    >
+  const classes = cn(
+    'w-full text-left mb-6 p-5 rounded-lg',
+    'bg-fg text-bg',
+    'hover:opacity-90 transition-opacity',
+    'flex flex-col gap-4',
+    className,
+  );
+
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <Kicker className="opacity-60">{kicker}</Kicker>
         {livePill && (
@@ -49,6 +51,28 @@ export function TripHeroCard({
           {subtitle && <div className="text-sm mt-1 opacity-70">{subtitle}</div>}
         </div>
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={classes}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        classes,
+      )}
+    >
+      {content}
     </button>
   );
 }

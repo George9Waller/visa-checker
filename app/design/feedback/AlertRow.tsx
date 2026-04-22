@@ -1,4 +1,5 @@
 import { cn } from '../cn';
+import Link from 'next/link';
 import { Tone, toneAlertClasses } from '../tokens';
 import { StatusPip } from '../primitives/StatusPip';
 import { Text } from '../primitives/Text';
@@ -9,6 +10,7 @@ export interface AlertRowProps {
   detail?: string;
   action?: string;
   onClick?: () => void;
+  href?: string;
 }
 
 export function AlertRow({
@@ -17,18 +19,18 @@ export function AlertRow({
   detail,
   action,
   onClick,
+  href,
 }: AlertRowProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full flex items-center gap-3 rounded-sm p-3',
-        'text-left border border-l-4',
-        'hover:opacity-90 transition-opacity',
-        'disabled:opacity-40 disabled:cursor-not-allowed',
-        toneAlertClasses(tone),
-      )}
-    >
+  const classes = cn(
+    'w-full flex items-center gap-3 rounded-sm p-3',
+    'text-left border border-l-4',
+    'hover:opacity-90 transition-opacity',
+    'disabled:opacity-40 disabled:cursor-not-allowed',
+    toneAlertClasses(tone),
+  );
+
+  const content = (
+    <>
       <StatusPip tone={tone} size="sm" />
       <div className="flex-1 min-w-0">
         <div className="font-body text-md font-bold text-fg">{title}</div>
@@ -39,6 +41,26 @@ export function AlertRow({
           {action} →
         </div>
       )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={classes}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={classes}
+    >
+      {content}
     </button>
   );
 }

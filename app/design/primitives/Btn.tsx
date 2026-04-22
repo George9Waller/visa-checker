@@ -8,6 +8,7 @@ export interface BtnProps
   size?: Size;
   as?: ElementType;
   type?: 'button' | 'submit' | 'reset';
+  href?: string;
 }
 
 export function Btn({

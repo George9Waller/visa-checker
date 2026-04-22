@@ -2,16 +2,29 @@
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { prisma } from "@/app/constants-server";
-import { Trip, Visa, VisaTrip } from "../../generated/prisma/client";
+import { Trip, Visa } from "../../generated/prisma/client";
 import { getServerSession } from "next-auth";
-import { isVisaValidForTrip } from "../server-actions";
+import {
+  AlertSeverity,
+  EvaluationVisa,
+  TripIssueKind,
+  evaluateSingleVisa,
+} from "../visas/evaluation";
 
-export type VisaWithValid = Pick<
+export type TripVisaCandidate = Pick<
   Visa,
   "id" | "type" | "name" | "expires" | "visaNumber"
 > & {
-  validForTrip: boolean;
-  VisaTrip: Pick<VisaTrip, "id">[];
+  isSelected: boolean;
+  status: "valid" | "invalid";
+  issueKinds: TripIssueKind[];
+  issues: Array<{
+    kind: TripIssueKind;
+    severity: AlertSeverity;
+    params?: Record<string, string | number | boolean | null>;
+  }>;
+  alertSeverity: AlertSeverity;
+  linkId?: string;
 };
 
 const generateHash = (str: string) => {
@@ -208,14 +221,24 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
     throw new Error("Authentication Required");
   }
 
-  const results: VisaWithValid[] = [];
+  const results: TripVisaCandidate[] = [];
 
   const trip = await getTrip(tripId);
   const visas = await prisma.visa.findMany({
     where: {
       user_id: (session.user as any).id,
-      countries: { has: trip.countryCode },
-      OR: [{ expires: null }, { expires: { gte: trip.endDate } }],
+      OR: [
+        {
+          countries: { has: trip.countryCode },
+        },
+        {
+          VisaTrip: {
+            some: {
+              tripId: trip.id,
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,
@@ -235,36 +258,101 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
   });
 
   for await (const visa of visas) {
-    const visaAlreadyLinked =
-      (
-        await prisma.visaTrip.findMany({
-          where: {
-            tripId,
-            visaId: visa.id,
+    const fullVisa = await prisma.visa.findUniqueOrThrow({
+      where: { id: visa.id },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        validFrom: true,
+        expires: true,
+        visaNumber: true,
+        countries: true,
+        maxNumTrips: true,
+        tripMaxLen: true,
+        totalMaxLen: true,
+        rollingPeriodLen: true,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: {
+          select: {
+            id: true,
+            trip: {
+              select: {
+                id: true,
+                startDate: true,
+                endDate: true,
+                name: true,
+                colour: true,
+                countryCode: true,
+                visaRequired: true,
+              },
+            },
           },
-        })
-      ).length > 0;
-    let validForTrip = false;
+        },
+      },
+    });
 
-    if (visaAlreadyLinked) {
-      validForTrip = await isVisaValidForTrip(visa.id, tripId, trip.endDate);
-    } else {
-      const tempLink = await prisma.visaTrip.create({
-        data: {
-          tripId,
-          visaId: visa.id,
-        },
-      });
-      validForTrip = await isVisaValidForTrip(visa.id, tripId, trip.endDate);
-      await prisma.visaTrip.delete({
-        where: {
-          id: tempLink.id,
-        },
+    const link = fullVisa.VisaTrip.find(({ trip: linkedTrip }) => linkedTrip.id === trip.id);
+    const linkedTrips = fullVisa.VisaTrip.map(({ trip: linkedTrip }) => ({
+      ...linkedTrip,
+      linkedVisaId: fullVisa.id,
+    }));
+    if (!link) {
+      linkedTrips.push({
+        id: trip.id,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        name: (trip as any).name ?? null,
+        colour: (trip as any).colour ?? "1",
+        countryCode: trip.countryCode,
+        visaRequired: true,
+        linkedVisaId: fullVisa.id,
       });
     }
-    results.push({ ...visa, validForTrip });
+
+    const evaluationVisa: EvaluationVisa = {
+      ...fullVisa,
+      linkedTrips,
+    };
+    const evaluation = evaluateSingleVisa({
+      visa: evaluationVisa,
+      referenceDate: trip.endDate,
+    }).tripEvaluations.find((tripEvaluation) => tripEvaluation.trip.id === trip.id);
+
+    results.push({
+      id: visa.id,
+      type: visa.type,
+      name: visa.name,
+      expires: visa.expires,
+      visaNumber: visa.visaNumber,
+      isSelected: Boolean(link),
+      status: evaluation?.status ?? "valid",
+      issueKinds: evaluation?.issueKinds ?? [],
+      issues:
+        evaluation?.issues.map((issue) => ({
+          kind: issue.kind as TripIssueKind,
+          severity: issue.severity,
+          params: {
+            ...issue.params,
+            tripName: trip.name ?? null,
+            visaName: visa.name,
+          },
+        })) ?? [],
+      alertSeverity: evaluation?.status === "invalid" ? AlertSeverity.DANGER : AlertSeverity.INFO,
+      linkId: link?.id,
+    });
   }
   return results.sort((a, b) => {
+    if (a.isSelected && !b.isSelected) {
+      return -1;
+    }
+    if (!a.isSelected && b.isSelected) {
+      return 1;
+    }
+    if (a.status !== b.status) {
+      return a.status === "valid" ? -1 : 1;
+    }
     if (!a.expires && !b.expires) {
       return 0;
     }
@@ -276,6 +364,28 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
     }
     return a.expires.getTime() - b.expires.getTime();
   });
+};
+
+export const getTripDetailSummary = async (tripId: string) => {
+  const trip = await getTrip(tripId);
+  const candidates = await getPossibleVisasForTrip(tripId);
+  const selectedCandidate = candidates.find((candidate) => candidate.isSelected);
+  const issueKinds = !trip.visaRequired
+    ? []
+    : selectedCandidate
+    ? selectedCandidate.issueKinds
+    : [TripIssueKind.TRIP_NO_VISA_LINKED];
+  const status =
+    !trip.visaRequired || issueKinds.length === 0 ? "valid" : "invalid";
+
+  return {
+    trip,
+    status,
+    issueKinds,
+    selectedVisaId: selectedCandidate?.id ?? null,
+    selectedCandidate: selectedCandidate ?? null,
+    candidates,
+  };
 };
 
 export const selectVisaForTrip = async (tripId: string, visaId: string) => {
@@ -295,5 +405,5 @@ export const selectVisaForTrip = async (tripId: string, visaId: string) => {
       visaId,
     },
   });
-  return await getPossibleVisasForTrip(tripId);
+  return await getTripDetailSummary(tripId);
 };

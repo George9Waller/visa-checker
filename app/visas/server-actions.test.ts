@@ -100,6 +100,43 @@ describe("visaInfoForDate — early exits", () => {
 describe("visaInfoForDate — individual trip validation", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("treats trip start exactly on validFrom as valid", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      validFrom: d("2024-03-01"),
+      VisaTrip: [
+        {
+          trip: makeTrip({
+            startDate: d("2024-03-01"),
+            endDate: d("2024-03-05"),
+          }),
+        },
+      ],
+    });
+
+    const result = await visaInfoForDate("visa-1", d("2024-03-05"));
+    expect(result.trips?.[0].valid).toBe(true);
+  });
+
+  it("treats trip end exactly on expiry as valid when mustExitBeforeExpiry is true", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      expires: d("2024-03-07"),
+      mustExitBeforeExpiry: true,
+      VisaTrip: [
+        {
+          trip: makeTrip({
+            startDate: d("2024-03-01"),
+            endDate: d("2024-03-07"),
+          }),
+        },
+      ],
+    });
+
+    const result = await visaInfoForDate("visa-1", d("2024-03-07"));
+    expect(result.trips?.[0].valid).toBe(true);
+  });
+
   it("marks trip valid when country matches and dates are in range", async () => {
     mockFindUnique.mockResolvedValue({
       ...baseVisa(),
@@ -181,6 +218,26 @@ describe("visaInfoForDate — individual trip validation", () => {
     });
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     expect(result.trips?.[0].valid).toBe(true);
+  });
+
+  it("treats trip length exactly equal to tripMaxLen as invalid in the current contract", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      tripMaxLen: 7,
+      includeEntryAndExitDates: true,
+      VisaTrip: [
+        {
+          // Intentional regression pin: current behavior treats equality as invalid.
+          trip: makeTrip({
+            startDate: d("2024-03-01"),
+            endDate: d("2024-03-07"),
+          }),
+        },
+      ],
+    });
+
+    const result = await visaInfoForDate("visa-1", d("2024-06-01"));
+    expect(result.trips?.[0].valid).toBe(false);
   });
 
   it("checks end date when mustExitBeforeExpiry is true", async () => {
@@ -363,6 +420,50 @@ describe("visaInfoForDate — aggregate validation", () => {
     const result = await visaInfoForDate("visa-1", d("2024-06-01"));
     // The old trip is excluded, so only 5 days counted — within limit of 10
     expect(result.aggregatesValid).toBe(true);
+  });
+
+  it("includes a trip that ends exactly on the rolling cutoff", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      totalMaxLen: 10,
+      rollingPeriodLen: 180,
+      VisaTrip: [
+        {
+          trip: makeTrip({
+            id: "cutoff",
+            startDate: d("2023-11-29"),
+            endDate: d("2023-12-04"),
+          }),
+        },
+      ],
+    });
+
+    const result = await visaInfoForDate("visa-1", d("2024-06-01"));
+    expect(result.aggregatesValid).toBe(true);
+  });
+
+  it("counts only the overlapping slice inside the rolling window", async () => {
+    mockFindUnique.mockResolvedValue({
+      ...baseVisa(),
+      totalMaxLen: 10,
+      rollingPeriodLen: 30,
+      includeEntryAndExitDates: true,
+      VisaTrip: [
+        {
+          trip: makeTrip({
+            id: "partial",
+            startDate: d("2024-05-01"),
+            endDate: d("2024-05-10"),
+          }),
+        },
+      ],
+    });
+
+    const result = await visaInfoForDate("visa-1", d("2024-05-20"));
+    const totalLenValidation = result.aggregateValidation?.find(
+      (v: { name: string }) => v.name === "Total max length"
+    );
+    expect(totalLenValidation?.remaining).toBe(0);
   });
 
   it("shows remaining days correctly when some days have been used", async () => {

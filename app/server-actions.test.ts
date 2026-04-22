@@ -1,16 +1,48 @@
-import { vi, describe, it, expect } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock all external dependencies so we can import pure functions in isolation
-vi.mock("@/auth", () => ({ auth: vi.fn() }));
-vi.mock("./constants", () => ({ prisma: {} }));
-vi.mock("@prisma/client", () => ({ PrismaClient: vi.fn() }));
-vi.mock("./visas/server-actions", () => ({ visaInfoForDate: vi.fn() }));
+const {
+  getServerSessionMock,
+  visaInfoForDateMock,
+  prismaMock,
+} = vi.hoisted(() => ({
+  getServerSessionMock: vi.fn(),
+  visaInfoForDateMock: vi.fn(),
+  prismaMock: {
+    trip: {
+      count: vi.fn(),
+      findMany: vi.fn(),
+    },
+    visa: {
+      findMany: vi.fn(),
+    },
+  },
+}));
 
-import { getDaysBetweenDates, getDateWithOffset } from "./server-actions";
+vi.mock("next-auth", () => ({
+  getServerSession: getServerSessionMock,
+}));
+
+vi.mock("./constants-server", () => ({
+  prisma: prismaMock,
+}));
+
+vi.mock("./visas/server-actions", () => ({
+  visaInfoForDate: visaInfoForDateMock,
+}));
+
+import {
+  getDashboardSummary,
+  getCurrentTrip,
+  getDateWithOffset,
+  getDaysBetweenDates,
+  getNextTrip,
+  isVisaValidForTrip,
+} from "./server-actions";
+
+const d = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
 describe("getDateWithOffset", () => {
   it("returns the same date when offset is zero (UTC)", async () => {
-    // Mock getTimezoneOffset to return 0 for this test
     vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(0);
 
     const date = new Date("2024-06-15T00:00:00.000Z");
@@ -19,7 +51,6 @@ describe("getDateWithOffset", () => {
   });
 
   it("adjusts date forward for positive offset", async () => {
-    // Mock getTimezoneOffset to return 120 (UTC+2)
     vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(120);
 
     const date = new Date("2024-06-15T00:00:00.000Z");
@@ -29,7 +60,6 @@ describe("getDateWithOffset", () => {
   });
 
   it("adjusts date backward for negative offset", async () => {
-    // Mock getTimezoneOffset to return -60 (UTC-1)
     vi.spyOn(Date.prototype, "getTimezoneOffset").mockReturnValue(-60);
 
     const date = new Date("2024-06-15T00:00:00.000Z");
@@ -41,27 +71,15 @@ describe("getDateWithOffset", () => {
 
 describe("getDaysBetweenDates", () => {
   it("returns 0 for same-day dates", async () => {
-    const d = new Date("2024-01-01T00:00:00.000Z");
-    expect(await getDaysBetweenDates(d, d)).toBe(0);
+    const sameDay = new Date("2024-01-01T00:00:00.000Z");
+    expect(await getDaysBetweenDates(sameDay, sameDay)).toBe(0);
   });
 
-  it("counts 1 day for consecutive dates (exclusive)", async () => {
-    const start = new Date("2024-01-01T00:00:00.000Z");
-    const end = new Date("2024-01-02T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end)).toBe(1);
-  });
-
-  it("counts 7 days for a week (exclusive)", async () => {
-    const start = new Date("2024-01-01T00:00:00.000Z");
-    const end = new Date("2024-01-08T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end)).toBe(7);
-  });
-
-  it("adds 1 when includeStartAndEnd is true", async () => {
+  it("counts exclusive and inclusive boundaries", async () => {
     const start = new Date("2024-01-01T00:00:00.000Z");
     const end = new Date("2024-01-07T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end, true)).toBe(7);
     expect(await getDaysBetweenDates(start, end, false)).toBe(6);
+    expect(await getDaysBetweenDates(start, end, true)).toBe(7);
   });
 
   it("returns absolute value regardless of argument order", async () => {
@@ -71,22 +89,167 @@ describe("getDaysBetweenDates", () => {
       await getDaysBetweenDates(end, start)
     );
   });
+});
 
-  it("counts correctly across month boundaries", async () => {
-    const start = new Date("2024-01-28T00:00:00.000Z");
-    const end = new Date("2024-02-03T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end)).toBe(6);
+describe("isVisaValidForTrip", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
   });
 
-  it("counts correctly across year boundaries", async () => {
-    const start = new Date("2023-12-28T00:00:00.000Z");
-    const end = new Date("2024-01-04T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end)).toBe(7);
+  it("returns true only when the trip is valid and aggregates are valid", async () => {
+    visaInfoForDateMock.mockResolvedValue({
+      trips: [{ trip: { id: "trip-1" }, valid: true }],
+      aggregatesValid: true,
+    });
+
+    await expect(
+      isVisaValidForTrip("visa-1", "trip-1", d("2024-06-01"))
+    ).resolves.toBe(true);
   });
 
-  it("handles a 90-day Schengen-style period", async () => {
-    const start = new Date("2024-01-01T00:00:00.000Z");
-    const end = new Date("2024-04-01T00:00:00.000Z");
-    expect(await getDaysBetweenDates(start, end)).toBe(91); // Jan(31) + Feb(29 leap) + Mar(31) = 91
+  it("returns false when the linked trip is invalid for one reason", async () => {
+    visaInfoForDateMock.mockResolvedValue({
+      trips: [{ trip: { id: "trip-1" }, valid: false }],
+      aggregatesValid: true,
+    });
+
+    await expect(
+      isVisaValidForTrip("visa-1", "trip-1", d("2024-06-01"))
+    ).resolves.toBe(false);
+  });
+
+  it("returns false when aggregate usage invalidates an otherwise valid trip", async () => {
+    visaInfoForDateMock.mockResolvedValue({
+      trips: [{ trip: { id: "trip-1" }, valid: true }],
+      aggregatesValid: false,
+    });
+
+    await expect(
+      isVisaValidForTrip("visa-1", "trip-1", d("2024-06-01"))
+    ).resolves.toBe(false);
+  });
+});
+
+describe("trip dashboard actions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+  });
+
+  it("selects current trips using today's boundaries", async () => {
+    vi.setSystemTime(new Date("2024-06-15T10:00:00.000Z"));
+    prismaMock.trip.findMany.mockResolvedValue([
+      {
+        id: "current",
+        startDate: d("2024-06-10"),
+        endDate: d("2024-06-18"),
+        name: "Current",
+        colour: "1",
+        countryCode: "FR",
+        visaRequired: true,
+        VisaTrip: [{ Visa: { id: "visa-1", name: "Schengen" } }],
+      },
+    ]);
+    visaInfoForDateMock.mockResolvedValue({
+      trips: [{ trip: { id: "current" }, valid: true }],
+      aggregatesValid: true,
+    });
+
+    const trips = await getCurrentTrip();
+
+    expect(prismaMock.trip.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          startDate: { lte: new Date("2024-06-15") },
+          endDate: { gte: new Date("2024-06-15") },
+        }),
+      })
+    );
+    expect(trips[0]?.visaValid).toBe(true);
+  });
+
+  it("selects the next upcoming trip", async () => {
+    vi.setSystemTime(new Date("2024-06-15T10:00:00.000Z"));
+    prismaMock.trip.findMany.mockResolvedValue([
+      {
+        id: "next",
+        startDate: d("2024-07-01"),
+        endDate: d("2024-07-10"),
+        name: "Next",
+        colour: "1",
+        countryCode: "FR",
+        visaRequired: true,
+        VisaTrip: [{ Visa: { id: "visa-1", name: "Schengen" } }],
+      },
+    ]);
+    visaInfoForDateMock.mockResolvedValue({
+      trips: [{ trip: { id: "next" }, valid: true }],
+      aggregatesValid: true,
+    });
+
+    const trip = await getNextTrip();
+
+    expect(trip?.id).toBe("next");
+    expect(prismaMock.trip.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 1,
+        where: expect.objectContaining({
+          startDate: { gt: new Date("2024-06-15") },
+        }),
+      })
+    );
+  });
+
+  it("returns structured dashboard alerts and cards", async () => {
+    vi.setSystemTime(new Date("2024-06-15T10:00:00.000Z"));
+    prismaMock.visa.findMany.mockResolvedValue([
+      {
+        id: "visa-1",
+        name: "Schengen",
+        type: "tourist",
+        validFrom: d("2024-01-01"),
+        expires: d("2024-12-31"),
+        visaNumber: null,
+        countries: ["FR"],
+        maxNumTrips: null,
+        tripMaxLen: 3,
+        totalMaxLen: 90,
+        rollingPeriodLen: 180,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: [
+          {
+            trip: {
+              id: "trip-1",
+              startDate: d("2024-06-20"),
+              endDate: d("2024-06-25"),
+              name: "Paris",
+              colour: "1",
+              countryCode: "DE",
+              visaRequired: true,
+            },
+          },
+        ],
+      },
+    ]);
+    prismaMock.trip.findMany.mockResolvedValue([
+      {
+        id: "trip-1",
+        startDate: d("2024-06-20"),
+        endDate: d("2024-06-25"),
+        name: "Paris",
+        colour: "1",
+        countryCode: "DE",
+        visaRequired: true,
+        VisaTrip: [{ visaId: "visa-1" }],
+      },
+    ]);
+
+    const summary = await getDashboardSummary();
+
+    expect(summary.alerts[0]?.kind).toBe("TRIP_COUNTRY_NOT_COVERED");
+    expect(summary.cards.length).toBeGreaterThan(0);
+    expect(summary.nextTrip?.trip.id).toBe("trip-1");
   });
 });

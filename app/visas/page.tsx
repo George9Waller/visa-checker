@@ -2,76 +2,94 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { getVisas } from "./server-actions";
-import PrivateText from "../components/PrivateText";
-import { StatusBadge } from "../components/ui/StatusBadge";
 import { VISA_TYPES_DISPLAY_MAP } from "./constants";
-import { getTranslations } from "next-intl/server";
-import { PageShell } from "../components/ui/PageShell";
-import { PageHeader, IconBtn } from "../components/ui/PageHeader";
-import { ContentWell } from "../components/ui/ContentWell";
-import { SelectableRow } from "../components/ui/SelectableRow";
-import { EmptyState } from "../components/ui/EmptyState";
-import { Btn } from "../components/ui/Btn";
+import {
+  Btn,
+  DashboardHeader,
+  EmptyState,
+  PageContainer,
+  Stack,
+  Text,
+  VisaListRow,
+} from "@/app/design";
+import { COUNTRY_EMOJIS } from "@/app/constants";
+
+const formatDate = (value: Date) =>
+  value.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
 export default async function VisasPage() {
-  const t = await getTranslations("visa");
-  const tStatus = await getTranslations("status");
   const visas = await getVisas();
+  const today = new Date();
+  const weekday = today.toLocaleDateString("en-GB", { weekday: "long" });
 
   return (
-    <PageShell>
-      <PageHeader
-        variant="detail"
-        backHref="/"
+    <PageContainer>
+      <DashboardHeader
+        date={today}
+        weekday={weekday}
         title="Visas"
         actions={
-          <IconBtn href="/visas/create" icon="add" label={t("create")} />
+          <Btn as={Link} href="/visas/create" variant="primary" size="sm">
+            Add visa
+          </Btn>
         }
       />
 
-      <ContentWell>
-        {visas.length === 0 && (
+      <Stack className="gap-4">
+        {visas.length === 0 ? (
           <EmptyState
             icon="passport"
-            message="No visas created yet"
-            action={
-              <Link href="/visas/create" style={{ textDecoration: "none" }}>
-                <Btn variant="primary">{t("create")}</Btn>
-              </Link>
-            }
+            title="No visas yet"
+            message="Add your first visa to start tracking coverage."
           />
+        ) : (
+          visas.map((visa) => {
+            const isExpired = Boolean(visa.expires && visa.expires < today);
+            const isExpiringSoon =
+              Boolean(visa.expires) &&
+              !isExpired &&
+              (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
+            const statusTone = isExpired
+              ? "danger"
+              : isExpiringSoon
+              ? "warn"
+              : "ok";
+
+            return (
+              <VisaListRow
+                key={visa.id}
+                href={`/visas/${visa.id}`}
+                flag={COUNTRY_EMOJIS[visa.countries[0] ?? ""] ?? "🛂"}
+                title={visa.name}
+                kicker={[
+                  VISA_TYPES_DISPLAY_MAP[visa.type],
+                  visa.expires ? `Expires ${formatDate(visa.expires)}` : "Open-ended",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                countryCount={visa.countries.length}
+                statusTone={statusTone}
+                statusLabel={isExpired ? "expired" : isExpiringSoon ? "expiring" : "valid"}
+              />
+            );
+          })
         )}
+        {visas.length === 0 && (
+          <Btn as={Link} href="/visas/create" variant="primary">
+            Create visa
+          </Btn>
+        )}
+      </Stack>
 
-        {visas.map((visa) => {
-          const isExpired = visa.expires && visa.expires < new Date();
-          const tone = isExpired ? ("danger" as const) : ("ok" as const);
-
-          const subtitle = [
-            VISA_TYPES_DISPLAY_MAP[visa.type],
-            visa.expires
-              ? `${isExpired ? "Expired" : "Until"} ${visa.expires.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · ");
-
-          return (
-            <SelectableRow
-              key={visa.id}
-              href={`/visas/${visa.id}`}
-              title={visa.name}
-              subtitle={subtitle}
-              trailing={
-                <StatusBadge
-                  tone={tone}
-                  label={isExpired ? tStatus("expired") : tStatus("valid")}
-                  size="xs"
-                />
-              }
-            />
-          );
-        })}
-      </ContentWell>
-    </PageShell>
+      {visas.length > 0 && (
+        <Text className="mt-4 text-sm text-fg-muted">
+          Tap a visa to review its trips, coverage, and remaining validity.
+        </Text>
+      )}
+    </PageContainer>
   );
 }

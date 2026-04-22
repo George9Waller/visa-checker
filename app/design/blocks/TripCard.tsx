@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Link from 'next/link';
 import { cn } from '../cn';
 import { Tone } from '../tokens';
 import { StatusBadge } from '../feedback/StatusBadge';
@@ -16,6 +17,7 @@ export interface TripCardProps {
   visaLabel?: string;
   isPast?: boolean;
   onClick?: () => void;
+  href?: string;
 }
 
 export function TripCard({
@@ -28,17 +30,17 @@ export function TripCard({
   visaLabel,
   isPast,
   onClick,
+  href,
 }: TripCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full text-left mb-3 p-4 rounded-lg border border-border',
-        'bg-bg-raised hover:bg-bg-sunken transition-colors',
-        'flex flex-col gap-3',
-        isPast && 'opacity-60',
-      )}
-    >
+  const classes = cn(
+    'w-full text-left mb-3 p-4 rounded-lg border border-border',
+    'bg-bg-raised hover:bg-bg-sunken transition-colors',
+    'flex flex-col gap-3',
+    isPast && 'opacity-60',
+  );
+
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Flag size="md">{flag}</Flag>
@@ -58,6 +60,28 @@ export function TripCard({
           VISA · {visaLabel}
         </div>
       )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={classes}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        classes,
+      )}
+    >
+      {content}
     </button>
   );
 }

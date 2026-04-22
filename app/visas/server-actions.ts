@@ -3,7 +3,14 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { prisma } from "../constants-server";
-import { getDateWithOffset, getDaysBetweenDates } from "../server-actions";
+import { getDaysBetweenDates } from "../server-actions";
+import {
+  AggregateRuleKind,
+  AlertSeverity,
+  EvaluationVisa,
+  TripIssueKind,
+  evaluateSingleVisa,
+} from "./evaluation";
 
 export const getVisas = async () => {
   const session = await getServerSession(authOptions);
@@ -43,6 +50,102 @@ export const getVisa = async (id: string) => {
       id,
     },
   });
+};
+
+export const getVisaDetailSummary = async (
+  id: string,
+  referenceDate = new Date()
+) => {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    throw new Error("Authentication required");
+  }
+
+  const visa = await prisma.visa.findUnique({
+    where: {
+      user_id: (session.user as any).id,
+      id,
+    },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      validFrom: true,
+      expires: true,
+      visaNumber: true,
+      documentNumber: true,
+      countries: true,
+      maxNumTrips: true,
+      tripMaxLen: true,
+      totalMaxLen: true,
+      rollingPeriodLen: true,
+      mustExitBeforeExpiry: true,
+      includeEntryAndExitDates: true,
+      VisaTrip: {
+        select: {
+          trip: {
+            select: {
+              id: true,
+              startDate: true,
+              endDate: true,
+              name: true,
+              colour: true,
+              countryCode: true,
+              visaRequired: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            trip: {
+              startDate: "asc",
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  if (!visa) {
+    return null;
+  }
+
+  const evaluation = evaluateSingleVisa({
+    visa: {
+      id: visa.id,
+      name: visa.name,
+      type: visa.type,
+      validFrom: visa.validFrom,
+      expires: visa.expires,
+      visaNumber: visa.visaNumber,
+      countries: visa.countries,
+      maxNumTrips: visa.maxNumTrips,
+      tripMaxLen: visa.tripMaxLen,
+      totalMaxLen: visa.totalMaxLen,
+      rollingPeriodLen: visa.rollingPeriodLen,
+      mustExitBeforeExpiry: visa.mustExitBeforeExpiry,
+      includeEntryAndExitDates: visa.includeEntryAndExitDates,
+      linkedTrips: visa.VisaTrip.map(({ trip }) => ({
+        ...trip,
+        linkedVisaId: visa.id,
+      })),
+    },
+    referenceDate,
+  });
+
+  return {
+    visa,
+    referenceDate,
+    status: evaluation.status,
+    alerts: evaluation.alerts,
+    usageSnapshots: evaluation.usageSnapshots,
+    tripEvaluations: evaluation.tripEvaluations,
+    projection: evaluation.projection,
+    rollingWindowTripIds:
+      evaluation.usageSnapshots.find(
+        (snapshot) => snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW
+      )?.relevantTripIds ?? [],
+  };
 };
 
 export const createVisa = async (
@@ -189,188 +292,218 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
       },
     };
   }
+  const evaluationVisa: EvaluationVisa = {
+    ...visa,
+    id: visaId,
+    name: "Compatibility Visa",
+    type: "compatibility",
+    visaNumber: null,
+    linkedTrips: visa.VisaTrip.map(({ trip }) => ({
+      id: trip.id,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      name: trip.name,
+      countryCode: trip.countryCode,
+      colour: trip.colour,
+      visaRequired: trip.visaRequired,
+      linkedVisaId: visaId,
+    })),
+  };
 
-  // Individual trip validation
-
-  const dateIsValid = (tripStartDate: Date) =>
-    tripStartDate >= visa.validFrom &&
-    (visa.expires ? tripStartDate <= visa.expires : true);
-
-  const countryIsValid = (tripCountryCode: string) =>
-    visa.countries.includes(tripCountryCode);
-
-  const singleTripMaxLenIsValid = (numDays: number) =>
-    visa.tripMaxLen ? numDays < visa.tripMaxLen : true;
+  const evaluation = evaluateSingleVisa({
+    visa: evaluationVisa,
+    referenceDate: date,
+  });
 
   const trips = await Promise.all(
-    visa.VisaTrip.map(async (visaTrip) => {
+    evaluation.tripEvaluations.map(async (tripEvaluation) => {
       const tripLen = await getDaysBetweenDates(
-        visaTrip.trip.startDate,
-        visaTrip.trip.endDate,
+        tripEvaluation.trip.startDate,
+        tripEvaluation.trip.endDate,
         visa.includeEntryAndExitDates
       );
-      const startDateValid = dateIsValid(visaTrip.trip.startDate);
-      const endDateValid = dateIsValid(visaTrip.trip.endDate);
-      const countryValid = countryIsValid(visaTrip.trip.countryCode);
-      const singleTripMaxLenValid = singleTripMaxLenIsValid(tripLen);
-
+      const issueKinds = new Set(tripEvaluation.issueKinds);
       const results = [
         {
           name: "Country",
-          valid: countryValid,
-          description: countryValid
-            ? "Country is valid"
-            : "Country is invalid, this visa does not cover this country",
+          valid: !issueKinds.has(TripIssueKind.TRIP_COUNTRY_NOT_COVERED),
+          description: issueKinds.has(TripIssueKind.TRIP_COUNTRY_NOT_COVERED)
+            ? "Country is invalid, this visa does not cover this country"
+            : "Country is valid",
         },
         {
           name: "Start Date",
-          valid: startDateValid,
-          description: startDateValid
-            ? "Valid start date"
-            : "Start date invalid, trips starts before or after visa validity",
+          valid:
+            !issueKinds.has(TripIssueKind.TRIP_VISA_NOT_YET_VALID) &&
+            !issueKinds.has(TripIssueKind.TRIP_VISA_EXPIRED),
+          description:
+            issueKinds.has(TripIssueKind.TRIP_VISA_NOT_YET_VALID) ||
+            issueKinds.has(TripIssueKind.TRIP_VISA_EXPIRED)
+              ? "Start date invalid, trips starts before or after visa validity"
+              : "Valid start date",
         },
       ];
+
       if (visa.mustExitBeforeExpiry) {
         results.push({
           name: "End Date",
-          valid: endDateValid,
-          description: endDateValid
-            ? "Valid end date"
-            : "End date invalid, trip ends before or after visa validity",
+          valid:
+            !issueKinds.has(TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED) &&
+            !issueKinds.has(TripIssueKind.TRIP_MUST_LEAVE_BEFORE_EXPIRY_BREACH),
+          description:
+            issueKinds.has(TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED) ||
+            issueKinds.has(TripIssueKind.TRIP_MUST_LEAVE_BEFORE_EXPIRY_BREACH)
+              ? "End date invalid, trip ends before or after visa validity"
+              : "Valid end date",
         });
       }
+
       if (visa.tripMaxLen) {
+        const valid = !issueKinds.has(TripIssueKind.TRIP_EXCEEDS_SINGLE_TRIP_LIMIT);
         results.push({
           name: "Maximum Single Trip Length",
-          valid: singleTripMaxLenValid,
-          description: singleTripMaxLenValid
+          valid,
+          description: valid
             ? `Maximum single trip length is valid: ${tripLen} days (max: ${visa.tripMaxLen} days)`
             : `Maximum single trip length invalid: ${tripLen} days (max: ${visa.tripMaxLen} days)`,
         });
       }
 
       return {
-        valid: results.map((result) => result.valid).every(Boolean),
+        valid: tripEvaluation.status === "valid",
         trip: {
-          id: visaTrip.trip.id,
-          startDate: visaTrip.trip.startDate,
-          endDate: visaTrip.trip.endDate,
-          name: visaTrip.trip.name,
-          country: visaTrip.trip.countryCode,
-          colour: visaTrip.trip.colour,
-          tripLen: tripLen,
+          id: tripEvaluation.trip.id,
+          startDate: tripEvaluation.trip.startDate,
+          endDate: tripEvaluation.trip.endDate,
+          name: tripEvaluation.trip.name,
+          country: tripEvaluation.trip.countryCode,
+          colour: tripEvaluation.trip.colour,
+          tripLen,
         },
         results,
       };
     })
   );
 
-  const dateWithOffset = await getDateWithOffset(date);
-  const rollingCutOff = visa.rollingPeriodLen
-    ? new Date(
-        dateWithOffset.getTime() - visa.rollingPeriodLen * 24 * 60 * 60 * 1000
-      )
-    : undefined;
+  const aggregateValidation = evaluation.usageSnapshots.flatMap((snapshot) => {
+    if (snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW) {
+      return [
+        {
+          name: "Rolling Period",
+          valid: true,
+          description: `${visa.rollingPeriodLen} days, starts from ${new Date(
+            snapshot.windowStart!
+          ).toLocaleDateString("en-GB")}`,
+          data: snapshot.relevantTripIds.map((tripId) => ({
+            tripId,
+            count: "",
+            descriptor: "",
+          })),
+        },
+        {
+          name: "Total max length",
+          valid: snapshot.remaining >= 0,
+          description:
+            snapshot.remaining >= 0
+              ? `Total trip length valid: ${snapshot.used} days (max ${snapshot.limit})`
+              : `Total trip max length invalid: ${snapshot.used} days (max ${snapshot.limit})`,
+          data: snapshot.relevantTripIds.map((tripId) => ({
+            tripId,
+            count: 0,
+            descriptor: "days",
+          })),
+          remaining: Math.max(snapshot.remaining, 0),
+        },
+      ];
+    }
 
-  // Aggregate trip validation
-  const validTrips = trips
-    .filter((trip) => trip.valid)
-    .filter((trip) => {
-      if (rollingCutOff) {
-        return trip.trip.endDate >= rollingCutOff;
-      } else {
-        return true;
-      }
-    });
+    if (snapshot.ruleKind === AggregateRuleKind.MAX_TRIPS) {
+      return [
+        {
+          name: "Maximum Number of Trips",
+          valid: snapshot.remaining >= 0,
+          description:
+            snapshot.remaining >= 0
+              ? `The maximum number of trips is valid: ${snapshot.used} trip(s) (max: ${snapshot.limit})`
+              : `The maximum number of trips is invalid: ${snapshot.used} trip(s) (max ${snapshot.limit})`,
+          data: snapshot.relevantTripIds.map((tripId) => ({
+            tripId,
+            count: 1,
+            descriptor: "trip",
+          })),
+          remaining: Math.max(snapshot.remaining, 0),
+        },
+      ];
+    }
 
-  const maxNumTripsValid = visa.maxNumTrips
-    ? validTrips.length <= visa.maxNumTrips
-    : true;
+    return [
+      {
+        name: "Total max length",
+        valid: snapshot.remaining >= 0,
+        description:
+          snapshot.remaining >= 0
+            ? `Total trip length valid: ${snapshot.used} days (max ${snapshot.limit})`
+            : `Total trip max length invalid: ${snapshot.used} days (max ${snapshot.limit})`,
+        data: snapshot.relevantTripIds.map((tripId) => ({
+          tripId,
+          count: 0,
+          descriptor: "days",
+        })),
+        remaining: Math.max(snapshot.remaining, 0),
+      },
+    ];
+  });
 
-  const tripLengths = await Promise.all(
-    validTrips.map(async (trip) => {
-      const startDateWithOffset = await getDateWithOffset(trip.trip.startDate);
-      const endDateWithOffset = await getDateWithOffset(trip.trip.endDate);
-      const start = rollingCutOff
-        ? Math.max(startDateWithOffset.getTime(), rollingCutOff.getTime())
-        : startDateWithOffset.getTime();
-      const end = Math.min(endDateWithOffset.getTime(), date.getTime());
-      const numDays = await getDaysBetweenDates(
-        new Date(start),
-        new Date(end),
-        visa.includeEntryAndExitDates
-      );
-      return {
-        tripId: trip.trip.id,
-        count: numDays,
-        descriptor: "days",
-      };
-    })
+  const summaryAlerts = evaluation.alerts.filter(
+    (alert) => alert.severity !== AlertSeverity.INFO
   );
-  const totalTripLength = tripLengths
-    .map((trip) => trip.count)
-    .reduce((previousValue, currentValue) => previousValue + currentValue, 0);
-  const totalTripLengthValid = visa.totalMaxLen
-    ? totalTripLength <= visa.totalMaxLen
-    : true;
 
-  const aggregateValidation = [];
+  const summary =
+    summaryAlerts.length > 0
+      ? {
+          valid: false,
+          items: summaryAlerts.slice(0, 3).map((alert) => ({
+            title:
+              alert.kind === "VISA_EXPIRED"
+                ? "Expired"
+                : alert.kind === "VISA_NOT_YET_VALID_FOR_TRIP"
+                ? "Invalid"
+                : "Warning",
+            content:
+              alert.kind === "VISA_EXPIRED"
+                ? "This visa has expired on this date"
+                : alert.kind === "VISA_NOT_YET_VALID_FOR_TRIP"
+                ? "This visa is not yet valid on this date"
+                : "This visa has one or more linked trip issues on this date",
+          })),
+        }
+      : undefined;
 
-  if (rollingCutOff) {
-    aggregateValidation.push({
-      name: "Rolling Period",
-      valid: true,
-      description: `${
-        visa.rollingPeriodLen
-      } days, starts from ${rollingCutOff.toLocaleDateString("en-GB")}`,
-      data: validTrips.map((trip) => ({
-        tripId: trip.trip.id,
-        count: "",
-        descriptor: "",
-      })),
-    });
-  }
+  const tripsValid = trips.every((trip) => trip.valid);
+  const aggregatesValid = aggregateValidation.every((aggregate) => aggregate.valid);
 
-  if (visa.maxNumTrips) {
-    aggregateValidation.push({
-      name: "Maximum Number of Trips",
-      valid: maxNumTripsValid,
-      description: maxNumTripsValid
-        ? `The maximum number of trips is valid: ${validTrips.length} trip(s) (max: ${visa.maxNumTrips})`
-        : `The maximum number of trips is invalid: ${validTrips.length} trip(s) (max ${visa.maxNumTrips})`,
-      data: validTrips.map((trip) => ({
-        tripId: trip.trip.id,
-        count: 1,
-        descriptor: "trip",
-      })),
-      remaining: Math.max(visa.maxNumTrips - validTrips.length, 0),
-    });
-  }
-
-  if (visa.totalMaxLen) {
-    aggregateValidation.push({
-      name: "Total max length",
-      valid: totalTripLengthValid,
-      description: totalTripLengthValid
-        ? `Total trip length valid: ${totalTripLength} days (max ${visa.totalMaxLen})`
-        : `Total trip max length invalid: ${totalTripLength} days (max ${visa.totalMaxLen})`,
-      data: tripLengths,
-      remaining: Math.max(visa.totalMaxLen - totalTripLength, 0),
-    });
-  }
-
-  const tripsValid = trips.map((trip) => trip.valid).every(Boolean);
-  const aggregatesValid = aggregateValidation
-    .map((aggregate) => aggregate.valid)
-    .every(Boolean);
-
-  return {
-    trips,
-    aggregateValidation,
-    tripsValid,
-    aggregatesValid,
-    valid: tripsValid && aggregatesValid,
-  };
+  // This adapter preserves the old string-based shape until the UI consumes structured alerts directly.
+  // Future hooks for alert dismissal, renewal suppression, passport expiry, and visa-free coverage belong above this boundary.
+  return summary
+    ? {
+        summary,
+        trips,
+        aggregateValidation,
+        tripsValid,
+        aggregatesValid,
+        valid: tripsValid && aggregatesValid,
+        structuredAlerts: evaluation.alerts,
+        infoKinds: evaluation.infoKinds,
+      }
+    : {
+        trips,
+        aggregateValidation,
+        tripsValid,
+        aggregatesValid,
+        valid: tripsValid && aggregatesValid,
+        structuredAlerts: evaluation.alerts,
+        infoKinds: evaluation.infoKinds,
+      };
 };
 
 // TODO: overhaul this to use constants rather than strings to describe errors
