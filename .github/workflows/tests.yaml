@@ -6,8 +6,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      POSTGRES_PRISMA_URL: postgresql://postgres:postgres@127.0.0.1:5432/visa_checker?schema=public
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: visa_checker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d visa_checker"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - name: Checkout Code
@@ -24,6 +39,9 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Apply Prisma Migrations
+        run: npx prisma migrate deploy
 
       - name: Run Vitest
         run: npm run test
