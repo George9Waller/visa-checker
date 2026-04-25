@@ -118,9 +118,11 @@ export default async function VisaDetail({
           </div>
         </Stack>
 
-        <FactGrid cols={3}>
-          <Fact label="Valid from" value={formatDate(summary.visa.validFrom)} />
-          <Fact label="Expires" value={formatDate(summary.visa.expires)} />
+        <FactGrid cols={2}>
+          <Fact
+            label="Validity"
+            value={`${formatDate(summary.visa.validFrom)} - ${formatDate(summary.visa.expires)}`}
+          />
           <Fact
             label="Status"
             value={

@@ -5,6 +5,8 @@ type SeedIds = {
   upcomingTripId: string;
   uncoveredTripId: string;
   pastTripId: string;
+  pastSpainTripId: string;
+  pastFranceTripId: string;
   activeVisaId: string;
   expiringVisaId: string;
   expiredVisaId: string;
@@ -31,6 +33,8 @@ export const seedDevLoginData = async () => {
     upcomingTripId: "trip-upcoming-tokyo",
     uncoveredTripId: "trip-upcoming-lisbon",
     pastTripId: "trip-past-toronto",
+    pastSpainTripId: "trip-past-madrid",
+    pastFranceTripId: "trip-past-paris",
     activeVisaId: "visa-active-schengen",
     expiringVisaId: "visa-expiring-japan",
     expiredVisaId: "visa-expired-canada",
@@ -143,6 +147,26 @@ export const seedDevLoginData = async () => {
         countryCode: "CA",
         visaRequired: true,
       },
+      {
+        id: ids.pastSpainTripId,
+        user_id: userId,
+        startDate: addDays(today, -96),
+        endDate: addDays(today, -90),
+        name: "Madrid review",
+        colour: "5",
+        countryCode: "ES",
+        visaRequired: true,
+      },
+      {
+        id: ids.pastFranceTripId,
+        user_id: userId,
+        startDate: addDays(today, -130),
+        endDate: addDays(today, -124),
+        name: "Paris retrospective",
+        colour: "6",
+        countryCode: "FR",
+        visaRequired: true,
+      },
     ],
   });
 
@@ -151,6 +175,8 @@ export const seedDevLoginData = async () => {
       { tripId: ids.currentTripId, visaId: ids.activeVisaId },
       { tripId: ids.upcomingTripId, visaId: ids.expiringVisaId },
       { tripId: ids.pastTripId, visaId: ids.expiredVisaId },
+      { tripId: ids.pastSpainTripId, visaId: ids.activeVisaId },
+      { tripId: ids.pastFranceTripId, visaId: ids.activeVisaId },
     ],
   });
 

@@ -22,6 +22,43 @@ export function OptionRow({
   onClick,
   variant = "list",
 }: OptionRowProps) {
+  if (variant === "grid") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "w-full rounded-[var(--radius)] border px-4 py-4 text-left transition-all",
+          "flex min-h-[7rem] flex-col justify-between gap-3",
+          "focus-visible:ds-focus-ring",
+          selected
+            ? "border-fg bg-fg text-bg shadow-sm"
+            : "border-border bg-bg-raised hover:border-fg/70 hover:bg-bg-sunken"
+        )}
+      >
+        <div className="flex items-start justify-between gap-3">
+          {flag && <span className="text-2xl flex-shrink-0">{flag}</span>}
+          {selected && (
+            <Icon name="check" size="sm" className="flex-shrink-0 mt-0.5" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-md leading-tight">{title}</div>
+          {subtitle && (
+            <div
+              className={cn(
+                "mt-1 text-xs leading-relaxed",
+                selected ? "opacity-70" : "text-fg-muted"
+              )}
+            >
+              {subtitle}
+            </div>
+          )}
+        </div>
+      </button>
+    );
+  }
+
   if (variant === "type") {
     return (
       <button

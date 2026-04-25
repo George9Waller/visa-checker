@@ -17,6 +17,7 @@ import {
 } from "@/app/structured-copy";
 import { getTripDetailSummary } from "../server-actions";
 import TripVisaSelector from "./TripVisaSelector";
+import TripDetailActions from "./TripDetailActions";
 
 const formatDate = (value: string | Date) =>
   new Date(value).toLocaleDateString("en-GB", {
@@ -53,9 +54,12 @@ export default async function TripDetailPage({
     <PageContainer>
       <Stack className="gap-6">
         <Stack className="gap-4 rounded-[var(--radius)] border border-border bg-bg-raised p-5 shadow-sm">
-          <Btn as={Link} href="/" variant="ghost" size="sm">
-            Back
-          </Btn>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Btn as={Link} href="/" variant="ghost" size="sm">
+              Back
+            </Btn>
+            <TripDetailActions tripId={summary.trip.id} />
+          </div>
           <Text className="text-sm text-fg-muted">
             {COUNTRY_EMOJIS[summary.trip.countryCode] ?? "✈"}{" "}
             {COUNTRY_NAMES[summary.trip.countryCode] ??

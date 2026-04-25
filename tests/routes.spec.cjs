@@ -80,7 +80,25 @@ test("trip detail shows the selected visa and coverage hierarchy", async ({
   await expect(page.getByText("Selected visa")).toBeVisible();
   await expect(page.getByText("Visa options")).toBeVisible();
   await expect(
+    page.getByRole("link", { name: /Edit trip/i })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Delete trip/i })
+  ).toBeVisible();
+  await expect(
     page.getByRole("button", { name: /Schengen Explorer/ })
+  ).toBeVisible();
+});
+
+test("trip edit page opens with the current trip data", async ({ page }) => {
+  await page.goto(`/trips/${ids.currentTripId}/edit`);
+
+  await expect(page.getByText("Edit trip")).toBeVisible();
+  await expect(page.getByLabel(/Trip name|Nom du voyage/i)).toHaveValue(
+    "Barcelona sprint"
+  );
+  await expect(
+    page.getByRole("button", { name: /Continue|Continuer/i })
   ).toBeVisible();
 });
 
@@ -90,6 +108,7 @@ test("visa detail shows projection, trips, and coverage", async ({ page }) => {
   await expect(
     page.getByText("Schengen Explorer", { exact: true })
   ).toBeVisible();
+  await expect(page.getByText("Validity")).toBeVisible();
   await expect(page.getByText("Projection")).toBeVisible();
   await expect(page.getByText("Usage", { exact: true })).toBeVisible();
   await expect(page.getByText("Trips", { exact: true })).toBeVisible();
@@ -113,6 +132,11 @@ test("trip create flow creates a trip and returns to the dashboard", async ({
   page,
 }) => {
   await page.goto("/trips/create");
+
+  await expect(page.getByText("Recently visited")).toBeVisible();
+  await expect(page.getByText("Most visited")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Canada/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /France/i })).toBeVisible();
 
   await page
     .getByPlaceholder(/Search country|Rechercher un pays/i)
