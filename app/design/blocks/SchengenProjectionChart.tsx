@@ -79,7 +79,7 @@ export function SchengenProjectionChart({
     new Date(today.getTime() + 365 * 86400000);
 
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-sm">
+    <div className="rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-sm md:p-5">
       <div className="mb-1 flex items-baseline justify-between gap-3">
         <div className="font-body font-semibold text-md text-fg">
           Days left over the next year

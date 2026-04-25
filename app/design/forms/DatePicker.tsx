@@ -114,7 +114,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-[320px] rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-xl sm:min-w-[360px]">
+        <div className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-[calc(100vw-2rem)] -translate-x-1/2 rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-xl sm:left-0 sm:w-full sm:min-w-[360px] sm:translate-x-0">
           <div className="mb-3 flex items-center justify-between">
             <IconBtn onClick={() => changeMonth(-1)} title="Previous month">
               <Icon name="chevron-left" size="sm" />
@@ -162,7 +162,7 @@ export function DatePicker({
                   onClick={() => !disabled && pick(d)}
                   disabled={disabled}
                   className={cn(
-                    "h-[34px] rounded-[var(--radius)] font-body text-[13px] transition-colors",
+                    "h-[36px] rounded-[var(--radius)] font-body text-[13px] transition-colors",
                     isSel && "bg-fg text-bg font-semibold",
                     !isSel &&
                       isToday &&

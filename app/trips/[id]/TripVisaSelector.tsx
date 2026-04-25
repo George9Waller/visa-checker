@@ -31,25 +31,29 @@ export default function TripVisaSelector({
           Create a visa for this country before you travel.
         </Text>
       ) : (
-        <OptionList maxHeight="56vh" className="overscroll-contain">
+        <OptionList maxHeight="48vh" className="overscroll-contain">
           {candidates.map((candidate) => {
+            const issueKinds = [...new Set(candidate.issueKinds)];
             const issue = candidate.issues[0];
             const badgeTone =
               candidate.status === "valid"
                 ? "ok"
                 : toneFromSeverity(issue?.severity ?? "danger");
+            const firstIssueKind = issueKinds[0];
             const issueSummary =
               candidate.status === "valid"
                 ? "Valid for this trip"
                 : issue
                   ? detailForTripIssue(issue.kind, issue.params)
-                  : titleForTripIssue(candidate.issueKinds[0]);
+                  : firstIssueKind
+                    ? titleForTripIssue(firstIssueKind)
+                    : "Needs review";
             const subtitle =
               candidate.status === "valid"
                 ? issueSummary
-                : candidate.issueKinds.length > 1
-                  ? `${issueSummary} · +${candidate.issueKinds.length - 1} more issue${
-                      candidate.issueKinds.length - 1 === 1 ? "" : "s"
+                : issueKinds.length > 1
+                  ? `${issueSummary} · +${issueKinds.length - 1} more issue${
+                      issueKinds.length - 1 === 1 ? "" : "s"
                     }`
                   : issueSummary;
             return (

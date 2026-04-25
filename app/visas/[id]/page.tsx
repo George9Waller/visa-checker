@@ -20,6 +20,7 @@ import {
   detailForTripIssue,
   titleForTripIssue,
   toneFromSeverity,
+  uniqueAlertsForDisplay,
 } from "@/app/structured-copy";
 import { getVisaDetailSummary } from "../server-actions";
 import { VISA_TYPES_DISPLAY_MAP } from "../constants";
@@ -66,6 +67,27 @@ export default async function VisaDetail({
     (tripEvaluation) =>
       tripEvaluation.projected && tripEvaluation.issueKinds.length > 0
   );
+  const visibleAlerts = uniqueAlertsForDisplay(summary.alerts);
+  const projectedIssueCards = projectedTripIssues
+    .flatMap((tripEvaluation) =>
+      tripEvaluation.issueKinds.map((issueKind) => {
+        const issue = tripEvaluation.issues.find(
+          (item) => item.kind === issueKind
+        );
+        return {
+          key: `${tripEvaluation.trip.id}-${issueKind}`,
+          title: titleForTripIssue(issueKind),
+          detail: detailForTripIssue(issueKind, issue?.params),
+        };
+      })
+    )
+    .filter(
+      (item, index, list) =>
+        list.findIndex(
+          (candidate) =>
+            candidate.title === item.title && candidate.detail === item.detail
+        ) === index
+    );
 
   return (
     <PageContainer>
@@ -114,7 +136,7 @@ export default async function VisaDetail({
 
         <Stack className="gap-3">
           <Text className="font-semibold text-lg">Alerts</Text>
-          {summary.alerts.map((alert) => {
+          {visibleAlerts.map((alert) => {
             const copy = copyForAlert(alert);
             return (
               <AlertBox
@@ -161,21 +183,6 @@ export default async function VisaDetail({
                 </Stack>
               );
             })}
-          </Stack>
-        )}
-
-        {summary.projection && (
-          <Stack className="gap-3">
-            <Text className="font-semibold text-lg">Projection</Text>
-            <SchengenProjectionChart
-              points={summary.projection.points.map((point) => ({
-                date: new Date(point.date),
-                remaining: point.remainingDays,
-              }))}
-              limit={summary.projection.points[0]?.limit ?? 0}
-              windowDays={summary.visa.rollingPeriodLen ?? 0}
-              today={referenceDate}
-            />
           </Stack>
         )}
 
@@ -265,27 +272,29 @@ export default async function VisaDetail({
           </FactGrid>
         )}
 
-        {projectedTripIssues.length > 0 && (
+        {summary.projection && (
+          <Stack className="gap-3">
+            <Text className="font-semibold text-lg">Projection</Text>
+            <SchengenProjectionChart
+              points={summary.projection.points.map((point) => ({
+                date: new Date(point.date),
+                remaining: point.remainingDays,
+              }))}
+              limit={summary.projection.points[0]?.limit ?? 0}
+              windowDays={summary.visa.rollingPeriodLen ?? 0}
+              today={referenceDate}
+            />
+          </Stack>
+        )}
+
+        {projectedIssueCards.length > 0 && (
           <Stack className="gap-3">
             <Text className="font-semibold text-lg">Projected trip issues</Text>
-            {projectedTripIssues.map((tripEvaluation) =>
-              tripEvaluation.issueKinds.map((issueKind) => (
-                <AlertBox
-                  key={`${tripEvaluation.trip.id}-${issueKind}`}
-                  tone="danger"
-                  title={titleForTripIssue(issueKind)}
-                >
-                  <Text className="text-sm text-fg-muted">
-                    {detailForTripIssue(
-                      issueKind,
-                      tripEvaluation.issues.find(
-                        (issue) => issue.kind === issueKind
-                      )?.params
-                    )}
-                  </Text>
-                </AlertBox>
-              ))
-            )}
+            {projectedIssueCards.map((item) => (
+              <AlertBox key={item.key} tone="danger" title={item.title}>
+                <Text className="text-sm text-fg-muted">{item.detail}</Text>
+              </AlertBox>
+            ))}
           </Stack>
         )}
       </Stack>

@@ -29,13 +29,13 @@ export function TripHeroCard({
   const classes = cn(
     "w-full overflow-hidden rounded-[calc(var(--radius)+2px)] border border-fg/10 text-left transition-all",
     "bg-fg text-bg shadow-sm hover:-translate-y-0.5 hover:shadow-md",
-    "flex flex-col gap-4 p-5",
+    "flex flex-col gap-5 p-5 md:p-6",
     className
   );
 
   const content = (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <Kicker className="opacity-70">{kicker}</Kicker>
         {livePill && (
           <span className="rounded-full border border-current px-2 py-1 text-xs font-mono uppercase opacity-70">
@@ -43,14 +43,16 @@ export function TripHeroCard({
           </span>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-4">
         <Flag size="lg">{flag}</Flag>
         <div className="flex-1 min-w-0">
           <Display level={2} className="text-bg">
             {title}
           </Display>
           {subtitle && (
-            <div className="mt-1 text-sm opacity-70">{subtitle}</div>
+            <div className="mt-1 text-sm leading-relaxed opacity-70">
+              {subtitle}
+            </div>
           )}
         </div>
       </div>

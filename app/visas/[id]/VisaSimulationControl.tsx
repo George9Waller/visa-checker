@@ -40,15 +40,23 @@ export default function VisaSimulationControl({
         Change the date to see how your visa usage looks at a different point in
         time.
       </Text>
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[240px] flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
           <DatePicker value={date} onChange={setDate} />
         </div>
-        <Btn variant="primary" onClick={apply}>
+        <Btn
+          variant="primary"
+          onClick={apply}
+          className="w-full justify-center sm:w-auto"
+        >
           Apply
         </Btn>
         {(hasChanged || date !== initialDate) && (
-          <Btn variant="outline" onClick={reset}>
+          <Btn
+            variant="outline"
+            onClick={reset}
+            className="w-full justify-center sm:w-auto"
+          >
             Reset
           </Btn>
         )}

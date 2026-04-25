@@ -9,10 +9,14 @@ export function AppShell({ children, fab, theme = 'system' }: AppShellProps) {
   return (
     <div
       data-theme={theme === 'system' ? undefined : theme}
-      className="relative min-h-screen bg-bg text-fg"
+      className="relative min-h-screen overflow-x-hidden bg-bg text-fg"
     >
       <div className="flex flex-col">{children}</div>
-      {fab && <div className="fixed bottom-6 right-6 z-50">{fab}</div>}
+      {fab && (
+        <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+          {fab}
+        </div>
+      )}
     </div>
   );
 }

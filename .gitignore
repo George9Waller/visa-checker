@@ -15,7 +15,9 @@
 
 # Playwright
 .playwright/
+.playwright-mcp/**
 test-results/**
+*.png
 
 # production
 /build

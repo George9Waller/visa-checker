@@ -110,7 +110,7 @@ export default function CreateTripWizard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <OptionList maxHeight="56vh" className="overscroll-contain">
+          <OptionList maxHeight="46vh" className="overscroll-contain">
             {filteredCountries.map(({ code, label }) => {
               const name = COUNTRY_NAMES[code] ?? label;
               const emoji = COUNTRY_EMOJIS[code] ?? "✈";

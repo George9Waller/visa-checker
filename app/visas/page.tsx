@@ -45,6 +45,10 @@ export default async function VisasPage() {
             icon="passport"
             title="No visas yet"
             message="Add your first visa to start tracking coverage."
+            action={{
+              label: "Create visa",
+              href: "/visas/create",
+            }}
           />
         ) : (
           visas.map((visa) => {
@@ -77,11 +81,6 @@ export default async function VisasPage() {
               />
             );
           })
-        )}
-        {visas.length === 0 && (
-          <Btn as={Link} href="/visas/create" variant="primary">
-            Create visa
-          </Btn>
         )}
       </Stack>
 

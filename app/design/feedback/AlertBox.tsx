@@ -12,7 +12,8 @@ export function AlertBox({ tone = "warn", title, children }: AlertBoxProps) {
   return (
     <div
       className={cn(
-        "rounded-[var(--radius)] border border-l-4 p-4 shadow-sm",
+        "rounded-[var(--radius)] border border-l-4 p-4 shadow-sm md:p-5",
+        "overflow-hidden",
         toneAlertClasses(tone)
       )}
     >

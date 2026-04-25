@@ -31,6 +31,8 @@ export function VisaListRow({
   onClick,
   href,
 }: VisaListRowProps) {
+  const countryLabel =
+    countryCount === 1 ? "1 country" : `${countryCount ?? 0} countries`;
   const classes = cn(
     "w-full rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
     "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken"
@@ -42,11 +44,11 @@ export function VisaListRow({
         <Flag size="lg">{flag}</Flag>
         <div className="min-w-0 flex-1">
           <Display level={4}>{title}</Display>
-          {(kicker || countryCount) && (
-            <Kicker tone="muted" className="text-xs mt-1 block">
+          {(kicker || countryCount !== undefined) && (
+            <Kicker tone="muted" className="mt-1 block text-xs">
               {kicker && <span>{kicker}</span>}
-              {kicker && countryCount && <span> · </span>}
-              {countryCount && <span>{countryCount} countries</span>}
+              {kicker && countryCount !== undefined && <span> · </span>}
+              {countryCount !== undefined && <span>{countryLabel}</span>}
             </Kicker>
           )}
         </div>
@@ -70,11 +72,11 @@ export function VisaListRow({
         <Flag size="lg">{flag}</Flag>
         <div className="min-w-0 flex-1">
           <Display level={4}>{title}</Display>
-          {(kicker || countryCount) && (
-            <Kicker tone="muted" className="text-xs mt-1 block">
+          {(kicker || countryCount !== undefined) && (
+            <Kicker tone="muted" className="mt-1 block text-xs">
               {kicker && <span>{kicker}</span>}
-              {kicker && countryCount && <span> · </span>}
-              {countryCount && <span>{countryCount} countries</span>}
+              {kicker && countryCount !== undefined && <span> · </span>}
+              {countryCount !== undefined && <span>{countryLabel}</span>}
             </Kicker>
           )}
         </div>

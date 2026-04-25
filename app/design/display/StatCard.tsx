@@ -22,7 +22,7 @@ export function StatCard({
 }: StatCardProps) {
   const classes = cn(
     "min-w-0 rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
-    "flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",
+    "flex min-h-[120px] flex-col justify-between gap-3 hover:border-fg/70 hover:bg-bg-sunken",
     className
   );
 

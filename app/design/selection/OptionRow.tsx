@@ -28,12 +28,12 @@ export function OptionRow({
         type="button"
         onClick={onClick}
         className={cn(
-          "w-full text-left rounded-[var(--radius)] border px-4 py-4",
+          "w-full text-left rounded-none px-4 py-4 sm:px-5",
           "flex items-start gap-4 transition-all",
           "focus-visible:ds-focus-ring",
           selected
-            ? "bg-fg text-bg border-fg shadow-sm"
-            : "bg-bg-raised text-fg border-border hover:border-fg/80 hover:bg-bg-sunken"
+            ? "bg-fg text-bg"
+            : "bg-bg-raised text-fg hover:bg-bg-sunken"
         )}
       >
         {flag && (
@@ -44,7 +44,7 @@ export function OptionRow({
           {subtitle && (
             <div
               className={cn(
-                "mt-1 text-sm leading-relaxed",
+                "mt-1 text-sm leading-relaxed max-w-[34rem]",
                 selected ? "opacity-70" : "text-fg-muted"
               )}
             >
@@ -64,12 +64,12 @@ export function OptionRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "w-full text-left rounded-[var(--radius)] border px-3 py-3 transition-all",
+        "w-full text-left px-4 py-3.5 transition-all sm:px-4",
         "flex items-center gap-3",
         "focus-visible:ds-focus-ring",
         selected
-          ? "bg-bg-sunken border-fg shadow-sm"
-          : "bg-bg-raised border-border hover:border-fg/80 hover:bg-bg-sunken"
+          ? "bg-bg-sunken"
+          : "bg-bg-raised hover:bg-bg-sunken"
       )}
     >
       {flag && <span className="text-lg flex-shrink-0">{flag}</span>}

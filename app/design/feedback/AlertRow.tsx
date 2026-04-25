@@ -22,8 +22,8 @@ export function AlertRow({
   href,
 }: AlertRowProps) {
   const classes = cn(
-    "w-full rounded-[var(--radius)] border border-l-4 p-3 text-left transition-all",
-    "flex items-center gap-3 hover:bg-bg-sunken focus-visible:ds-focus-ring",
+    "w-full rounded-[var(--radius)] border border-l-4 p-4 text-left transition-all md:p-4",
+    "flex items-start gap-3 hover:bg-bg-sunken focus-visible:ds-focus-ring",
     "disabled:opacity-40 disabled:cursor-not-allowed",
     toneAlertClasses(tone)
   );

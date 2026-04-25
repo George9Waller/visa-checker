@@ -45,7 +45,7 @@ export function TripCard({
           <Flag size="md">{flag}</Flag>
           <div className="flex-1 min-w-0">
             <Display level={4}>{title}</Display>
-            <Kicker tone="muted" className="text-xs mt-1 block truncate">
+            <Kicker tone="muted" className="mt-1 block truncate text-xs">
               {dateRange} · {length}D
             </Kicker>
           </div>

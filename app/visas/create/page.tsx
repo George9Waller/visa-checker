@@ -155,7 +155,7 @@ export default function CreateVisaWizard() {
               change every limit later.
             </Text>
           </AlertBox>
-          <OptionList maxHeight="56vh" className="overscroll-contain">
+          <OptionList maxHeight="46vh" className="overscroll-contain">
             {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
               const meta = VISA_TYPE_META[key];
               return (

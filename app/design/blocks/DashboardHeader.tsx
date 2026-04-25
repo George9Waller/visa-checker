@@ -21,14 +21,23 @@ export function DashboardHeader({
   const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
   return (
-    <div className={cn('flex items-end justify-between mb-6 gap-3', className)}>
+    <div
+      className={cn(
+        'mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        className,
+      )}
+    >
       <div className="flex-1 min-w-0">
         <Kicker className="mb-1">
           {weekday} · {dateStr}
         </Kicker>
         <Display level={1} as="h1">{title}</Display>
       </div>
-      {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

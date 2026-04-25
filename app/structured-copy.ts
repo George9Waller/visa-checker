@@ -143,6 +143,23 @@ export const copyForAlert = (alert: StructuredAlert) => {
   }
 };
 
+export const alertSignatureForDisplay = (alert: StructuredAlert) => {
+  const copy = copyForAlert(alert);
+  return `${copy.title}::${copy.detail ?? ""}`;
+};
+
+export const uniqueAlertsForDisplay = (alerts: StructuredAlert[]) => {
+  const seen = new Set<string>();
+  return alerts.filter((alert) => {
+    const signature = alertSignatureForDisplay(alert);
+    if (seen.has(signature)) {
+      return false;
+    }
+    seen.add(signature);
+    return true;
+  });
+};
+
 export const copyForCard = (card: DashboardCard) => {
   switch (card.kind) {
     case CardKind.CURRENTLY_TRAVELING:

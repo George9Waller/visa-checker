@@ -75,22 +75,22 @@ export function WizardShell({
       </div>
 
       <div className="sticky bottom-0 border-t border-border/80 bg-bg/95 px-4 py-4 backdrop-blur md:px-6">
-        <div className="mx-auto flex w-full max-w-2xl flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <Btn
-            variant="ghost"
-            onClick={onClose}
-            className="justify-center sm:justify-start"
-          >
-            Cancel
-          </Btn>
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 pb-[env(safe-area-inset-bottom)] sm:flex-row sm:items-center sm:justify-end">
           <Btn
             variant={primary.variant ?? "primary"}
             onClick={primary.onClick}
             disabled={!primary.enabled}
-            className="justify-center"
+            className="w-full justify-center sm:w-auto sm:min-w-36"
           >
             {primary.label}
             <Icon name="arrow-right" size="sm" />
+          </Btn>
+          <Btn
+            variant="ghost"
+            onClick={onClose}
+            className="w-full justify-center sm:w-auto sm:min-w-28"
+          >
+            Cancel
           </Btn>
         </div>
       </div>

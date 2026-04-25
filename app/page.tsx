@@ -17,7 +17,12 @@ import {
   getTripsBefore,
   getTripsFrom,
 } from "./server-actions";
-import { copyForAlert, copyForCard, toneFromSeverity } from "./structured-copy";
+import {
+  copyForAlert,
+  copyForCard,
+  toneFromSeverity,
+  uniqueAlertsForDisplay,
+} from "./structured-copy";
 import Link from "next/link";
 
 const formatDateRange = (startDate: string, endDate: string) => {
@@ -42,6 +47,7 @@ export default async function Home() {
       getTripsFrom(todayIso, 8),
       getTripsBefore(todayIso, 8),
     ]);
+  const visibleAlerts = uniqueAlertsForDisplay(alerts);
 
   return (
     <PageContainer>
@@ -111,9 +117,9 @@ export default async function Home() {
           </Grid>
         )}
 
-        {alerts.length > 0 && (
+        {visibleAlerts.length > 0 && (
           <Stack className="gap-3">
-            {alerts.map((alert) => {
+            {visibleAlerts.map((alert) => {
               const copy = copyForAlert(alert);
               return (
                 <AlertRow

@@ -14,9 +14,8 @@ export function OptionList({
   return (
     <div
       className={cn(
-        'flex flex-col gap-0 rounded-sm',
-        'border border-border bg-bg-raised',
-        'overflow-auto',
+        'flex flex-col rounded-[var(--radius)] border border-border bg-bg-raised',
+        'divide-y divide-border overflow-auto',
         className,
       )}
       style={{ maxHeight }}

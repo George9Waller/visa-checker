@@ -39,6 +39,15 @@ export default async function TripDetailPage({
         new Date(summary.trip.startDate).getTime()) /
         86400000
     ) + 1;
+  const issueKinds = [...new Set(summary.issueKinds)];
+  const selectedIssueKinds = [
+    ...new Set(summary.selectedCandidate?.issueKinds ?? []),
+  ];
+  const selectedIssue =
+    selectedIssueKinds[0] &&
+    summary.selectedCandidate?.issues.find(
+      (issue) => issue.kind === selectedIssueKinds[0]
+    );
 
   return (
     <PageContainer>
@@ -90,9 +99,9 @@ export default async function TripDetailPage({
           />
         </FactGrid>
 
-        {summary.issueKinds.length > 0 ? (
+        {issueKinds.length > 0 ? (
           <Stack className="gap-3">
-            {summary.issueKinds.map((issueKind) => (
+            {issueKinds.map((issueKind) => (
               <AlertBox
                 key={issueKind}
                 tone={toneFromSeverity(
@@ -141,22 +150,13 @@ export default async function TripDetailPage({
               title={summary.selectedCandidate.name}
             >
               <Text className="text-sm text-fg-muted">
-                {summary.selectedCandidate.issueKinds.length > 0
+                {selectedIssueKinds.length > 0
                   ? `${detailForTripIssue(
-                      summary.selectedCandidate.issueKinds[0],
-                      summary.selectedCandidate.issues.find(
-                        (issue) =>
-                          issue.kind ===
-                          summary.selectedCandidate?.issueKinds[0]
-                      )?.params
+                      selectedIssueKinds[0],
+                      selectedIssue?.params
                     )}${
-                      summary.selectedCandidate.issueKinds.length > 1
-                        ? ` · +${summary.selectedCandidate.issueKinds.length - 1} more issue${
-                            summary.selectedCandidate.issueKinds.length - 1 ===
-                            1
-                              ? ""
-                              : "s"
-                          }`
+                      selectedIssueKinds.length > 1
+                        ? ` · +${selectedIssueKinds.length - 1} more issue${selectedIssueKinds.length - 1 === 1 ? "" : "s"}`
                         : ""
                     }`
                   : "This visa currently evaluates as valid for the trip."}
