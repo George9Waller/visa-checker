@@ -83,8 +83,7 @@ export const InfoKind = {
 } as const;
 
 export type AlertKind = (typeof AlertKind)[keyof typeof AlertKind];
-export type AlertSeverity =
-  (typeof AlertSeverity)[keyof typeof AlertSeverity];
+export type AlertSeverity = (typeof AlertSeverity)[keyof typeof AlertSeverity];
 export type AlertSubjectType =
   (typeof AlertSubjectType)[keyof typeof AlertSubjectType];
 export type TripIssueKind = (typeof TripIssueKind)[keyof typeof TripIssueKind];
@@ -228,10 +227,16 @@ const addDays = (date: Date, days: number) =>
 
 const isoDate = (date: Date) => startOfUtcDay(date).toISOString().split("T")[0];
 
-const diffDays = (start: Date, end: Date, includeEntryAndExitDates: boolean) => {
+const diffDays = (
+  start: Date,
+  end: Date,
+  includeEntryAndExitDates: boolean
+) => {
   const startDay = startOfUtcDay(start);
   const endDay = startOfUtcDay(end);
-  const count = Math.abs(Math.floor((endDay.getTime() - startDay.getTime()) / DAY_MS));
+  const count = Math.abs(
+    Math.floor((endDay.getTime() - startDay.getTime()) / DAY_MS)
+  );
   return includeEntryAndExitDates ? count + 1 : count;
 };
 
@@ -243,7 +248,10 @@ const overlapDays = (
   includeEntryAndExitDates: boolean
 ) => {
   const overlapStart = new Date(
-    Math.max(startOfUtcDay(start).getTime(), startOfUtcDay(rangeStart).getTime())
+    Math.max(
+      startOfUtcDay(start).getTime(),
+      startOfUtcDay(rangeStart).getTime()
+    )
   );
   const overlapEnd = new Date(
     Math.min(startOfUtcDay(end).getTime(), startOfUtcDay(rangeEnd).getTime())
@@ -271,7 +279,8 @@ const makeFingerprint = ({
 const sortTrips = (trips: EvaluationTrip[]) =>
   [...trips].sort(
     (a, b) =>
-      startOfUtcDay(a.startDate).getTime() - startOfUtcDay(b.startDate).getTime()
+      startOfUtcDay(a.startDate).getTime() -
+      startOfUtcDay(b.startDate).getTime()
   );
 
 type AggregateAssessment = {
@@ -285,8 +294,8 @@ const assessAggregateRulesForDate = (
   date: Date,
   candidateTripId?: string
 ): AggregateAssessment => {
-  const individuallyValidTrips = visa.linkedTrips.filter((trip) =>
-    assessTripRuleIssues(visa, trip, date).length === 0
+  const individuallyValidTrips = visa.linkedTrips.filter(
+    (trip) => assessTripRuleIssues(visa, trip, date).length === 0
   );
   const evaluationDate = startOfUtcDay(date);
   const rollingCutoff = visa.rollingPeriodLen
@@ -329,7 +338,8 @@ const assessAggregateRulesForDate = (
         effectiveDate: isoDate(evaluationDate),
         params: { used, limit: visa.maxNumTrips, remaining },
         ruleKinds: [AggregateRuleKind.MAX_TRIPS],
-        projected: evaluationDate.getTime() > startOfUtcDay(new Date()).getTime(),
+        projected:
+          evaluationDate.getTime() > startOfUtcDay(new Date()).getTime(),
       });
     }
   }
@@ -374,7 +384,8 @@ const assessAggregateRulesForDate = (
         effectiveDate: isoDate(evaluationDate),
         params: { used, limit: visa.totalMaxLen, remaining },
         ruleKinds: [ruleKind],
-        projected: evaluationDate.getTime() > startOfUtcDay(new Date()).getTime(),
+        projected:
+          evaluationDate.getTime() > startOfUtcDay(new Date()).getTime(),
       });
     }
   }
@@ -388,7 +399,9 @@ const assessTripRuleIssues = (
   evaluationDate: Date
 ) => {
   const issues: StructuredIssue[] = [];
-  const projected = startOfUtcDay(trip.endDate).getTime() > startOfUtcDay(evaluationDate).getTime();
+  const projected =
+    startOfUtcDay(trip.endDate).getTime() >
+    startOfUtcDay(evaluationDate).getTime();
   const tripLength = diffDays(
     trip.startDate,
     trip.endDate,
@@ -412,7 +425,10 @@ const assessTripRuleIssues = (
     });
   }
 
-  if (startOfUtcDay(trip.startDate).getTime() < startOfUtcDay(visa.validFrom).getTime()) {
+  if (
+    startOfUtcDay(trip.startDate).getTime() <
+    startOfUtcDay(visa.validFrom).getTime()
+  ) {
     issues.push({
       kind: TripIssueKind.TRIP_VISA_NOT_YET_VALID,
       severity: AlertSeverity.DANGER,
@@ -431,7 +447,8 @@ const assessTripRuleIssues = (
 
   if (
     visa.expires &&
-    startOfUtcDay(visa.expires).getTime() < startOfUtcDay(trip.startDate).getTime()
+    startOfUtcDay(visa.expires).getTime() <
+      startOfUtcDay(trip.startDate).getTime()
   ) {
     issues.push({
       kind: TripIssueKind.TRIP_VISA_EXPIRED,
@@ -451,8 +468,10 @@ const assessTripRuleIssues = (
 
   if (
     visa.expires &&
-    startOfUtcDay(visa.expires).getTime() >= startOfUtcDay(trip.startDate).getTime() &&
-    startOfUtcDay(visa.expires).getTime() < startOfUtcDay(trip.endDate).getTime()
+    startOfUtcDay(visa.expires).getTime() >=
+      startOfUtcDay(trip.startDate).getTime() &&
+    startOfUtcDay(visa.expires).getTime() <
+      startOfUtcDay(trip.endDate).getTime()
   ) {
     issues.push({
       kind: TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED,
@@ -491,7 +510,8 @@ const assessTripRuleIssues = (
   if (
     visa.mustExitBeforeExpiry &&
     visa.expires &&
-    startOfUtcDay(trip.endDate).getTime() > startOfUtcDay(visa.expires).getTime()
+    startOfUtcDay(trip.endDate).getTime() >
+      startOfUtcDay(visa.expires).getTime()
   ) {
     issues.push({
       kind: TripIssueKind.TRIP_MUST_LEAVE_BEFORE_EXPIRY_BREACH,
@@ -531,11 +551,14 @@ const buildTripEvaluation = (
           tripId: trip.id,
           effectiveDate: isoDate(trip.startDate),
           params: {},
-          projected: startOfUtcDay(trip.startDate).getTime() > startOfUtcDay(referenceDate).getTime(),
+          projected:
+            startOfUtcDay(trip.startDate).getTime() >
+            startOfUtcDay(referenceDate).getTime(),
         },
       ],
       projected:
-        startOfUtcDay(trip.endDate).getTime() > startOfUtcDay(referenceDate).getTime(),
+        startOfUtcDay(trip.endDate).getTime() >
+        startOfUtcDay(referenceDate).getTime(),
     };
   }
 
@@ -549,21 +572,24 @@ const buildTripEvaluation = (
       issueKinds: [],
       issues: [],
       projected:
-        startOfUtcDay(trip.endDate).getTime() > startOfUtcDay(referenceDate).getTime(),
+        startOfUtcDay(trip.endDate).getTime() >
+        startOfUtcDay(referenceDate).getTime(),
     };
   }
 
   const evaluationDate = startOfUtcDay(trip.endDate);
   const issues = [
     ...assessTripRuleIssues(visa, trip, referenceDate),
-    ...assessAggregateRulesForDate(visa, evaluationDate, trip.id).issues.map((issue) => ({
-      ...issue,
-      params: {
-        ...issue.params,
-        tripName: trip.name ?? null,
-        visaName: visa.name,
-      },
-    })),
+    ...assessAggregateRulesForDate(visa, evaluationDate, trip.id).issues.map(
+      (issue) => ({
+        ...issue,
+        params: {
+          ...issue.params,
+          tripName: trip.name ?? null,
+          visaName: visa.name,
+        },
+      })
+    ),
   ];
 
   return {
@@ -573,7 +599,8 @@ const buildTripEvaluation = (
     issueKinds: issues.map((issue) => issue.kind as TripIssueKind),
     issues,
     projected:
-      startOfUtcDay(trip.endDate).getTime() > startOfUtcDay(referenceDate).getTime(),
+      startOfUtcDay(trip.endDate).getTime() >
+      startOfUtcDay(referenceDate).getTime(),
   };
 };
 
@@ -641,7 +668,10 @@ const buildProjection = (
       limit: visa.totalMaxLen,
       inDangerZone: remainingDays < 15,
       triggeredTripIds: activeTrips
-        .filter((trip) => startOfUtcDay(trip.endDate).getTime() >= windowStart.getTime())
+        .filter(
+          (trip) =>
+            startOfUtcDay(trip.endDate).getTime() >= windowStart.getTime()
+        )
         .map((trip) => trip.id),
     });
   }
@@ -682,7 +712,8 @@ const buildVisaAlerts = (
     (snapshot) => snapshot.ruleKind === AggregateRuleKind.MAX_TRIPS
   );
 
-  const relevant = upcomingTrips.length > 0 || !visa.expires || visa.expires >= today;
+  const relevant =
+    upcomingTrips.length > 0 || !visa.expires || visa.expires >= today;
   if (!relevant) {
     return alerts;
   }
@@ -690,28 +721,32 @@ const buildVisaAlerts = (
   // Future dismissal persistence and renewal-linked suppression should hook in here
   // once fingerprints can be matched against dismissed alerts and predecessor/successor visas.
   if (
-    currentAggregate.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_TOTAL_ALLOWANCE) ||
-    currentAggregate.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT) ||
+    currentAggregate.issueKinds.includes(
+      TripIssueKind.TRIP_EXCEEDS_TOTAL_ALLOWANCE
+    ) ||
+    currentAggregate.issueKinds.includes(
+      TripIssueKind.TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT
+    ) ||
     currentAggregate.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_ENTRY_LIMIT)
   ) {
-      alerts.push({
-        kind: AlertKind.VISA_OVER_LIMIT_NOW,
-        severity: AlertSeverity.DANGER,
-        subjectType: AlertSubjectType.VISA,
-        visaId: visa.id,
+    alerts.push({
+      kind: AlertKind.VISA_OVER_LIMIT_NOW,
+      severity: AlertSeverity.DANGER,
+      subjectType: AlertSubjectType.VISA,
+      visaId: visa.id,
       effectiveDate: isoDate(today),
       fingerprint: makeFingerprint({
         kind: AlertKind.VISA_OVER_LIMIT_NOW,
         visaId: visa.id,
         effectiveDate: isoDate(today),
-        }),
-        params: {
-          used: aggregateSnapshot?.used ?? entrySnapshot?.used ?? 0,
-          limit: aggregateSnapshot?.limit ?? entrySnapshot?.limit ?? 0,
-          visaName: visa.name,
-        },
-        rankingScore: 900,
-      });
+      }),
+      params: {
+        used: aggregateSnapshot?.used ?? entrySnapshot?.used ?? 0,
+        limit: aggregateSnapshot?.limit ?? entrySnapshot?.limit ?? 0,
+        visaName: visa.name,
+      },
+      rankingScore: 900,
+    });
   }
 
   if (visa.expires && startOfUtcDay(visa.expires).getTime() < today.getTime()) {
@@ -725,16 +760,20 @@ const buildVisaAlerts = (
         kind: AlertKind.VISA_EXPIRED,
         visaId: visa.id,
         effectiveDate: isoDate(visa.expires),
-        }),
-        params: { expires: isoDate(visa.expires), visaName: visa.name },
-        rankingScore: 890,
-      });
+      }),
+      params: { expires: isoDate(visa.expires), visaName: visa.name },
+      rankingScore: 890,
+    });
   }
 
   for (const tripEvaluation of upcomingTrips) {
     if (
-      tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_TOTAL_ALLOWANCE) ||
-      tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT) ||
+      tripEvaluation.issueKinds.includes(
+        TripIssueKind.TRIP_EXCEEDS_TOTAL_ALLOWANCE
+      ) ||
+      tripEvaluation.issueKinds.includes(
+        TripIssueKind.TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT
+      ) ||
       tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_EXCEEDS_ENTRY_LIMIT)
     ) {
       alerts.push({
@@ -759,19 +798,27 @@ const buildVisaAlerts = (
       });
     }
 
-    if (tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED)) {
+    if (
+      tripEvaluation.issueKinds.includes(
+        TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED
+      )
+    ) {
       alerts.push({
         kind: AlertKind.VISA_EXPIRES_DURING_TRIP,
         severity: AlertSeverity.DANGER,
         subjectType: AlertSubjectType.VISA,
         visaId: visa.id,
         tripId: tripEvaluation.trip.id,
-        effectiveDate: visa.expires ? isoDate(visa.expires) : isoDate(tripEvaluation.trip.endDate),
+        effectiveDate: visa.expires
+          ? isoDate(visa.expires)
+          : isoDate(tripEvaluation.trip.endDate),
         fingerprint: makeFingerprint({
           kind: AlertKind.VISA_EXPIRES_DURING_TRIP,
           visaId: visa.id,
           tripId: tripEvaluation.trip.id,
-          effectiveDate: visa.expires ? isoDate(visa.expires) : isoDate(tripEvaluation.trip.endDate),
+          effectiveDate: visa.expires
+            ? isoDate(visa.expires)
+            : isoDate(tripEvaluation.trip.endDate),
         }),
         params: {
           tripEndDate: isoDate(tripEvaluation.trip.endDate),
@@ -783,7 +830,9 @@ const buildVisaAlerts = (
       });
     }
 
-    if (tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_VISA_NOT_YET_VALID)) {
+    if (
+      tripEvaluation.issueKinds.includes(TripIssueKind.TRIP_VISA_NOT_YET_VALID)
+    ) {
       alerts.push({
         kind: AlertKind.VISA_NOT_YET_VALID_FOR_TRIP,
         severity: AlertSeverity.DANGER,
@@ -817,12 +866,16 @@ const buildVisaAlerts = (
         subjectType: AlertSubjectType.VISA,
         visaId: visa.id,
         tripId: tripEvaluation.trip.id,
-        effectiveDate: visa.expires ? isoDate(visa.expires) : isoDate(tripEvaluation.trip.endDate),
+        effectiveDate: visa.expires
+          ? isoDate(visa.expires)
+          : isoDate(tripEvaluation.trip.endDate),
         fingerprint: makeFingerprint({
           kind: AlertKind.VISA_MUST_LEAVE_BEFORE_EXPIRY_BREACH,
           visaId: visa.id,
           tripId: tripEvaluation.trip.id,
-          effectiveDate: visa.expires ? isoDate(visa.expires) : isoDate(tripEvaluation.trip.endDate),
+          effectiveDate: visa.expires
+            ? isoDate(visa.expires)
+            : isoDate(tripEvaluation.trip.endDate),
         }),
         params: {
           tripEndDate: isoDate(tripEvaluation.trip.endDate),
@@ -836,7 +889,10 @@ const buildVisaAlerts = (
 
   if (visa.expires) {
     const daysUntilExpiry = diffDays(today, visa.expires, false);
-    if (startOfUtcDay(visa.expires).getTime() > today.getTime() && daysUntilExpiry <= 30) {
+    if (
+      startOfUtcDay(visa.expires).getTime() > today.getTime() &&
+      daysUntilExpiry <= 30
+    ) {
       alerts.push({
         kind: AlertKind.VISA_EXPIRING_SOON,
         severity: AlertSeverity.WARN,
@@ -889,14 +945,14 @@ const buildVisaAlerts = (
         visaId: visa.id,
         effectiveDate: isoDate(today),
       }),
-        params: {
-          used: aggregateSnapshot.used,
-          limit: aggregateSnapshot.limit,
-          remaining: aggregateSnapshot.remaining,
-          visaName: visa.name,
-        },
-        rankingScore: 480,
-      });
+      params: {
+        used: aggregateSnapshot.used,
+        limit: aggregateSnapshot.limit,
+        remaining: aggregateSnapshot.remaining,
+        visaName: visa.name,
+      },
+      rankingScore: 480,
+    });
   }
 
   if (
@@ -918,7 +974,10 @@ const buildVisaAlerts = (
         visaId: visa.id,
         effectiveDate: isoDate(today),
       }),
-      params: { remainingEntries: entrySnapshot.remaining, visaName: visa.name },
+      params: {
+        remainingEntries: entrySnapshot.remaining,
+        visaName: visa.name,
+      },
       rankingScore: 470,
     });
   }
@@ -943,9 +1002,10 @@ const buildVisaAlerts = (
     });
   }
 
-  const daysUntilValid = startOfUtcDay(visa.validFrom).getTime() > today.getTime()
-    ? diffDays(today, visa.validFrom, false)
-    : undefined;
+  const daysUntilValid =
+    startOfUtcDay(visa.validFrom).getTime() > today.getTime()
+      ? diffDays(today, visa.validFrom, false)
+      : undefined;
   if (daysUntilValid !== undefined && daysUntilValid <= 30) {
     alerts.push({
       kind: AlertKind.VISA_VALID_SOON,
@@ -963,7 +1023,11 @@ const buildVisaAlerts = (
     });
   }
 
-  if (visa.rollingPeriodLen && visa.linkedTrips.length > 0 && upcomingTrips.length === 0) {
+  if (
+    visa.rollingPeriodLen &&
+    visa.linkedTrips.length > 0 &&
+    upcomingTrips.length === 0
+  ) {
     const lastTrip = sortTrips(visa.linkedTrips).at(-1);
     if (lastTrip) {
       const gap = diffDays(lastTrip.endDate, today, false);
@@ -1017,8 +1081,13 @@ const buildDashboardCards = (
   }
 
   const nextTrip = sortTrips(trips.map((trip) => trip.trip))
-    .map((trip) => trips.find((tripEvaluation) => tripEvaluation.trip.id === trip.id)!)
-    .find((trip) => startOfUtcDay(trip.trip.startDate).getTime() > today.getTime());
+    .map(
+      (trip) =>
+        trips.find((tripEvaluation) => tripEvaluation.trip.id === trip.id)!
+    )
+    .find(
+      (trip) => startOfUtcDay(trip.trip.startDate).getTime() > today.getTime()
+    );
   if (nextTrip) {
     const daysUntilStart = diffDays(today, nextTrip.trip.startDate, false);
     cards.push({
@@ -1040,7 +1109,9 @@ const buildDashboardCards = (
   const highestRolling = visas
     .flatMap((visa) =>
       visa.usageSnapshots
-        .filter((snapshot) => snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW)
+        .filter(
+          (snapshot) => snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW
+        )
         .map((snapshot) => ({ visa, snapshot }))
     )
     .sort((a, b) => b.snapshot.utilization - a.snapshot.utilization)[0];
@@ -1051,15 +1122,15 @@ const buildDashboardCards = (
         highestRolling.snapshot.remaining < 0
           ? "danger"
           : highestRolling.snapshot.utilization >= 0.8
-          ? "warn"
-          : "ok",
+            ? "warn"
+            : "ok",
       visaId: highestRolling.visa.visa.id,
       rankingScore:
         highestRolling.snapshot.remaining < 0
           ? 800
           : highestRolling.snapshot.utilization >= 0.8
-          ? 600
-          : 350,
+            ? 600
+            : 350,
       params: {
         used: highestRolling.snapshot.used,
         limit: highestRolling.snapshot.limit,
@@ -1072,7 +1143,9 @@ const buildDashboardCards = (
   const totalAllowance = visas
     .flatMap((visa) =>
       visa.usageSnapshots
-        .filter((snapshot) => snapshot.ruleKind === AggregateRuleKind.TOTAL_ALLOWANCE)
+        .filter(
+          (snapshot) => snapshot.ruleKind === AggregateRuleKind.TOTAL_ALLOWANCE
+        )
         .map((snapshot) => ({ visa, snapshot }))
     )
     .sort((a, b) => b.snapshot.utilization - a.snapshot.utilization)[0];
@@ -1083,8 +1156,8 @@ const buildDashboardCards = (
         totalAllowance.snapshot.remaining < 0
           ? "danger"
           : totalAllowance.snapshot.utilization >= 0.8
-          ? "warn"
-          : "ok",
+            ? "warn"
+            : "ok",
       visaId: totalAllowance.visa.visa.id,
       rankingScore: totalAllowance.snapshot.utilization >= 0.8 ? 590 : 340,
       params: {
@@ -1121,7 +1194,11 @@ const buildDashboardCards = (
   }
 
   const nextExpiry = visas
-    .filter((visa) => visa.visa.expires)
+    .filter(
+      (visa) =>
+        visa.visa.expires &&
+        startOfUtcDay(visa.visa.expires).getTime() >= today.getTime()
+    )
     .sort(
       (a, b) =>
         startOfUtcDay(a.visa.expires!).getTime() -
@@ -1224,7 +1301,10 @@ export const evaluateVisaPortfolio = ({
     if (startOfUtcDay(visa.validFrom).getTime() > today.getTime()) {
       issueKinds.add(VisaIssueKind.VISA_NOT_YET_VALID);
     }
-    if (visa.expires && startOfUtcDay(visa.expires).getTime() < today.getTime()) {
+    if (
+      visa.expires &&
+      startOfUtcDay(visa.expires).getTime() < today.getTime()
+    ) {
       issueKinds.add(VisaIssueKind.VISA_EXPIRED);
     }
     if (usageSnapshots.some((snapshot) => snapshot.remaining < 0)) {
@@ -1242,20 +1322,20 @@ export const evaluateVisaPortfolio = ({
         kind === VisaIssueKind.VISA_NOT_YET_VALID
           ? isoDate(visa.validFrom)
           : visa.expires
-          ? isoDate(visa.expires)
-          : isoDate(today),
+            ? isoDate(visa.expires)
+            : isoDate(today),
       params: {},
       projected: false,
     }));
 
     return {
       visa,
-      status: (
-        issues.length === 0 &&
-        linkedTripEvaluations.every((tripEvaluation) => tripEvaluation.status === "valid")
-          ? "valid"
-          : "invalid"
-      ) as "valid" | "invalid",
+      status: (issues.length === 0 &&
+      linkedTripEvaluations.every(
+        (tripEvaluation) => tripEvaluation.status === "valid"
+      )
+        ? "valid"
+        : "invalid") as "valid" | "invalid",
       issues,
       tripEvaluations: linkedTripEvaluations,
       usageSnapshots,
@@ -1286,18 +1366,25 @@ export const evaluateVisaPortfolio = ({
     }))
   );
 
-  const alerts = [...visaEvaluations.flatMap((visa) => visa.alerts), ...tripAlerts].sort(
-    (a, b) => b.rankingScore - a.rankingScore
-  );
+  const alerts = [
+    ...visaEvaluations.flatMap((visa) => visa.alerts),
+    ...tripAlerts,
+  ].sort((a, b) => b.rankingScore - a.rankingScore);
 
   return {
     visas: visaEvaluations,
     tripEvaluations,
     alerts,
-    dashboardCards: buildDashboardCards(tripEvaluations, visaEvaluations, today),
+    dashboardCards: buildDashboardCards(
+      tripEvaluations,
+      visaEvaluations,
+      today
+    ),
     projections: visaEvaluations
       .map((visa) => visa.projection)
-      .filter((projection): projection is RollingWindowProjection => Boolean(projection)),
+      .filter((projection): projection is RollingWindowProjection =>
+        Boolean(projection)
+      ),
   };
 };
 

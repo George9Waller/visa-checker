@@ -15,7 +15,12 @@ import {
   UsageBar,
 } from "@/app/design";
 import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
-import { copyForAlert, detailForTripIssue, titleForTripIssue, toneFromSeverity } from "@/app/structured-copy";
+import {
+  copyForAlert,
+  detailForTripIssue,
+  titleForTripIssue,
+  toneFromSeverity,
+} from "@/app/structured-copy";
 import { getVisaDetailSummary } from "../server-actions";
 import { VISA_TYPES_DISPLAY_MAP } from "../constants";
 import Link from "next/link";
@@ -65,12 +70,30 @@ export default async function VisaDetail({
   return (
     <PageContainer>
       <Stack className="gap-6">
-        <Stack className="gap-2 border-b border-border pb-4">
+        <Stack className="gap-4 rounded-[var(--radius)] border border-border bg-bg-raised p-5 shadow-sm">
           <Btn as={Link} href="/visas" variant="ghost" size="sm">
             Back
           </Btn>
-          <Text className="text-sm text-fg-muted">{VISA_TYPES_DISPLAY_MAP[summary.visa.type]}</Text>
-          <Text className="text-3xl font-semibold">{summary.visa.name}</Text>
+          <Text className="text-sm text-fg-muted">
+            {VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
+          </Text>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <Text className="text-3xl font-semibold leading-tight">
+                {summary.visa.name}
+              </Text>
+              <Text className="mt-1 text-sm text-fg-muted">
+                {formatDate(summary.visa.validFrom)} -{" "}
+                {formatDate(summary.visa.expires)}
+              </Text>
+            </div>
+            <StatusBadge
+              tone={summary.status === "valid" ? "ok" : "danger"}
+              size="xs"
+            >
+              {summary.status}
+            </StatusBadge>
+          </div>
         </Stack>
 
         <FactGrid cols={3}>
@@ -79,7 +102,10 @@ export default async function VisaDetail({
           <Fact
             label="Status"
             value={
-              <StatusBadge tone={summary.status === "valid" ? "ok" : "danger"} size="xs">
+              <StatusBadge
+                tone={summary.status === "valid" ? "ok" : "danger"}
+                size="xs"
+              >
                 {summary.status}
               </StatusBadge>
             }
@@ -87,6 +113,7 @@ export default async function VisaDetail({
         </FactGrid>
 
         <Stack className="gap-3">
+          <Text className="font-semibold text-lg">Alerts</Text>
           {summary.alerts.map((alert) => {
             const copy = copyForAlert(alert);
             return (
@@ -118,15 +145,19 @@ export default async function VisaDetail({
                 snapshot.remaining < 0
                   ? "danger"
                   : snapshot.utilization >= 0.8
-                  ? "warn"
-                  : "ok";
+                    ? "warn"
+                    : "ok";
               return (
                 <Stack
                   key={`${snapshot.ruleKind}-${snapshot.limit}`}
-                  className="gap-2 rounded-lg border border-border bg-bg-raised p-4"
+                  className="gap-2 rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-sm"
                 >
                   <Text className="font-semibold">{snapshot.ruleKind}</Text>
-                  <UsageBar used={snapshot.used} limit={snapshot.limit} tone={tone} />
+                  <UsageBar
+                    used={snapshot.used}
+                    limit={snapshot.limit}
+                    tone={tone}
+                  />
                 </Stack>
               );
             })}
@@ -151,7 +182,9 @@ export default async function VisaDetail({
         <Stack className="gap-3">
           <Text className="font-semibold text-lg">Trips</Text>
           {visibleTrips.length === 0 ? (
-            <Text className="text-sm text-fg-muted">No trips linked to this visa.</Text>
+            <Text className="text-sm text-fg-muted">
+              No trips linked to this visa.
+            </Text>
           ) : (
             visibleTrips.map((tripEvaluation) => (
               <TripCard
@@ -198,7 +231,9 @@ export default async function VisaDetail({
               variant="ghost"
               size="sm"
             >
-              {showAllTrips ? "Hide trips outside the window" : "Show all trips"}
+              {showAllTrips
+                ? "Hide trips outside the window"
+                : "Show all trips"}
             </Btn>
           )}
         </Stack>
@@ -222,7 +257,10 @@ export default async function VisaDetail({
               <Fact label="Visa number" value={summary.visa.visaNumber} />
             )}
             {summary.visa.documentNumber && (
-              <Fact label="Document number" value={summary.visa.documentNumber} />
+              <Fact
+                label="Document number"
+                value={summary.visa.documentNumber}
+              />
             )}
           </FactGrid>
         )}
@@ -240,7 +278,9 @@ export default async function VisaDetail({
                   <Text className="text-sm text-fg-muted">
                     {detailForTripIssue(
                       issueKind,
-                      tripEvaluation.issues.find((issue) => issue.kind === issueKind)?.params
+                      tripEvaluation.issues.find(
+                        (issue) => issue.kind === issueKind
+                      )?.params
                     )}
                   </Text>
                 </AlertBox>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
+import { seedDevLoginData } from "./seed";
 
 const getCookieName = (request: NextRequest) =>
   request.nextUrl.protocol === "https:"
@@ -11,6 +12,8 @@ export async function POST(request: NextRequest) {
   if (!secret) {
     return NextResponse.json({ error: "Missing auth secret" }, { status: 500 });
   }
+
+  await seedDevLoginData();
 
   const token = await encode({
     token: {

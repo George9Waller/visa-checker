@@ -1,8 +1,8 @@
-import { PropsWithChildren, ReactNode } from 'react';
-import Link from 'next/link';
-import { cn } from '../cn';
-import { Kicker } from '../primitives/Kicker';
-import { Display } from '../primitives/Display';
+import { PropsWithChildren, ReactNode } from "react";
+import Link from "next/link";
+import { cn } from "../cn";
+import { Kicker } from "../primitives/Kicker";
+import { Display } from "../primitives/Display";
 
 export interface StatCardProps extends PropsWithChildren {
   label: string;
@@ -21,10 +21,9 @@ export function StatCard({
   children,
 }: StatCardProps) {
   const classes = cn(
-    'text-left p-4 rounded-lg border border-border',
-    'bg-bg-raised hover:bg-bg-sunken transition-colors',
-    'flex flex-col gap-3 min-w-0',
-    className,
+    "min-w-0 rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
+    "flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",
+    className
   );
 
   const content = (
@@ -39,22 +38,14 @@ export function StatCard({
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={classes}
-      >
+      <Link href={href} className={classes}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        classes,
-      )}
-    >
+    <button type="button" onClick={onClick} className={classes}>
       {content}
     </button>
   );

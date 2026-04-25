@@ -1,9 +1,9 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { cn } from '../cn';
-import { Kicker } from '../primitives/Kicker';
-import { Display } from '../primitives/Display';
-import { Flag } from '../primitives/Flag';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { cn } from "../cn";
+import { Kicker } from "../primitives/Kicker";
+import { Display } from "../primitives/Display";
+import { Flag } from "../primitives/Flag";
 
 export interface TripHeroCardProps {
   flag: ReactNode;
@@ -19,7 +19,7 @@ export interface TripHeroCardProps {
 export function TripHeroCard({
   flag,
   title,
-  kicker = 'Currently in',
+  kicker = "Currently in",
   livePill,
   subtitle,
   onClick,
@@ -27,19 +27,18 @@ export function TripHeroCard({
   className,
 }: TripHeroCardProps) {
   const classes = cn(
-    'w-full text-left p-5 rounded-lg',
-    'bg-fg text-bg',
-    'hover:opacity-90 transition-opacity',
-    'flex flex-col gap-4',
-    className,
+    "w-full overflow-hidden rounded-[calc(var(--radius)+2px)] border border-fg/10 text-left transition-all",
+    "bg-fg text-bg shadow-sm hover:-translate-y-0.5 hover:shadow-md",
+    "flex flex-col gap-4 p-5",
+    className
   );
 
   const content = (
     <>
       <div className="flex items-center justify-between">
-        <Kicker className="opacity-60">{kicker}</Kicker>
+        <Kicker className="opacity-70">{kicker}</Kicker>
         {livePill && (
-          <span className="px-2 py-1 rounded-full border border-current text-xs font-mono uppercase opacity-70">
+          <span className="rounded-full border border-current px-2 py-1 text-xs font-mono uppercase opacity-70">
             LIVE
           </span>
         )}
@@ -47,8 +46,12 @@ export function TripHeroCard({
       <div className="flex items-center gap-4">
         <Flag size="lg">{flag}</Flag>
         <div className="flex-1 min-w-0">
-          <Display level={2} className="text-bg">{title}</Display>
-          {subtitle && <div className="text-sm mt-1 opacity-70">{subtitle}</div>}
+          <Display level={2} className="text-bg">
+            {title}
+          </Display>
+          {subtitle && (
+            <div className="mt-1 text-sm opacity-70">{subtitle}</div>
+          )}
         </div>
       </div>
     </>
@@ -56,22 +59,14 @@ export function TripHeroCard({
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={classes}
-      >
+      <Link href={href} className={classes}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        classes,
-      )}
-    >
+    <button type="button" onClick={onClick} className={classes}>
       {content}
     </button>
   );

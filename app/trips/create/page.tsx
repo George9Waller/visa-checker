@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
 import { createTrip } from "../server-actions";
-import {
-  COUNTRY_EMOJIS,
-  COUNTRY_LABELS,
-  COUNTRY_NAMES,
-} from "@/app/constants";
+import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
 import {
   Checkbox,
   DatePicker,
@@ -98,13 +94,23 @@ export default function CreateTripWizard() {
           variant: "primary",
         }}
       >
-        <Stack gap="md">
+        <Stack gap="lg">
+          <AlertBox
+            tone={country ? "ok" : "warn"}
+            title={country ? selectedCountryName : "Choose a destination"}
+          >
+            <Text variant="small" tone="muted">
+              {country
+                ? "You can refine the trip details once the destination is selected."
+                : "Search or scroll to pick the country first. The list is sorted alphabetically and stays compact on mobile."}
+            </Text>
+          </AlertBox>
           <Input
             placeholder={t("searchCountry")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <OptionList maxHeight="none">
+          <OptionList maxHeight="56vh" className="overscroll-contain">
             {filteredCountries.map(({ code, label }) => {
               const name = COUNTRY_NAMES[code] ?? label;
               const emoji = COUNTRY_EMOJIS[code] ?? "✈";
@@ -141,7 +147,7 @@ export default function CreateTripWizard() {
           variant: "primary",
         }}
       >
-        <Stack gap="lg">
+        <Stack gap="xl">
           <Field label={t("name")} hint={`${name.length} / 40`}>
             <Input
               value={name}
@@ -165,7 +171,12 @@ export default function CreateTripWizard() {
                 minDate={asIso(new Date())}
                 onChange={(value) => {
                   setStartDate(value);
-                  if (endDate && value && new Date(`${endDate}T00:00:00`) < new Date(`${value}T00:00:00`)) {
+                  if (
+                    endDate &&
+                    value &&
+                    new Date(`${endDate}T00:00:00`) <
+                      new Date(`${value}T00:00:00`)
+                  ) {
                     setEndDate("");
                   }
                 }}
@@ -200,7 +211,10 @@ export default function CreateTripWizard() {
       }}
     >
       <Stack gap="lg">
-        <AlertBox tone={visaRequired ? "warn" : "ok"} title={name || selectedCountryName}>
+        <AlertBox
+          tone={visaRequired ? "warn" : "ok"}
+          title={name || selectedCountryName}
+        >
           <Text variant="small" tone="muted">
             {visaRequired
               ? t("requiresVisaHint")

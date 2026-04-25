@@ -1,20 +1,27 @@
-import { PropsWithChildren } from 'react';
-import { cn } from '../cn';
-import { Tone, toneAlertClasses } from '../tokens';
-import { StatusPip } from '../primitives/StatusPip';
+import { PropsWithChildren } from "react";
+import { cn } from "../cn";
+import { Tone, toneAlertClasses } from "../tokens";
+import { StatusPip } from "../primitives/StatusPip";
 
 export interface AlertBoxProps extends PropsWithChildren {
   tone?: Tone;
   title?: string;
 }
 
-export function AlertBox({ tone = 'warn', title, children }: AlertBoxProps) {
+export function AlertBox({ tone = "warn", title, children }: AlertBoxProps) {
   return (
-    <div className={cn('rounded-sm p-4 border border-l-4', toneAlertClasses(tone))}>
+    <div
+      className={cn(
+        "rounded-[var(--radius)] border border-l-4 p-4 shadow-sm",
+        toneAlertClasses(tone)
+      )}
+    >
       {title && (
-        <div className="flex items-center gap-2 mb-2">
+        <div className="mb-2 flex items-center gap-2">
           <StatusPip tone={tone} size="sm" />
-          <div className="font-body font-bold text-md">{title}</div>
+          <div className="font-body font-bold text-md leading-tight">
+            {title}
+          </div>
         </div>
       )}
       {children}

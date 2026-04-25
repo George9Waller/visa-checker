@@ -18,6 +18,9 @@ test("bootstrap authenticated storage state", async ({ page }) => {
   await page.waitForURL("**/", { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: "Trips" })).toBeVisible();
+  await page.evaluate(() => {
+    document.cookie = "NEXT_LOCALE=en;path=/;max-age=31536000";
+  });
 
   await page.context().storageState({ path: authFile });
 });

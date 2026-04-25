@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { OptionList, OptionRow, Stack, StatusBadge, Text } from "@/app/design";
 import { TripVisaCandidate, selectVisaForTrip } from "../server-actions";
-import { detailForTripIssue, titleForTripIssue, toneFromSeverity } from "@/app/structured-copy";
+import {
+  detailForTripIssue,
+  titleForTripIssue,
+  toneFromSeverity,
+} from "@/app/structured-copy";
 
 export default function TripVisaSelector({
   tripId,
@@ -23,13 +27,17 @@ export default function TripVisaSelector({
     <Stack className="gap-3">
       <Text className="font-semibold text-lg">Visa options</Text>
       {candidates.length === 0 ? (
-        <Text className="text-sm text-fg-muted">Create a visa for this country before you travel.</Text>
+        <Text className="text-sm text-fg-muted">
+          Create a visa for this country before you travel.
+        </Text>
       ) : (
-        <OptionList maxHeight="none">
+        <OptionList maxHeight="56vh" className="overscroll-contain">
           {candidates.map((candidate) => {
             const issue = candidate.issues[0];
             const badgeTone =
-              candidate.status === "valid" ? "ok" : toneFromSeverity(issue?.severity ?? "danger");
+              candidate.status === "valid"
+                ? "ok"
+                : toneFromSeverity(issue?.severity ?? "danger");
             const issueSummary =
               candidate.status === "valid"
                 ? "Valid for this trip"
@@ -52,7 +60,9 @@ export default function TripVisaSelector({
                 selected={candidate.id === selectedVisaId}
                 trailing={
                   <StatusBadge tone={badgeTone} size="xs">
-                    {isPending && pendingVisaId === candidate.id ? "saving" : candidate.status}
+                    {isPending && pendingVisaId === candidate.id
+                      ? "saving"
+                      : candidate.status}
                   </StatusBadge>
                 }
                 onClick={() => {

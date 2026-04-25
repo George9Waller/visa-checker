@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { cn } from '../cn';
-import { StatusPip } from '../primitives/StatusPip';
-import { Icon } from '../primitives/Icon';
+import { ReactNode } from "react";
+import { cn } from "../cn";
+import { StatusPip } from "../primitives/StatusPip";
+import { Icon } from "../primitives/Icon";
 
 export interface OptionRowProps {
   flag?: ReactNode;
@@ -10,7 +10,7 @@ export interface OptionRowProps {
   selected?: boolean;
   trailing?: ReactNode;
   onClick?: () => void;
-  variant?: 'list' | 'grid' | 'type';
+  variant?: "list" | "grid" | "type";
 }
 
 export function OptionRow({
@@ -20,28 +20,32 @@ export function OptionRow({
   selected,
   trailing,
   onClick,
-  variant = 'list',
+  variant = "list",
 }: OptionRowProps) {
-  if (variant === 'type') {
+  if (variant === "type") {
     return (
       <button
+        type="button"
         onClick={onClick}
         className={cn(
-          'w-full text-left p-4 rounded-sm border',
-          'flex items-start gap-4 transition-all',
+          "w-full text-left rounded-[var(--radius)] border px-4 py-4",
+          "flex items-start gap-4 transition-all",
+          "focus-visible:ds-focus-ring",
           selected
-            ? 'bg-fg text-bg border-fg'
-            : 'bg-bg-raised text-fg border-border hover:border-fg',
+            ? "bg-fg text-bg border-fg shadow-sm"
+            : "bg-bg-raised text-fg border-border hover:border-fg/80 hover:bg-bg-sunken"
         )}
       >
-        {flag && <span className="text-2xl flex-shrink-0 w-7 text-center">{flag}</span>}
+        {flag && (
+          <span className="text-2xl flex-shrink-0 w-7 text-center">{flag}</span>
+        )}
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-md">{title}</div>
+          <div className="font-semibold text-md leading-tight">{title}</div>
           {subtitle && (
             <div
               className={cn(
-                'text-sm mt-1 leading-relaxed',
-                selected ? 'opacity-60' : 'text-fg-muted',
+                "mt-1 text-sm leading-relaxed",
+                selected ? "opacity-70" : "text-fg-muted"
               )}
             >
               {subtitle}
@@ -57,19 +61,23 @@ export function OptionRow({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
-        'w-full text-left p-3 rounded-sm border transition-all',
-        'flex items-center gap-3',
+        "w-full text-left rounded-[var(--radius)] border px-3 py-3 transition-all",
+        "flex items-center gap-3",
+        "focus-visible:ds-focus-ring",
         selected
-          ? 'bg-bg-sunken border-fg'
-          : 'bg-bg-raised border-border hover:border-fg',
+          ? "bg-bg-sunken border-fg shadow-sm"
+          : "bg-bg-raised border-border hover:border-fg/80 hover:bg-bg-sunken"
       )}
     >
       {flag && <span className="text-lg flex-shrink-0">{flag}</span>}
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-md">{title}</div>
-        {subtitle && <div className="text-xs text-fg-muted mt-1">{subtitle}</div>}
+        <div className="font-semibold text-md leading-tight">{title}</div>
+        {subtitle && (
+          <div className="text-xs text-fg-muted mt-1">{subtitle}</div>
+        )}
       </div>
       {(trailing || selected) && (
         <div className="flex-shrink-0">

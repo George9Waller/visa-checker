@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { cn } from '../cn';
-import { Text } from '../primitives/Text';
-import { Btn } from '../primitives/Btn';
+import { ReactNode } from "react";
+import { cn } from "../cn";
+import { Text } from "../primitives/Text";
+import { Btn } from "../primitives/Btn";
 
 export interface EmptyStateProps {
   icon?: ReactNode;
@@ -21,13 +21,16 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-4 py-12 px-6',
-        'rounded-sm border border-dashed border-border-strong',
-        'text-center text-fg-muted',
-        className,
+        "flex flex-col items-center gap-4 rounded-[var(--radius)] border border-dashed border-border-strong",
+        "bg-bg-raised px-6 py-10 text-center text-fg-muted shadow-sm",
+        className
       )}
     >
-      {icon && <div className="text-4xl">{icon}</div>}
+      {icon && (
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-bg text-4xl text-fg">
+          {icon}
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <div className="font-body text-lg font-bold text-fg">{title}</div>
         {message && <Text variant="small">{message}</Text>}

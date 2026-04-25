@@ -4,10 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
-import {
-  SCHENGEN_COUNTRIES,
-  VISA_TYPE,
-} from "../constants";
+import { SCHENGEN_COUNTRIES, VISA_TYPE } from "../constants";
 import { createVisa } from "../server-actions";
 import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
 import {
@@ -151,66 +148,74 @@ export default function CreateVisaWizard() {
           variant: "primary",
         }}
       >
-        <OptionList maxHeight="none">
-          {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
-            const meta = VISA_TYPE_META[key];
-            return (
-              <OptionRow
-                key={key}
-                variant="type"
-                flag={<span>{meta.flag}</span>}
-                title={t(`types.${key}`)}
-                subtitle={meta.desc}
-                selected={form.type === key}
-                onClick={() => {
-                  const preset =
-                    key === "SCHENGEN"
-                      ? {
-                          countries: SCHENGEN_COUNTRIES,
-                          totalMaxLen: 90,
-                          rollingPeriodLen: 180,
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        }
-                      : key === "ESTA"
-                      ? {
-                          countries: ["US"],
-                          tripMaxLen: 90,
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        }
-                      : key === "CA_ETA"
-                      ? {
-                          countries: ["CA"],
-                          tripMaxLen: 180,
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        }
-                      : key === "AU_EVISITOR"
-                      ? {
-                          countries: ["AU"],
-                          tripMaxLen: 30,
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        }
-                      : key === "NZETA"
-                      ? {
-                          countries: ["NZ"],
-                          tripMaxLen: 180,
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        }
-                      : {
-                          countries: [],
-                          mustExitBeforeExpiry: true,
-                          includeEntryAndExitDates: true,
-                        };
-                  patch({ type: key, ...preset });
-                }}
-              />
-            );
-          })}
-        </OptionList>
+        <Stack gap="lg">
+          <AlertBox tone="warn" title="Choose a visa template">
+            <Text variant="small" tone="muted">
+              Templates prefill the rules for the common cases. You can still
+              change every limit later.
+            </Text>
+          </AlertBox>
+          <OptionList maxHeight="56vh" className="overscroll-contain">
+            {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
+              const meta = VISA_TYPE_META[key];
+              return (
+                <OptionRow
+                  key={key}
+                  variant="type"
+                  flag={<span>{meta.flag}</span>}
+                  title={t(`types.${key}`)}
+                  subtitle={meta.desc}
+                  selected={form.type === key}
+                  onClick={() => {
+                    const preset =
+                      key === "SCHENGEN"
+                        ? {
+                            countries: SCHENGEN_COUNTRIES,
+                            totalMaxLen: 90,
+                            rollingPeriodLen: 180,
+                            mustExitBeforeExpiry: true,
+                            includeEntryAndExitDates: true,
+                          }
+                        : key === "ESTA"
+                          ? {
+                              countries: ["US"],
+                              tripMaxLen: 90,
+                              mustExitBeforeExpiry: true,
+                              includeEntryAndExitDates: true,
+                            }
+                          : key === "CA_ETA"
+                            ? {
+                                countries: ["CA"],
+                                tripMaxLen: 180,
+                                mustExitBeforeExpiry: true,
+                                includeEntryAndExitDates: true,
+                              }
+                            : key === "AU_EVISITOR"
+                              ? {
+                                  countries: ["AU"],
+                                  tripMaxLen: 30,
+                                  mustExitBeforeExpiry: true,
+                                  includeEntryAndExitDates: true,
+                                }
+                              : key === "NZETA"
+                                ? {
+                                    countries: ["NZ"],
+                                    tripMaxLen: 180,
+                                    mustExitBeforeExpiry: true,
+                                    includeEntryAndExitDates: true,
+                                  }
+                                : {
+                                    countries: [],
+                                    mustExitBeforeExpiry: true,
+                                    includeEntryAndExitDates: true,
+                                  };
+                    patch({ type: key, ...preset });
+                  }}
+                />
+              );
+            })}
+          </OptionList>
+        </Stack>
       </WizardShell>
     );
   }
@@ -255,7 +260,10 @@ export default function CreateVisaWizard() {
           </Field>
           <FactGrid cols={2}>
             <Fact label={t("typeQuestion")} value={t(`types.${form.type}`)} />
-            <Fact label={t("countriesStep")} value={form.countries.length || "—"} />
+            <Fact
+              label={t("countriesStep")}
+              value={form.countries.length || "—"}
+            />
           </FactGrid>
         </Stack>
       </WizardShell>
@@ -278,12 +286,20 @@ export default function CreateVisaWizard() {
           variant: "primary",
         }}
       >
-        <Stack gap="md">
-          <Stack gap="sm" className="flex-row flex-wrap">
-            <Btn variant="outline" size="sm" onClick={() => patch({ countries: SCHENGEN_COUNTRIES })}>
+        <Stack gap="lg">
+          <Stack gap="sm" className="flex-row flex-wrap items-center">
+            <Btn
+              variant="outline"
+              size="sm"
+              onClick={() => patch({ countries: SCHENGEN_COUNTRIES })}
+            >
               {t("selectSchengen")}
             </Btn>
-            <Btn variant="ghost" size="sm" onClick={() => patch({ countries: [] })}>
+            <Btn
+              variant="ghost"
+              size="sm"
+              onClick={() => patch({ countries: [] })}
+            >
               {t("clear")}
             </Btn>
             <Text variant="meta" tone="muted" className="ml-auto">
@@ -297,7 +313,7 @@ export default function CreateVisaWizard() {
             onChange={(e) => setCountrySearch(e.target.value)}
           />
 
-          <OptionList maxHeight="none">
+          <OptionList maxHeight="56vh" className="overscroll-contain">
             {filteredCountries.map(({ code, label }) => {
               const name = COUNTRY_NAMES[code] ?? label;
               const emoji = COUNTRY_EMOJIS[code] ?? "•";
@@ -342,6 +358,12 @@ export default function CreateVisaWizard() {
         }}
       >
         <Stack gap="lg">
+          <AlertBox tone="ok" title={form.name || t(`types.${form.type}`)}>
+            <Text variant="small" tone="muted">
+              This step controls when the visa can be used and whether departure
+              must happen before expiry.
+            </Text>
+          </AlertBox>
           <Field label={t("validFrom")}>
             <DatePicker
               value={form.validFrom}
@@ -399,7 +421,10 @@ export default function CreateVisaWizard() {
       }}
     >
       <Stack gap="lg">
-        <AlertBox tone="warn" title={selectedCountries || t(`types.${form.type}`)}>
+        <AlertBox
+          tone="warn"
+          title={selectedCountries || t(`types.${form.type}`)}
+        >
           <Text variant="small" tone="muted">
             Configure the remaining limits for this visa.
           </Text>
@@ -412,7 +437,9 @@ export default function CreateVisaWizard() {
               value={form.totalMaxLen}
               onChange={(e) =>
                 patch({
-                  totalMaxLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                  totalMaxLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
                 })
               }
               placeholder="e.g. 90"
@@ -424,7 +451,9 @@ export default function CreateVisaWizard() {
               value={form.rollingPeriodLen}
               onChange={(e) =>
                 patch({
-                  rollingPeriodLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                  rollingPeriodLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
                 })
               }
               placeholder="e.g. 180"
@@ -439,7 +468,9 @@ export default function CreateVisaWizard() {
               value={form.maxNumTrips}
               onChange={(e) =>
                 patch({
-                  maxNumTrips: e.target.value ? parseInt(e.target.value, 10) : "",
+                  maxNumTrips: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
                 })
               }
               placeholder="Optional"
@@ -451,7 +482,9 @@ export default function CreateVisaWizard() {
               value={form.tripMaxLen}
               onChange={(e) =>
                 patch({
-                  tripMaxLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                  tripMaxLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
                 })
               }
               placeholder="Optional"

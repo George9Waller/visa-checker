@@ -1,11 +1,11 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { cn } from '../cn';
-import { Tone } from '../tokens';
-import { StatusBadge } from '../feedback/StatusBadge';
-import { Flag } from '../primitives/Flag';
-import { Display } from '../primitives/Display';
-import { Kicker } from '../primitives/Kicker';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { cn } from "../cn";
+import { Tone } from "../tokens";
+import { StatusBadge } from "../feedback/StatusBadge";
+import { Flag } from "../primitives/Flag";
+import { Display } from "../primitives/Display";
+import { Kicker } from "../primitives/Kicker";
 
 export interface TripCardProps {
   flag: ReactNode;
@@ -33,10 +33,9 @@ export function TripCard({
   href,
 }: TripCardProps) {
   const classes = cn(
-    'w-full text-left mb-3 p-4 rounded-lg border border-border',
-    'bg-bg-raised hover:bg-bg-sunken transition-colors',
-    'flex flex-col gap-3',
-    isPast && 'opacity-60',
+    "w-full rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
+    "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",
+    isPast && "opacity-60"
   );
 
   const content = (
@@ -65,22 +64,14 @@ export function TripCard({
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={classes}
-      >
+      <Link href={href} className={classes}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        classes,
-      )}
-    >
+    <button type="button" onClick={onClick} className={classes}>
       {content}
     </button>
   );

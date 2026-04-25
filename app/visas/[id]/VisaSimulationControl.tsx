@@ -37,9 +37,10 @@ export default function VisaSimulationControl({
   return (
     <Stack gap="sm">
       <Text variant="small" tone="muted">
-        Change the date to see how your visa usage looks at a different point in time.
+        Change the date to see how your visa usage looks at a different point in
+        time.
       </Text>
-      <div className="flex flex-wrap gap-3 items-end">
+      <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[240px] flex-1">
           <DatePicker value={date} onChange={setDate} />
         </div>
