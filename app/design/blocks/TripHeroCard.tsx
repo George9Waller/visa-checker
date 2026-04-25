@@ -27,7 +27,7 @@ export function TripHeroCard({
   className,
 }: TripHeroCardProps) {
   const classes = cn(
-    'w-full text-left mb-6 p-5 rounded-lg',
+    'w-full text-left p-5 rounded-lg',
     'bg-fg text-bg',
     'hover:opacity-90 transition-opacity',
     'flex flex-col gap-4',

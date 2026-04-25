@@ -5,7 +5,6 @@ import {
   Btn,
   Fact,
   FactGrid,
-  Input,
   PageContainer,
   SchengenProjectionChart,
   Stack,
@@ -21,6 +20,7 @@ import { getVisaDetailSummary } from "../server-actions";
 import { VISA_TYPES_DISPLAY_MAP } from "../constants";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import VisaSimulationControl from "./VisaSimulationControl";
 
 const formatDate = (date: Date | null) =>
   date
@@ -50,14 +50,16 @@ export default async function VisaDetail({
     redirect("/visas");
   }
 
-  const isSimulating =
-    referenceDate.toISOString().split("T")[0] !== new Date().toISOString().split("T")[0];
   const showAllTrips = show_outside_rolling_range?.toString() === "true";
   const visibleTrips = summary.tripEvaluations.filter(
     (tripEvaluation) =>
       showAllTrips ||
       summary.rollingWindowTripIds.length === 0 ||
       summary.rollingWindowTripIds.includes(tripEvaluation.trip.id)
+  );
+  const projectedTripIssues = summary.tripEvaluations.filter(
+    (tripEvaluation) =>
+      tripEvaluation.projected && tripEvaluation.issueKinds.length > 0
   );
 
   return (
@@ -101,28 +103,11 @@ export default async function VisaDetail({
 
         <Stack className="gap-3">
           <Text className="font-semibold text-lg">Calculation date</Text>
-          <form className="flex flex-wrap gap-3 items-end" action={`/visas/${id}`} method="GET">
-            <div className="min-w-[220px] flex-1">
-              <Input
-                type="date"
-                name="date"
-                defaultValue={referenceDate.toISOString().split("T")[0]}
-              />
-            </div>
-            <input
-              type="hidden"
-              name="show_outside_rolling_range"
-              value={show_outside_rolling_range?.toString() ?? ""}
-            />
-            <Btn type="submit" variant="primary">
-              Apply
-            </Btn>
-            {isSimulating && (
-              <Btn as={Link} href={`/visas/${id}`} variant="outline">
-                Reset
-              </Btn>
-            )}
-          </form>
+          <VisaSimulationControl
+            id={id}
+            initialDate={referenceDate.toISOString().split("T")[0]}
+            showAllTrips={showAllTrips}
+          />
         </Stack>
 
         {summary.usageSnapshots.length > 0 && (
@@ -201,9 +186,15 @@ export default async function VisaDetail({
           {summary.rollingWindowTripIds.length > 0 && (
             <Btn
               as={Link}
-              href={`/visas/${id}?date=${referenceDate
-                .toISOString()
-                .split("T")[0]}&show_outside_rolling_range=${showAllTrips ? "" : "true"}`}
+              href={(() => {
+                const params = new URLSearchParams({
+                  date: referenceDate.toISOString().split("T")[0],
+                });
+                if (!showAllTrips) {
+                  params.set("show_outside_rolling_range", "true");
+                }
+                return `/visas/${id}?${params.toString()}`;
+              })()}
               variant="ghost"
               size="sm"
             >
@@ -236,24 +227,27 @@ export default async function VisaDetail({
           </FactGrid>
         )}
 
-        {summary.tripEvaluations
-          .filter((tripEvaluation) => tripEvaluation.issueKinds.length > 0)
-          .map((tripEvaluation) =>
-            tripEvaluation.issueKinds.map((issueKind) => (
-              <AlertBox
-                key={`${tripEvaluation.trip.id}-${issueKind}`}
-                tone="danger"
-                title={titleForTripIssue(issueKind)}
-              >
-                <Text className="text-sm text-fg-muted">
-                  {detailForTripIssue(
-                    issueKind,
-                    tripEvaluation.issues.find((issue) => issue.kind === issueKind)?.params
-                  )}
-                </Text>
-              </AlertBox>
-            ))
-          )}
+        {projectedTripIssues.length > 0 && (
+          <Stack className="gap-3">
+            <Text className="font-semibold text-lg">Projected trip issues</Text>
+            {projectedTripIssues.map((tripEvaluation) =>
+              tripEvaluation.issueKinds.map((issueKind) => (
+                <AlertBox
+                  key={`${tripEvaluation.trip.id}-${issueKind}`}
+                  tone="danger"
+                  title={titleForTripIssue(issueKind)}
+                >
+                  <Text className="text-sm text-fg-muted">
+                    {detailForTripIssue(
+                      issueKind,
+                      tripEvaluation.issues.find((issue) => issue.kind === issueKind)?.params
+                    )}
+                  </Text>
+                </AlertBox>
+              ))
+            )}
+          </Stack>
+        )}
       </Stack>
     </PageContainer>
   );

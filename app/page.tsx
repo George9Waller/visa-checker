@@ -12,7 +12,11 @@ import {
   TripTimelineRow,
 } from "@/app/design";
 import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
-import { getDashboardSummary, getTripsBefore, getTripsFrom } from "./server-actions";
+import {
+  getDashboardSummary,
+  getTripsBefore,
+  getTripsFrom,
+} from "./server-actions";
 import { copyForAlert, copyForCard, toneFromSeverity } from "./structured-copy";
 import Link from "next/link";
 
@@ -57,7 +61,9 @@ export default async function Home() {
             href={`/trips/${currentTrip.trip.id}`}
             flag={COUNTRY_EMOJIS[currentTrip.trip.countryCode] ?? "✈"}
             title={
-              currentTrip.trip.name ?? COUNTRY_NAMES[currentTrip.trip.countryCode] ?? currentTrip.trip.countryCode
+              currentTrip.trip.name ??
+              COUNTRY_NAMES[currentTrip.trip.countryCode] ??
+              currentTrip.trip.countryCode
             }
             livePill
             subtitle={formatDateRange(
@@ -74,8 +80,8 @@ export default async function Home() {
               const href = card.tripId
                 ? `/trips/${card.tripId}`
                 : card.visaId
-                ? `/visas/${card.visaId}`
-                : undefined;
+                  ? `/visas/${card.visaId}`
+                  : undefined;
               return (
                 <StatCard
                   key={`${card.kind}-${card.tripId ?? card.visaId ?? "card"}`}
@@ -86,18 +92,18 @@ export default async function Home() {
                     card.tone === "danger"
                       ? "border-danger/40"
                       : card.tone === "warn"
-                      ? "border-warn/40"
-                      : ""
+                        ? "border-warn/40"
+                        : ""
                   }
                 >
                   <Text className="text-sm text-fg-muted">
                     {card.kind === "NEXT_TRIP"
-                      ? card.params.tripName?.toString() ?? ""
+                      ? (card.params.tripName?.toString() ?? "")
                       : card.kind === "NEXT_EXPIRY"
-                      ? card.params.expiryDate?.toString() ?? ""
-                      : card.kind === "ROLLING_WINDOW_USAGE"
-                      ? `Reset ${card.params.resetDate ?? "TBC"}`
-                      : ""}
+                        ? (card.params.expiryDate?.toString() ?? "")
+                        : card.kind === "ROLLING_WINDOW_USAGE"
+                          ? `Reset ${card.params.resetDate ?? "TBC"}`
+                          : ""}
                   </Text>
                 </StatCard>
               );
@@ -116,8 +122,8 @@ export default async function Home() {
                     alert.tripId
                       ? `/trips/${alert.tripId}`
                       : alert.visaId
-                      ? `/visas/${alert.visaId}`
-                      : undefined
+                        ? `/visas/${alert.visaId}`
+                        : undefined
                   }
                   tone={toneFromSeverity(alert.severity)}
                   title={copy.title}
@@ -128,7 +134,8 @@ export default async function Home() {
             })}
             {warningOverflowCount > 0 && (
               <Text className="text-sm text-fg-muted">
-                +{warningOverflowCount} more warning{warningOverflowCount === 1 ? "" : "s"}
+                +{warningOverflowCount} more warning
+                {warningOverflowCount === 1 ? "" : "s"}
               </Text>
             )}
           </Stack>
@@ -157,12 +164,28 @@ export default async function Home() {
                 month={new Date(trip.startDate).toLocaleDateString("en-GB", {
                   month: "short",
                 })}
-                title={trip.name ?? COUNTRY_NAMES[trip.countryCode] ?? trip.countryCode}
+                title={
+                  trip.name ??
+                  COUNTRY_NAMES[trip.countryCode] ??
+                  trip.countryCode
+                }
                 flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
                 meta={formatDateRange(trip.startDate, trip.endDate)}
                 length={trip.durationDays}
-                statusTone={trip.visaRequired ? (trip.visaValid ? "ok" : "danger") : "muted"}
-                statusLabel={trip.visaRequired ? (trip.visaValid ? "ready" : "needs review") : "visa-free"}
+                statusTone={
+                  trip.visaRequired
+                    ? trip.visaValid
+                      ? "ok"
+                      : "danger"
+                    : "muted"
+                }
+                statusLabel={
+                  trip.visaRequired
+                    ? trip.visaValid
+                      ? "ready"
+                      : "needs review"
+                    : "visa-free"
+                }
                 isLast={index === upcoming.trips.length - 1}
               />
             ))
@@ -179,12 +202,22 @@ export default async function Home() {
               month={new Date(trip.startDate).toLocaleDateString("en-GB", {
                 month: "short",
               })}
-              title={trip.name ?? COUNTRY_NAMES[trip.countryCode] ?? trip.countryCode}
+              title={
+                trip.name ?? COUNTRY_NAMES[trip.countryCode] ?? trip.countryCode
+              }
               flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
               meta={formatDateRange(trip.startDate, trip.endDate)}
               length={trip.durationDays}
-              statusTone={trip.visaRequired ? (trip.visaValid ? "ok" : "danger") : "muted"}
-              statusLabel={trip.visaRequired ? (trip.visaValid ? "valid" : "invalid") : "visa-free"}
+              statusTone={
+                trip.visaRequired ? (trip.visaValid ? "ok" : "danger") : "muted"
+              }
+              statusLabel={
+                trip.visaRequired
+                  ? trip.visaValid
+                    ? "valid"
+                    : "invalid"
+                  : "visa-free"
+              }
               isPast
               isLast={index === past.trips.length - 1}
             />

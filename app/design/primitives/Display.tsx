@@ -14,10 +14,10 @@ export function Display({
   children,
 }: DisplayProps) {
   const levelClasses: Record<number, string> = {
-    1: 'text-hero leading-tight font-display font-display tracking-tight',
-    2: 'text-display leading-tight font-display font-display tracking-tight',
-    3: 'text-2xl leading-tight font-display font-display tracking-tight',
-    4: 'text-xl leading-snug font-display font-display tracking-tight',
+    1: 'text-4xl leading-tight font-display tracking-tight',
+    2: 'text-3xl leading-tight font-display tracking-tight',
+    3: 'text-2xl leading-tight font-display tracking-tight',
+    4: 'text-xl leading-snug font-display tracking-tight',
   };
 
   return (

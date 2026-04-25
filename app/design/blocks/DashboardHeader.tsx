@@ -26,7 +26,7 @@ export function DashboardHeader({
         <Kicker className="mb-1">
           {weekday} · {dateStr}
         </Kicker>
-        <Display level={1}>{title}</Display>
+        <Display level={1} as="h1">{title}</Display>
       </div>
       {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
     </div>

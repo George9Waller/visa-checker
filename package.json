@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "pw:auth": "PLAYWRIGHT_AUTH_SETUP=1 playwright test tests/auth.setup.cjs --project=setup --headed",
+    "pw:test": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prisma:generate": "prisma generate",
@@ -29,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",

@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import NextAuthProvider from "./context/NextAuthProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Suspense } from "react";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { ProfileAvatar } from "./components/ProfileAvatar";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
-import { Flex } from "./components/ui/layout/Flex";
-import { Box } from "./components/ui/layout/Box";
-import { Text } from "./components/ui/typography/Text";
-import { Icon } from "./components/ui/typography/Icon";
+import { AppShell } from "./design";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,11 +31,11 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <NextAuthProvider>
             <ThemeProvider />
-            <Suspense>
-              <Box as="main" variant="page-container" p="none">
+            <AppShell theme="system">
+              <main>
                 {children}
-              </Box>
-            </Suspense>
+              </main>
+            </AppShell>
           </NextAuthProvider>
         </NextIntlClientProvider>
         <ToastContainer

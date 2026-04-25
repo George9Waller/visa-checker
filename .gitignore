@@ -13,6 +13,10 @@
 /.next/
 /out/
 
+# Playwright
+.playwright/
+test-results/**
+
 # production
 /build
 

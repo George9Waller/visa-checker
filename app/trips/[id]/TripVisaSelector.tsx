@@ -30,17 +30,25 @@ export default function TripVisaSelector({
             const issue = candidate.issues[0];
             const badgeTone =
               candidate.status === "valid" ? "ok" : toneFromSeverity(issue?.severity ?? "danger");
+            const issueSummary =
+              candidate.status === "valid"
+                ? "Valid for this trip"
+                : issue
+                  ? detailForTripIssue(issue.kind, issue.params)
+                  : titleForTripIssue(candidate.issueKinds[0]);
+            const subtitle =
+              candidate.status === "valid"
+                ? issueSummary
+                : candidate.issueKinds.length > 1
+                  ? `${issueSummary} · +${candidate.issueKinds.length - 1} more issue${
+                      candidate.issueKinds.length - 1 === 1 ? "" : "s"
+                    }`
+                  : issueSummary;
             return (
               <OptionRow
                 key={candidate.id}
                 title={candidate.name}
-                subtitle={
-                  candidate.status === "valid"
-                    ? "Valid for this trip"
-                    : issue
-                    ? detailForTripIssue(issue.kind, issue.params)
-                    : titleForTripIssue(candidate.issueKinds[0])
-                }
+                subtitle={subtitle}
                 selected={candidate.id === selectedVisaId}
                 trailing={
                   <StatusBadge tone={badgeTone} size="xs">

@@ -107,15 +107,24 @@ export default async function TripDetailPage({
         {summary.selectedCandidate && (
           <Stack className="gap-3">
             <Text className="font-semibold text-lg">Selected visa</Text>
-            <AlertBox tone={summary.selectedCandidate.status === "valid" ? "ok" : "danger"} title={summary.selectedCandidate.name}>
+            <AlertBox
+              tone={summary.selectedCandidate.status === "valid" ? "ok" : "danger"}
+              title={summary.selectedCandidate.name}
+            >
               <Text className="text-sm text-fg-muted">
                 {summary.selectedCandidate.issueKinds.length > 0
-                  ? detailForTripIssue(
+                  ? `${detailForTripIssue(
                       summary.selectedCandidate.issueKinds[0],
                       summary.selectedCandidate.issues.find(
                         (issue) => issue.kind === summary.selectedCandidate?.issueKinds[0]
                       )?.params
-                    )
+                    )}${
+                      summary.selectedCandidate.issueKinds.length > 1
+                        ? ` · +${summary.selectedCandidate.issueKinds.length - 1} more issue${
+                            summary.selectedCandidate.issueKinds.length - 1 === 1 ? "" : "s"
+                          }`
+                        : ""
+                    }`
                   : "This visa currently evaluates as valid for the trip."}
               </Text>
             </AlertBox>

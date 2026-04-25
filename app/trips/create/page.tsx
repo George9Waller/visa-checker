@@ -1,29 +1,39 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { createTrip } from "../server-actions";
-import { COUNTRY_LABELS } from "@/app/constants";
-import { Field, Input } from "@/app/components/ui/Field";
-import { Btn } from "@/app/components/ui/Btn";
 import { useTranslations } from "next-intl";
-import { WizardShell } from "@/app/components/ui/WizardShell";
-import { SelectableRow } from "@/app/components/ui/SelectableRow";
-import { CheckableRow } from "@/app/components/ui/CheckableRow";
-import { splitCountryLabel } from "@/app/components/utils/countries";
-import { Flex } from "@/app/components/ui/layout/Flex";
-import { Box } from "@/app/components/ui/layout/Box";
-import { Grid } from "@/app/components/ui/layout/Grid";
-import { Text } from "@/app/components/ui/typography/Text";
+import { createTrip } from "../server-actions";
+import {
+  COUNTRY_EMOJIS,
+  COUNTRY_LABELS,
+  COUNTRY_NAMES,
+} from "@/app/constants";
+import {
+  Checkbox,
+  DatePicker,
+  Field,
+  Input,
+  OptionList,
+  OptionRow,
+  Stack,
+  Text,
+  WizardShell,
+  FactGrid,
+  Fact,
+  AlertBox,
+} from "@/app/design";
 
 const TOTAL_STEPS = 3;
+
+const asIso = (value: Date) => value.toISOString().split("T")[0];
 
 export default function CreateTripWizard() {
   const t = useTranslations("trip");
   const router = useRouter();
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [country, setCountry] = useState("");
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
@@ -44,18 +54,18 @@ export default function CreateTripWizard() {
     const q = search.toLowerCase();
     return q
       ? sortedCountries.filter(
-          (c) =>
-            c.label.toLowerCase().includes(q) ||
-            c.code.toLowerCase().includes(q)
+          (item) =>
+            item.label.toLowerCase().includes(q) ||
+            item.code.toLowerCase().includes(q)
         )
       : sortedCountries;
   }, [search, sortedCountries]);
 
   const durationDays = useMemo(() => {
     if (!startDate || !endDate) return null;
-    const s = new Date(startDate + "T00:00:00");
-    const e = new Date(endDate + "T00:00:00");
-    const diff = Math.round((e.getTime() - s.getTime()) / 86400000) + 1;
+    const start = new Date(`${startDate}T00:00:00`);
+    const end = new Date(`${endDate}T00:00:00`);
+    const diff = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
     return diff > 0 ? diff : null;
   }, [startDate, endDate]);
 
@@ -64,72 +74,74 @@ export default function CreateTripWizard() {
     try {
       await createTrip(startDate, endDate, country, visaRequired, name || null);
       router.push("/");
-    } catch (e) {
-      toast.error(`Error creating trip: ${e}`);
+    } catch (error) {
+      toast.error(`Error creating trip: ${error}`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleBack = () => setStep((s) => s - 1);
-  const handleCancel = () => router.push("/");
+  const selectedCountryName = COUNTRY_NAMES[country] ?? country;
 
-  /* ── Step 1: Destination ── */
-  if (step === 1) {
+  if (step === 0) {
     return (
       <WizardShell
-        kicker={t("create")}
-        step={1}
+        title={t("create")}
+        step={0}
         totalSteps={TOTAL_STEPS}
-        title={t("destination")}
-        onNext={() => setStep(2)}
-        nextLabel={t("continue")}
-        nextDisabled={!country}
-        onCancel={handleCancel}
+        stepTitle={t("destination")}
+        onClose={() => router.push("/")}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(1),
+          enabled: Boolean(country),
+          variant: "primary",
+        }}
       >
-        <Box mb="md">
+        <Stack gap="md">
           <Input
             placeholder={t("searchCountry")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </Box>
-        <Flex variant="column" gap="xs">
-          {filteredCountries.map(({ code, label }) => {
-            const { flag, name: cName } = splitCountryLabel(label);
-            return (
-              <SelectableRow
-                key={code}
-                selected={country === code}
-                indicator="check"
-                icon={<span style={{ fontSize: 20 }}>{flag}</span>}
-                title={cName}
-                subtitle={code}
-                onClick={() => setCountry(code)}
-              />
-            );
-          })}
-        </Flex>
+          <OptionList maxHeight="none">
+            {filteredCountries.map(({ code, label }) => {
+              const name = COUNTRY_NAMES[code] ?? label;
+              const emoji = COUNTRY_EMOJIS[code] ?? "✈";
+              return (
+                <OptionRow
+                  key={code}
+                  flag={<span className="text-lg">{emoji}</span>}
+                  title={name}
+                  subtitle={code}
+                  selected={country === code}
+                  onClick={() => setCountry(code)}
+                />
+              );
+            })}
+          </OptionList>
+        </Stack>
       </WizardShell>
     );
   }
 
-  /* ── Step 2: Dates & Name ── */
-  if (step === 2) {
-    const today = new Date().toISOString().split("T")[0];
+  if (step === 1) {
     return (
       <WizardShell
-        kicker={t("create")}
-        step={2}
+        title={t("create")}
+        step={1}
         totalSteps={TOTAL_STEPS}
-        title={t("details")}
-        onBack={handleBack}
-        onNext={() => setStep(3)}
-        nextLabel={t("continue")}
-        nextDisabled={!startDate || !endDate}
-        onCancel={handleCancel}
+        stepTitle={t("details")}
+        onClose={() => router.push("/")}
+        onBack={() => setStep(0)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(2),
+          enabled: Boolean(startDate && endDate && name.trim()),
+          variant: "primary",
+        }}
       >
-        <Flex variant="column" gap="lg">
+        <Stack gap="lg">
           <Field label={t("name")} hint={`${name.length} / 40`}>
             <Input
               value={name}
@@ -138,72 +150,73 @@ export default function CreateTripWizard() {
             />
           </Field>
 
-          <Grid columns={2} gap="md">
-            <Field label={t("startDate")} required>
-              <Input
-                type="date"
-                value={startDate}
-                min={today}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </Field>
-            <Field label={t("endDate")} required>
-              <Input
-                type="date"
-                value={endDate}
-                min={startDate || today}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </Field>
-          </Grid>
+          <FactGrid cols={2}>
+            <Fact label={t("country")} value={selectedCountryName} />
+            <Fact
+              label={t("length")}
+              value={durationDays ? `${durationDays} ${t("days")}` : "—"}
+            />
+          </FactGrid>
 
-          {durationDays !== null && (
-            <Flex
-              variant="row-center"
-              p="sm"
-              style={{ 
-                justifyContent: "center", 
-                background: "var(--bg-sunken)", 
-                border: "1px solid var(--border)", 
-                borderRadius: "var(--r-s)" 
-              }}
-            >
-              <Text variant="mono" color="muted" style={{ fontWeight: "bold", fontSize: "var(--text-xs)", letterSpacing: "0.1em" }}>
-                {t("length")} · {durationDays} {t("days")}
-              </Text>
-            </Flex>
-          )}
-        </Flex>
+          <Stack gap="md">
+            <Field label={t("startDate")}>
+              <DatePicker
+                value={startDate}
+                minDate={asIso(new Date())}
+                onChange={(value) => {
+                  setStartDate(value);
+                  if (endDate && value && new Date(`${endDate}T00:00:00`) < new Date(`${value}T00:00:00`)) {
+                    setEndDate("");
+                  }
+                }}
+              />
+            </Field>
+            <Field label={t("endDate")}>
+              <DatePicker
+                value={endDate}
+                minDate={startDate || asIso(new Date())}
+                onChange={setEndDate}
+              />
+            </Field>
+          </Stack>
+        </Stack>
       </WizardShell>
     );
   }
 
-  /* ── Step 3: Visa ── */
   return (
     <WizardShell
-      kicker={t("create")}
-      step={3}
+      title={t("create")}
+      step={2}
       totalSteps={TOTAL_STEPS}
-      title={t("visa")}
-      onBack={handleBack}
-      onNext={handleSubmit}
-      nextLabel={submitting ? "…" : t("create")}
-      nextDisabled={submitting}
-      onCancel={handleCancel}
+      stepTitle={t("visa")}
+      onClose={() => router.push("/")}
+      onBack={() => setStep(1)}
+      primary={{
+        label: submitting ? "…" : t("create"),
+        onClick: handleSubmit,
+        enabled: !submitting,
+        variant: "accent",
+      }}
     >
-      <Flex variant="column" gap="md">
-        <CheckableRow
-          checked={visaRequired}
-          onChange={() => setVisaRequired((v) => !v)}
-          label={t("requiresVisa")}
-          hint={t("requiresVisaHint")}
-        />
-        <Text as="p" variant="mono" color="muted" style={{ fontSize: "var(--text-xs)" }}>
-          {visaRequired
-            ? t("requiresVisaHint")
-            : "You can link a visa later from the trip detail page."}
-        </Text>
-      </Flex>
+      <Stack gap="lg">
+        <AlertBox tone={visaRequired ? "warn" : "ok"} title={name || selectedCountryName}>
+          <Text variant="small" tone="muted">
+            {visaRequired
+              ? t("requiresVisaHint")
+              : "This trip will be marked as visa-free and can be linked later if needed."}
+          </Text>
+        </AlertBox>
+
+        <Checkbox checked={visaRequired} onChange={setVisaRequired}>
+          <div className="space-y-1">
+            <div className="font-semibold text-fg">{t("requiresVisa")}</div>
+            <Text variant="small" tone="muted">
+              {t("requiresVisaHint")}
+            </Text>
+          </div>
+        </Checkbox>
+      </Stack>
     </WizardShell>
   );
 }

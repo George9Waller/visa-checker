@@ -3,77 +3,42 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 import {
   SCHENGEN_COUNTRIES,
   VISA_TYPE,
 } from "../constants";
 import { createVisa } from "../server-actions";
-import { COUNTRY_LABELS } from "@/app/constants";
-import { Field, Input } from "@/app/components/ui/Field";
-import { Btn } from "@/app/components/ui/Btn";
-import { useTranslations } from "next-intl";
-import { convertDateToString } from "@/app/utils";
-import { WizardShell } from "@/app/components/ui/WizardShell";
-import { SelectableRow } from "@/app/components/ui/SelectableRow";
-import { SelectableGrid } from "@/app/components/ui/SelectableGrid";
-import { CheckableRow } from "@/app/components/ui/CheckableRow";
-import { splitCountryLabel } from "@/app/components/utils/countries";
-import { Flex } from "@/app/components/ui/layout/Flex";
-import { Grid } from "@/app/components/ui/layout/Grid";
-import { Text } from "@/app/components/ui/typography/Text";
-import { Box } from "@/app/components/ui/layout/Box";
+import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
+import {
+  AlertBox,
+  Btn,
+  Checkbox,
+  DatePicker,
+  Field,
+  Grid,
+  Input,
+  OptionList,
+  OptionRow,
+  Stack,
+  Text,
+  WizardShell,
+  Fact,
+  FactGrid,
+} from "@/app/design";
 
 type VisaTypeKey = keyof typeof VISA_TYPE;
 
-const VISA_TYPE_META: Record<VisaTypeKey, { flag: string; descKey: string }> = {
-  SCHENGEN: { flag: "🇪🇺", descKey: "SCHENGEN" },
-  ESTA: { flag: "🇺🇸", descKey: "ESTA" },
-  CA_ETA: { flag: "🇨🇦", descKey: "CA_ETA" },
-  AU_EVISITOR: { flag: "🇦🇺", descKey: "AU_EVISITOR" },
-  NZETA: { flag: "🇳🇿", descKey: "NZETA" },
-  OTHER: { flag: "⚙️", descKey: "OTHER" },
+const VISA_TYPE_META: Record<VisaTypeKey, { flag: string; desc: string }> = {
+  SCHENGEN: { flag: "🇪🇺", desc: "Rolling window (90 in 180)" },
+  ESTA: { flag: "🇺🇸", desc: "Fixed duration, single entry" },
+  CA_ETA: { flag: "🇨🇦", desc: "Fixed duration" },
+  AU_EVISITOR: { flag: "🇦🇺", desc: "Multiple entry" },
+  NZETA: { flag: "🇳🇿", desc: "Fixed duration" },
+  OTHER: { flag: "⚙️", desc: "Configure every rule" },
 };
 
-const VISA_PRESETS: Record<VisaTypeKey, () => Partial<FormData2>> = {
-  SCHENGEN: () => ({
-    countries: SCHENGEN_COUNTRIES,
-    totalMaxLen: 90,
-    rollingPeriodLen: 180,
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-  ESTA: () => ({
-    countries: ["US"],
-    tripMaxLen: 90,
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-  CA_ETA: () => ({
-    countries: ["CA"],
-    tripMaxLen: 180,
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-  AU_EVISITOR: () => ({
-    countries: ["AU"],
-    tripMaxLen: 30,
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-  NZETA: () => ({
-    countries: ["NZ"],
-    tripMaxLen: 180,
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-  OTHER: () => ({
-    countries: [],
-    mustExitBeforeExpiry: true,
-    includeEntryAndExitDates: true,
-  }),
-};
-
-type FormData2 = {
+type FormData = {
   type: VisaTypeKey;
   name: string;
   visaNumber: string;
@@ -89,13 +54,13 @@ type FormData2 = {
   tripMaxLen: number | "";
 };
 
-const INITIAL: FormData2 = {
+const INITIAL: FormData = {
   type: "OTHER",
   name: "",
   visaNumber: "",
   documentNumber: "",
   countries: [],
-  validFrom: convertDateToString(new Date()),
+  validFrom: "",
   expires: "",
   mustExitBeforeExpiry: true,
   includeEntryAndExitDates: true,
@@ -105,29 +70,22 @@ const INITIAL: FormData2 = {
   tripMaxLen: "",
 };
 
-function totalSteps(type: VisaTypeKey): number {
-  return type === "SCHENGEN" ||
-    type === "ESTA" ||
-    type === "CA_ETA" ||
-    type === "AU_EVISITOR" ||
-    type === "NZETA"
-    ? 4
-    : 5;
-}
+const totalSteps = (type: VisaTypeKey) => (type === "OTHER" ? 5 : 4);
 
+const asIso = (date: Date) => date.toISOString().split("T")[0];
 
 export default function CreateVisaWizard() {
   const t = useTranslations("visa");
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormData2>(INITIAL);
+  const [form, setForm] = useState<FormData>(INITIAL);
   const [countrySearch, setCountrySearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const maxSteps = totalSteps(form.type);
 
-  const patch = (update: Partial<FormData2>) =>
-    setForm((f) => ({ ...f, ...update }));
+  const patch = (update: Partial<FormData>) =>
+    setForm((current) => ({ ...current, ...update }));
 
   const sortedCountries = useMemo(
     () =>
@@ -141,9 +99,9 @@ export default function CreateVisaWizard() {
     const q = countrySearch.toLowerCase();
     return q
       ? sortedCountries.filter(
-          (c) =>
-            c.label.toLowerCase().includes(q) ||
-            c.code.toLowerCase().includes(q)
+          (item) =>
+            item.label.toLowerCase().includes(q) ||
+            item.code.toLowerCase().includes(q)
         )
       : sortedCountries;
   }, [countrySearch, sortedCountries]);
@@ -167,133 +125,171 @@ export default function CreateVisaWizard() {
         form.documentNumber || undefined
       );
       router.push("/visas");
-    } catch (e) {
-      toast.error(`Error creating visa: ${e}`);
+    } catch (error) {
+      toast.error(`Error creating visa: ${error}`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleBack = () => setStep((s) => s - 1);
-  const handleCancel = () => router.push("/visas");
+  const selectedCountries = form.countries
+    .map((code) => COUNTRY_NAMES[code] ?? code)
+    .join(" · ");
 
-  /* ── Step 1: Visa type ── */
   if (step === 0) {
     return (
       <WizardShell
+        title={t("create")}
         step={0}
         totalSteps={maxSteps}
-        kicker={t("create")}
-        title={t("typeQuestion")}
-        onNext={() => setStep(1)}
-        nextLabel={t("continue")}
-        nextDisabled={!form.type}
-        onCancel={handleCancel}
+        stepTitle={t("typeQuestion")}
+        onClose={() => router.push("/visas")}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(1),
+          enabled: Boolean(form.type),
+          variant: "primary",
+        }}
       >
-        <Flex variant="column" gap="sm">
+        <OptionList maxHeight="none">
           {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
             const meta = VISA_TYPE_META[key];
             return (
-              <SelectableRow
+              <OptionRow
                 key={key}
-                selected={form.type === key}
-                indicator="check"
-                icon={<span style={{ fontSize: 22 }}>{meta.flag}</span>}
+                variant="type"
+                flag={<span>{meta.flag}</span>}
                 title={t(`types.${key}`)}
-                subtitle={t(`typeDescs.${key}`)}
+                subtitle={meta.desc}
+                selected={form.type === key}
                 onClick={() => {
-                  const preset = VISA_PRESETS[key]();
+                  const preset =
+                    key === "SCHENGEN"
+                      ? {
+                          countries: SCHENGEN_COUNTRIES,
+                          totalMaxLen: 90,
+                          rollingPeriodLen: 180,
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        }
+                      : key === "ESTA"
+                      ? {
+                          countries: ["US"],
+                          tripMaxLen: 90,
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        }
+                      : key === "CA_ETA"
+                      ? {
+                          countries: ["CA"],
+                          tripMaxLen: 180,
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        }
+                      : key === "AU_EVISITOR"
+                      ? {
+                          countries: ["AU"],
+                          tripMaxLen: 30,
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        }
+                      : key === "NZETA"
+                      ? {
+                          countries: ["NZ"],
+                          tripMaxLen: 180,
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        }
+                      : {
+                          countries: [],
+                          mustExitBeforeExpiry: true,
+                          includeEntryAndExitDates: true,
+                        };
                   patch({ type: key, ...preset });
                 }}
               />
             );
           })}
-        </Flex>
+        </OptionList>
       </WizardShell>
     );
   }
 
-  /* ── Step 2: Identity ── */
   if (step === 1) {
     return (
       <WizardShell
+        title={t("create")}
         step={1}
         totalSteps={maxSteps}
-        kicker={t("create")}
-        title={t("nameStep")}
-        onBack={handleBack}
-        onNext={() => setStep(2)}
-        nextLabel={t("continue")}
-        nextDisabled={!form.name.trim()}
-        onCancel={handleCancel}
+        stepTitle={t("nameStep")}
+        onClose={() => router.push("/visas")}
+        onBack={() => setStep(0)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(2),
+          enabled: Boolean(form.name.trim()),
+          variant: "primary",
+        }}
       >
-        <Flex variant="column" gap="lg">
-          <Field label={t("name")} required>
+        <Stack gap="lg">
+          <Field label={t("name")}>
             <Input
               value={form.name}
               onChange={(e) => patch({ name: e.target.value })}
               placeholder={t("namePlaceholder")}
             />
           </Field>
-          <Field label={t("number")}>
+          <Field label={t("number")} optional>
             <Input
               value={form.visaNumber}
               onChange={(e) => patch({ visaNumber: e.target.value })}
               placeholder="Optional"
             />
           </Field>
-          <Field label={t("documentNumber")}>
+          <Field label={t("documentNumber")} optional>
             <Input
               value={form.documentNumber}
               onChange={(e) => patch({ documentNumber: e.target.value })}
               placeholder="Optional"
             />
           </Field>
-        </Flex>
+          <FactGrid cols={2}>
+            <Fact label={t("typeQuestion")} value={t(`types.${form.type}`)} />
+            <Fact label={t("countriesStep")} value={form.countries.length || "—"} />
+          </FactGrid>
+        </Stack>
       </WizardShell>
     );
   }
 
-  /* ── Step 3: Countries ── */
-  if (step === 3) {
-    const toggleCountry = (code: string) => {
-      patch({
-        countries: form.countries.includes(code)
-          ? form.countries.filter((c) => c !== code)
-          : [...form.countries, code],
-      });
-    };
-
+  if (step === 2) {
     return (
       <WizardShell
-        step={3}
+        title={t("create")}
+        step={2}
         totalSteps={maxSteps}
-        title={t("countriesStep")}
-        onBack={handleBack}
-        onNext={() => setStep(4)}
-        nextLabel={t("continue")}
-        onCancel={handleCancel}
+        stepTitle={t("countriesStep")}
+        onClose={() => router.push("/visas")}
+        onBack={() => setStep(1)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(3),
+          enabled: form.countries.length > 0,
+          variant: "primary",
+        }}
       >
-        <Flex variant="column" gap="md">
-          <Flex variant="row-center" gap="sm">
-            <Btn
-              variant="outline"
-              size="sm"
-              onClick={() => patch({ countries: SCHENGEN_COUNTRIES })}
-            >
+        <Stack gap="md">
+          <Stack gap="sm" className="flex-row flex-wrap">
+            <Btn variant="outline" size="sm" onClick={() => patch({ countries: SCHENGEN_COUNTRIES })}>
               {t("selectSchengen")}
             </Btn>
-            <Btn
-              variant="ghost"
-              size="sm"
-              onClick={() => patch({ countries: [] })}
-            >
+            <Btn variant="ghost" size="sm" onClick={() => patch({ countries: [] })}>
               {t("clear")}
             </Btn>
-            <Text variant="mono" color="muted" style={{ fontSize: "var(--text-xs)", fontWeight: "bold", marginLeft: "auto" }}>
+            <Text variant="meta" tone="muted" className="ml-auto">
               {form.countries.length} selected
             </Text>
-          </Flex>
+          </Stack>
 
           <Input
             placeholder={t("searchCountry")}
@@ -301,153 +297,168 @@ export default function CreateVisaWizard() {
             onChange={(e) => setCountrySearch(e.target.value)}
           />
 
-          <Box style={{ maxHeight: 360, overflow: "auto" }}>
-            <SelectableGrid>
-              {filteredCountries.map(({ code, label }) => {
-                const { flag, name: cName } = splitCountryLabel(label);
-                return (
-                  <SelectableGrid.Item
-                    key={code}
-                    selected={form.countries.includes(code)}
-                    onClick={() => toggleCountry(code)}
-                    leading={<span style={{ fontSize: 16 }}>{flag}</span>}
-                    label={cName}
-                  />
-                );
-              })}
-            </SelectableGrid>
-          </Box>
-        </Flex>
+          <OptionList maxHeight="none">
+            {filteredCountries.map(({ code, label }) => {
+              const name = COUNTRY_NAMES[code] ?? label;
+              const emoji = COUNTRY_EMOJIS[code] ?? "•";
+              return (
+                <OptionRow
+                  key={code}
+                  flag={<span className="text-lg">{emoji}</span>}
+                  title={name}
+                  subtitle={code}
+                  selected={form.countries.includes(code)}
+                  onClick={() =>
+                    patch({
+                      countries: form.countries.includes(code)
+                        ? form.countries.filter((selected) => selected !== code)
+                        : [...form.countries, code],
+                    })
+                  }
+                />
+              );
+            })}
+          </OptionList>
+        </Stack>
       </WizardShell>
     );
   }
 
-  /* ── Step 4: Validity ── */
   if (step === 3) {
-    const isLastStep = step === maxSteps - 1;
+    const isFinalStep = maxSteps === 4;
     return (
       <WizardShell
+        title={t("create")}
         step={3}
         totalSteps={maxSteps}
-        kicker={t("create")}
-        title={t("validityStep")}
-        onBack={handleBack}
-        onNext={() => (isLastStep ? handleSubmit() : setStep(4))}
-        nextLabel={submitting ? "…" : isLastStep ? t("create") : t("continue")}
-        nextDisabled={!form.validFrom || submitting}
-        onCancel={handleCancel}
+        stepTitle={t("validityStep")}
+        onClose={() => router.push("/visas")}
+        onBack={() => setStep(2)}
+        primary={{
+          label: submitting ? "…" : isFinalStep ? t("create") : t("continue"),
+          onClick: isFinalStep ? handleSubmit : () => setStep(4),
+          enabled: Boolean(form.validFrom) && !submitting,
+          variant: isFinalStep ? "accent" : "primary",
+        }}
       >
-        <Flex variant="column" gap="lg">
-          <Field label={t("validFrom")} required>
-            <Input
-              type="date"
+        <Stack gap="lg">
+          <Field label={t("validFrom")}>
+            <DatePicker
               value={form.validFrom}
-              onChange={(e) => patch({ validFrom: e.target.value })}
+              minDate={asIso(new Date())}
+              onChange={(value) => patch({ validFrom: value })}
             />
           </Field>
-          <Field label={t("expiresOn")} hint={t("expiresHint")}>
-            <Input
-              type="date"
+          <Field label={t("expiresOn")} hint={t("expiresHint")} optional>
+            <DatePicker
               value={form.expires}
-              min={form.validFrom}
-              onChange={(e) => patch({ expires: e.target.value })}
+              minDate={form.validFrom || asIso(new Date())}
+              onChange={(value) => patch({ expires: value })}
             />
           </Field>
-          <CheckableRow
+          <Checkbox
             checked={form.mustExitBeforeExpiry}
-            onChange={() => patch({ mustExitBeforeExpiry: !form.mustExitBeforeExpiry })}
-            label={t("mustLeave")}
-          />
-        </Flex>
+            onChange={(checked) => patch({ mustExitBeforeExpiry: checked })}
+          >
+            <div className="space-y-1">
+              <div className="font-semibold text-fg">{t("mustLeave")}</div>
+              <Text variant="small" tone="muted">
+                Leave selected when the visa expires.
+              </Text>
+            </div>
+          </Checkbox>
+          <Checkbox
+            checked={form.includeEntryAndExitDates}
+            onChange={(checked) => patch({ includeEntryAndExitDates: checked })}
+          >
+            <div className="space-y-1">
+              <div className="font-semibold text-fg">{t("countBothDays")}</div>
+              <Text variant="small" tone="muted">
+                Entry and exit days count toward the limit.
+              </Text>
+            </div>
+          </Checkbox>
+        </Stack>
       </WizardShell>
     );
   }
-
-  /* ── Step 5: Rules ── */
-  const showRolling = form.type === "SCHENGEN" || form.type === "OTHER";
-  const showFixed =
-    form.type === "ESTA" ||
-    form.type === "CA_ETA" ||
-    form.type === "AU_EVISITOR" ||
-    form.type === "NZETA" ||
-    form.type === "OTHER";
 
   return (
     <WizardShell
-      step={5}
+      title={t("create")}
+      step={4}
       totalSteps={maxSteps}
-      title={t("rulesStep")}
-      onBack={handleBack}
-      onNext={handleSubmit}
-      nextLabel={submitting ? "…" : t("create")}
-      nextDisabled={submitting}
-      onCancel={handleCancel}
+      stepTitle={t("rulesStep")}
+      onClose={() => router.push("/visas")}
+      onBack={() => setStep(3)}
+      primary={{
+        label: submitting ? "…" : t("create"),
+        onClick: handleSubmit,
+        enabled: !submitting,
+        variant: "accent",
+      }}
     >
-      <Flex variant="column" gap="lg">
-        {showRolling && (
-          <Grid columns={2} gap="md">
-            <Field label={t("rollingLimit")}>
-              <Input
-                type="number"
-                value={form.totalMaxLen}
-                onChange={(e) =>
-                  patch({ totalMaxLen: e.target.value ? parseInt(e.target.value) : "" })
-                }
-                placeholder="e.g. 90"
-              />
-            </Field>
-            <Field label={t("rollingWindow")}>
-              <Input
-                type="number"
-                value={form.rollingPeriodLen}
-                onChange={(e) =>
-                  patch({ rollingPeriodLen: e.target.value ? parseInt(e.target.value) : "" })
-                }
-                placeholder="e.g. 180"
-              />
-            </Field>
-          </Grid>
-        )}
-        {showFixed && !showRolling && (
-          <Field label={t("totalMax")}>
+      <Stack gap="lg">
+        <AlertBox tone="warn" title={selectedCountries || t(`types.${form.type}`)}>
+          <Text variant="small" tone="muted">
+            Configure the remaining limits for this visa.
+          </Text>
+        </AlertBox>
+
+        <Grid cols={2} gap="md">
+          <Field label={t("rollingLimit")}>
             <Input
               type="number"
               value={form.totalMaxLen}
               onChange={(e) =>
-                patch({ totalMaxLen: e.target.value ? parseInt(e.target.value) : "" })
+                patch({
+                  totalMaxLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                })
               }
               placeholder="e.g. 90"
             />
           </Field>
-        )}
-        <Grid columns={2} gap="md">
-          <Field label={t("maxTrips")}>
+          <Field label={t("rollingWindow")}>
+            <Input
+              type="number"
+              value={form.rollingPeriodLen}
+              onChange={(e) =>
+                patch({
+                  rollingPeriodLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                })
+              }
+              placeholder="e.g. 180"
+            />
+          </Field>
+        </Grid>
+
+        <Grid cols={2} gap="md">
+          <Field label={t("maxTrips")} optional>
             <Input
               type="number"
               value={form.maxNumTrips}
               onChange={(e) =>
-                patch({ maxNumTrips: e.target.value ? parseInt(e.target.value) : "" })
+                patch({
+                  maxNumTrips: e.target.value ? parseInt(e.target.value, 10) : "",
+                })
               }
               placeholder="Optional"
             />
           </Field>
-          <Field label={t("maxDaysPerTrip")}>
+          <Field label={t("maxDaysPerTrip")} optional>
             <Input
               type="number"
               value={form.tripMaxLen}
               onChange={(e) =>
-                patch({ tripMaxLen: e.target.value ? parseInt(e.target.value) : "" })
+                patch({
+                  tripMaxLen: e.target.value ? parseInt(e.target.value, 10) : "",
+                })
               }
               placeholder="Optional"
             />
           </Field>
         </Grid>
-        <CheckableRow
-          checked={form.includeEntryAndExitDates}
-          onChange={() => patch({ includeEntryAndExitDates: !form.includeEntryAndExitDates })}
-          label={t("countBothDays")}
-        />
-      </Flex>
+      </Stack>
     </WizardShell>
   );
 }

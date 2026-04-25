@@ -13,7 +13,12 @@ export interface WizardShellProps extends PropsWithChildren {
   stepTitle: string;
   onClose: () => void;
   onBack?: (() => void) | null;
-  primary: { label: string; onClick: () => void; enabled: boolean };
+  primary: {
+    label: string;
+    onClick: () => void;
+    enabled: boolean;
+    variant?: "primary" | "accent" | "danger";
+  };
 }
 
 export function WizardShell({
@@ -75,7 +80,7 @@ export function WizardShell({
         <Btn variant="ghost" onClick={onClose}>
           Cancel
         </Btn>
-        <Btn variant={primary.label.includes('Create') ? 'accent' : 'primary'} onClick={primary.onClick} disabled={!primary.enabled}>
+        <Btn variant={primary.variant ?? "primary"} onClick={primary.onClick} disabled={!primary.enabled}>
           {primary.label}
           <Icon name="arrow-right" size="sm" />
         </Btn>
