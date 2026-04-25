@@ -5,6 +5,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
     steps:
       - name: Checkout Code

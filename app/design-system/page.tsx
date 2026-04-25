@@ -53,7 +53,9 @@ export default function DesignSystemShowcase() {
   const [wizardStep, setWizardStep] = useState(0);
   const [wizardMode, setWizardMode] = useState(false);
   const [pickedDate, setPickedDate] = useState("");
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [theme, setTheme] = useState<"light" | "dark" | "system">(
+    () => getSavedScheme()
+  );
 
   const chartToday = useMemo(() => new Date(), []);
   const mockPoints = useMemo(() => {
@@ -67,15 +69,10 @@ export default function DesignSystemShowcase() {
     });
   }, [chartToday]);
 
-  // Initialize theme from saved preference
-  useEffect(() => {
-    const saved = getSavedScheme();
-    setTheme(saved === "system" ? "light": saved);
-  }, []);
-
   // Update theme when toggle is clicked
   const handleThemeToggle = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
+    const currentTheme = theme === "system" ? "light" : theme;
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
     saveScheme(newTheme);
     setTheme(newTheme);
   };

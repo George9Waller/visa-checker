@@ -132,25 +132,35 @@ export default function CreateTripWizard({
     });
   }, [search, sortedCountries, suggestedCodes]);
 
-  const filterSuggestions = (items: CountrySuggestion[]) => {
-    const q = search.toLowerCase();
-    return q
-      ? items.filter((item) => {
-          const label = COUNTRY_LABELS[item.code] ?? item.code;
-          return (
-            label.toLowerCase().includes(q) || item.code.toLowerCase().includes(q)
-          );
-        })
-      : items;
-  };
-
   const filteredRecentCountries = useMemo(
-    () => filterSuggestions(countrySuggestions.recent),
+    () => {
+      const q = search.toLowerCase();
+      return q
+        ? countrySuggestions.recent.filter((item) => {
+            const label = COUNTRY_LABELS[item.code] ?? item.code;
+            return (
+              label.toLowerCase().includes(q) ||
+              item.code.toLowerCase().includes(q)
+            );
+          })
+        : countrySuggestions.recent;
+    },
     [countrySuggestions.recent, search]
   );
 
   const filteredPopularCountries = useMemo(
-    () => filterSuggestions(countrySuggestions.popular),
+    () => {
+      const q = search.toLowerCase();
+      return q
+        ? countrySuggestions.popular.filter((item) => {
+            const label = COUNTRY_LABELS[item.code] ?? item.code;
+            return (
+              label.toLowerCase().includes(q) ||
+              item.code.toLowerCase().includes(q)
+            );
+          })
+        : countrySuggestions.popular;
+    },
     [countrySuggestions.popular, search]
   );
 

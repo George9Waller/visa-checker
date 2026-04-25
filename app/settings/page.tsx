@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -16,6 +16,7 @@ import {
   Stack,
   Text,
 } from "@/app/design";
+import { setLocaleCookie } from "@/app/components/locale";
 import {
   type ColorScheme,
   getSavedScheme,
@@ -27,20 +28,20 @@ const LOCALES = [
   { code: "fr", label: "Français" },
 ];
 
+const getInitialLocale = () => {
+  if (typeof document === "undefined") {
+    return "en";
+  }
+  const match = document.cookie.match(/NEXT_LOCALE=([^;]+)/);
+  return match?.[1] ?? "en";
+};
+
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const { data: session } = useSession();
   const router = useRouter();
-  const [scheme, setScheme] = useState<ColorScheme>("system");
-  const [currentLocale, setCurrentLocale] = useState("en");
-
-  useEffect(() => {
-    setScheme(getSavedScheme());
-    const match = document.cookie.match(/NEXT_LOCALE=([^;]+)/);
-    if (match) {
-      setCurrentLocale(match[1]);
-    }
-  }, []);
+  const [scheme, setScheme] = useState<ColorScheme>(() => getSavedScheme());
+  const [currentLocale, setCurrentLocale] = useState(() => getInitialLocale());
 
   const handleScheme = (nextScheme: ColorScheme) => {
     setScheme(nextScheme);
@@ -48,7 +49,7 @@ export default function SettingsPage() {
   };
 
   const handleLocale = (code: string) => {
-    document.cookie = `NEXT_LOCALE=${code};path=/;max-age=31536000`;
+    setLocaleCookie(code);
     setCurrentLocale(code);
     router.refresh();
   };
