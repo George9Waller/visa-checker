@@ -4,6 +4,8 @@ import {
   DashboardHeader,
   EmptyState,
   Grid,
+  FAB,
+  Icon,
   PageContainer,
   Stack,
   StatCard,
@@ -12,6 +14,7 @@ import {
   TripTimelineRow,
 } from "@/app/design";
 import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
+import { ProfileAvatar } from "./components/ProfileAvatar";
 import {
   getDashboardSummary,
   getTripsBefore,
@@ -38,6 +41,34 @@ const formatDateRange = (startDate: string, endDate: string) => {
   })}`;
 };
 
+const formatRollingChange = (today: Date, resetDate?: string | null) => {
+  if (!resetDate) {
+    return "No upcoming change";
+  }
+
+  const todayIso = today.toISOString().split("T")[0];
+  if (resetDate === todayIso) {
+    return "Changes today";
+  }
+
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  if (resetDate === tomorrow.toISOString().split("T")[0]) {
+    return "Changes tomorrow";
+  }
+
+  const diffDays = Math.round(
+    (new Date(`${resetDate}T00:00:00Z`).getTime() -
+      new Date(`${todayIso}T00:00:00Z`).getTime()) /
+      86400000
+  );
+  if (diffDays > 0) {
+    return `Changes in ${diffDays} days`;
+  }
+
+  return `Changes on ${resetDate}`;
+};
+
 export default async function Home() {
   const today = new Date();
   const todayIso = today.toISOString().split("T")[0];
@@ -55,9 +86,12 @@ export default async function Home() {
         date={today}
         weekday={today.toLocaleDateString("en-GB", { weekday: "long" })}
         actions={
-          <Btn as={Link} href="/visas" variant="outline" size="sm">
-            Visas
-          </Btn>
+          <>
+            <Btn as={Link} href="/visas" variant="outline" size="sm">
+              Visas
+            </Btn>
+            <ProfileAvatar />
+          </>
         }
       />
 
@@ -108,7 +142,7 @@ export default async function Home() {
                       : card.kind === "NEXT_EXPIRY"
                         ? (card.params.expiryDate?.toString() ?? "")
                         : card.kind === "ROLLING_WINDOW_USAGE"
-                          ? `Reset ${card.params.resetDate ?? "TBC"}`
+                          ? formatRollingChange(today, card.params.resetDate?.toString())
                           : ""}
                   </Text>
                 </StatCard>
@@ -230,6 +264,25 @@ export default async function Home() {
           ))}
         </Stack>
       </Stack>
+
+      <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+        <FAB
+          actions={[
+            {
+              href: "/trips/create",
+              icon: <Icon name="calendar" size="sm" />,
+              title: "Plan trip",
+              description: "Create an upcoming journey",
+            },
+            {
+              href: "/visas/create",
+              icon: <Icon name="visa-card" size="sm" />,
+              title: "Add visa",
+              description: "Save a visa or permit",
+            },
+          ]}
+        />
+      </div>
     </PageContainer>
   );
 }

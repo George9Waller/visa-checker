@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Box } from "./ui/layout/Box";
+import { Btn } from "@/app/design";
 
 export function ProfileAvatar() {
   const { data: session } = useSession();
@@ -17,27 +17,15 @@ export function ProfileAvatar() {
     : "?";
 
   return (
-    <Box
+    <Btn
       as={Link}
       href="/settings"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 99,
-        fontWeight: 600,
-        width: 36,
-        height: 36,
-        fontSize: 11,
-        fontFamily: "var(--font-body)",
-        backgroundColor: "var(--fg)",
-        color: "var(--bg)",
-        textDecoration: "none",
-        flexShrink: 0,
-      }}
+      variant="primary"
+      size="sm"
+      className="h-10 w-10 justify-center rounded-full px-0"
       aria-label="Settings"
     >
       {initials}
-    </Box>
+    </Btn>
   );
 }

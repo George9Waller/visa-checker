@@ -33,9 +33,14 @@ export default async function VisasPage() {
         weekday={weekday}
         title="Visas"
         actions={
-          <Btn as={Link} href="/visas/create" variant="primary" size="sm">
-            Add visa
-          </Btn>
+          <div className="flex items-center gap-2">
+            <Btn as={Link} href="/" variant="outline" size="sm">
+              Back
+            </Btn>
+            <Btn as={Link} href="/visas/create" variant="primary" size="sm">
+              Add visa
+            </Btn>
+          </div>
         }
       />
 

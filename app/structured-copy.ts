@@ -122,8 +122,8 @@ export const copyForAlert = (alert: StructuredAlert) => {
       };
     case AlertKind.ROLLING_WINDOW_RESETS_SOON:
       return {
-        title: `${visaLabel} rolling window resets soon`,
-        detail: `Reset date ${alert.params.nextResetDate}.`,
+        title: `${visaLabel} rolling window changes soon`,
+        detail: `One counted day drops out of the rolling window on ${alert.params.nextResetDate}.`,
       };
     case AlertKind.VISA_VALID_SOON:
       return {

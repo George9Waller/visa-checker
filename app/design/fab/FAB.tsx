@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { cn } from "../cn";
 import { Icon } from "../primitives/Icon";
 
@@ -8,7 +9,8 @@ export interface FABAction {
   icon: React.ReactNode;
   title: string;
   description: string;
-  onClick: () => void;
+  onClick?: () => void;
+  href?: string;
 }
 
 export interface FABProps {
@@ -40,20 +42,43 @@ export function FAB({ actions }: FABProps) {
             </span>
           </div>
           {actions.map((action, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setOpen(false);
-                action.onClick();
-              }}
-              className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-bg-sunken last:border-b-0"
-            >
-              <div className="text-lg flex-shrink-0">{action.icon}</div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-md text-fg">{action.title}</div>
-                <div className="text-xs text-fg-muted mt-0.5">{action.description}</div>
-              </div>
-            </button>
+            action.href ? (
+              <Link
+                key={i}
+                href={action.href}
+                onClick={() => setOpen(false)}
+                className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-bg-sunken last:border-b-0"
+              >
+                <div className="text-lg flex-shrink-0">{action.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-md text-fg">
+                    {action.title}
+                  </div>
+                  <div className="mt-0.5 text-xs text-fg-muted">
+                    {action.description}
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <button
+                key={i}
+                onClick={() => {
+                  setOpen(false);
+                  action.onClick?.();
+                }}
+                className="flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-bg-sunken last:border-b-0"
+              >
+                <div className="text-lg flex-shrink-0">{action.icon}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-md text-fg">
+                    {action.title}
+                  </div>
+                  <div className="mt-0.5 text-xs text-fg-muted">
+                    {action.description}
+                  </div>
+                </div>
+              </button>
+            )
           ))}
         </div>
       )}
