@@ -1,338 +1,569 @@
 "use client";
 
-import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import {
   SCHENGEN_COUNTRIES,
   VISA_TYPE,
-  VISA_TYPES_DISPLAY_MAP,
+  VISA_TYPE_META,
+  VisaTypeKey,
 } from "../constants";
-import { convertDateToString } from "@/app/utils";
-import { COUNTRY_LABELS } from "@/app/constants";
-import CountryModel from "@/app/components/CountryModel";
-import { createVisa } from "../server-actions";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { createVisa, updateVisa } from "../server-actions";
+import {
+  COUNTRY_EMOJIS,
+  getCountryLabel,
+  getCountryLabels,
+  getCountryName,
+} from "@/app/constants";
+import {
+  AlertBox,
+  Btn,
+  Checkbox,
+  DatePicker,
+  Field,
+  Grid,
+  Input,
+  OptionList,
+  OptionRow,
+  Stack,
+  Text,
+  WizardShell,
+  Fact,
+  FactGrid,
+} from "@/app/design";
 
-export default function Home() {
+type FormData = {
+  type: VisaTypeKey;
+  name: string;
+  visaNumber: string;
+  documentNumber: string;
+  countries: string[];
+  validFrom: string;
+  expires: string;
+  mustExitBeforeExpiry: boolean;
+  includeEntryAndExitDates: boolean;
+  totalMaxLen: number | "";
+  rollingPeriodLen: number | "";
+  maxNumTrips: number | "";
+  tripMaxLen: number | "";
+};
+
+type VisaDraft = {
+  id: string;
+  type: VisaTypeKey;
+  name: string;
+  visaNumber: string;
+  documentNumber: string;
+  countries: string[];
+  validFrom: string;
+  expires: string;
+  mustExitBeforeExpiry: boolean;
+  includeEntryAndExitDates: boolean;
+  totalMaxLen: number | "";
+  rollingPeriodLen: number | "";
+  maxNumTrips: number | "";
+  tripMaxLen: number | "";
+};
+
+const INITIAL: FormData = {
+  type: "OTHER",
+  name: "",
+  visaNumber: "",
+  documentNumber: "",
+  countries: [],
+  validFrom: "",
+  expires: "",
+  mustExitBeforeExpiry: true,
+  includeEntryAndExitDates: true,
+  totalMaxLen: "",
+  rollingPeriodLen: "",
+  maxNumTrips: "",
+  tripMaxLen: "",
+};
+
+const totalSteps = (type: VisaTypeKey) => (type === "OTHER" ? 5 : 4);
+
+const asIso = (date: Date) => date.toISOString().split("T")[0];
+
+const formFromDraft = (draft?: VisaDraft | null): FormData =>
+  draft
+    ? {
+        type: draft.type,
+        name: draft.name,
+        visaNumber: draft.visaNumber,
+        documentNumber: draft.documentNumber,
+        countries: draft.countries,
+        validFrom: draft.validFrom,
+        expires: draft.expires,
+        mustExitBeforeExpiry: draft.mustExitBeforeExpiry,
+        includeEntryAndExitDates: draft.includeEntryAndExitDates,
+        totalMaxLen: draft.totalMaxLen,
+        rollingPeriodLen: draft.rollingPeriodLen,
+        maxNumTrips: draft.maxNumTrips,
+        tripMaxLen: draft.tripMaxLen,
+      }
+    : INITIAL;
+
+interface CreateVisaWizardProps {
+  title?: string;
+  mode?: "create" | "edit";
+  cancelHref?: string;
+  submitHref?: string;
+  initialVisa?: VisaDraft | null;
+  lockedType?: VisaTypeKey | null;
+  renewedFromId?: string | null;
+  redirectToCreatedVisa?: boolean;
+}
+
+export default function CreateVisaWizard({
+  title,
+  mode = "create",
+  cancelHref = "/visas",
+  submitHref = "/visas",
+  initialVisa = null,
+  lockedType = null,
+  renewedFromId = null,
+  redirectToCreatedVisa = false,
+}: CreateVisaWizardProps = {}) {
+  const t = useTranslations("visa");
+  const locale = useLocale();
   const router = useRouter();
-  const [countries, setCountries] = useState<string[]>([]);
-  const [maxNumTrips, setMaxNumTrips] = useState<number | "">("");
-  const [tripMaxLen, setTripMaxLen] = useState<number | "">("");
-  const [totalMaxLen, setTotalMaxLen] = useState<number | "">("");
-  const [rollingPeriodLen, setRollingPeriodLen] = useState<number | "">("");
-  const [mustExitBeforeExpiry, setMustExitBeforeExpiry] = useState(false);
-  const [includeEntryAndExitDates, setIncludeEntryAndExitDates] =
-    useState(false);
+  const [step, setStep] = useState(lockedType ? 1 : 0);
+  const [form, setForm] = useState<FormData>(() => formFromDraft(initialVisa));
+  const [countrySearch, setCountrySearch] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const getIntOrUndefined = (value: number | "") =>
-    value === "" ? undefined : value;
+  const maxSteps = totalSteps(form.type);
+  const displayedStep = lockedType ? Math.max(step - 1, 0) : step;
+  const displayedTotalSteps = lockedType ? maxSteps - 1 : maxSteps;
+  const shellTitle = title ?? (mode === "edit" ? t("edit") : t("create"));
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const patch = (update: Partial<FormData>) =>
+    setForm((current) => ({ ...current, ...update }));
 
-    createVisa(
-      formData.get("name") as string,
-      formData.get("type") as string,
-      formData.get("validFrom") as string,
-      countries,
-      getIntOrUndefined(maxNumTrips),
-      getIntOrUndefined(tripMaxLen),
-      getIntOrUndefined(totalMaxLen),
-      getIntOrUndefined(rollingPeriodLen),
-      (formData.get("expires") as string) || undefined,
-      mustExitBeforeExpiry,
-      includeEntryAndExitDates,
-      (formData.get("visaNumber") as string) || undefined,
-      (formData.get("documentNumber") as string) || undefined
-    )
-      .then(() => router.push("/visas"))
-      .catch((error) => toast.error(`Error creating visa: ${error}`));
-  };
+  const sortedCountries = useMemo(
+    () =>
+      Object.keys(getCountryLabels(locale))
+        .map((code) => ({ code, label: getCountryLabel(code, locale) }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [locale]
+  );
 
-  const typeOnChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    switch (event.currentTarget.value) {
-      case VISA_TYPE.SCHENGEN:
-        setCountries(SCHENGEN_COUNTRIES);
-        setMaxNumTrips("");
-        setTripMaxLen("");
-        setTotalMaxLen(90);
-        setRollingPeriodLen(180);
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
-      case VISA_TYPE.ESTA:
-        setCountries(["US"]);
-        setMaxNumTrips("");
-        setTripMaxLen(90);
-        setTotalMaxLen("");
-        setRollingPeriodLen("");
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
-      case VISA_TYPE.CA_ETA:
-        setCountries(["CA"]);
-        setMaxNumTrips("");
-        setTripMaxLen(180);
-        setTotalMaxLen("");
-        setRollingPeriodLen("");
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
-      case VISA_TYPE.AU_EVISITOR:
-        setCountries(["AU"]);
-        setMaxNumTrips("");
-        setTripMaxLen(30);
-        setTotalMaxLen("");
-        setRollingPeriodLen("");
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
-      case VISA_TYPE.NZETA:
-        setCountries(["NZ"]);
-        setMaxNumTrips("");
-        setTripMaxLen(180);
-        setTotalMaxLen("");
-        setRollingPeriodLen("");
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
-      default:
-        setCountries([]);
-        setMaxNumTrips("");
-        setTripMaxLen("");
-        setTotalMaxLen("");
-        setRollingPeriodLen("");
-        setMustExitBeforeExpiry(true);
-        setIncludeEntryAndExitDates(true);
-        break;
+  const filteredCountries = useMemo(() => {
+    const q = countrySearch.toLowerCase();
+    return q
+      ? sortedCountries.filter(
+          (item) =>
+            item.label.toLowerCase().includes(q) ||
+            item.code.toLowerCase().includes(q)
+        )
+      : sortedCountries;
+  }, [countrySearch, sortedCountries]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const payload = [
+        form.name,
+        form.type,
+        form.validFrom,
+        form.countries,
+        form.maxNumTrips === "" ? undefined : form.maxNumTrips,
+        form.tripMaxLen === "" ? undefined : form.tripMaxLen,
+        form.totalMaxLen === "" ? undefined : form.totalMaxLen,
+        form.rollingPeriodLen === "" ? undefined : form.rollingPeriodLen,
+        form.expires || undefined,
+        form.mustExitBeforeExpiry,
+        form.includeEntryAndExitDates,
+        form.visaNumber || undefined,
+        form.documentNumber || undefined,
+      ] as const;
+
+      if (mode === "edit" && initialVisa) {
+        await updateVisa(initialVisa.id, ...payload);
+      } else {
+        const visa = await createVisa(...payload, renewedFromId || undefined);
+        if (redirectToCreatedVisa && visa?.id) {
+          router.push(`/visas/${visa.id}`);
+          return;
+        }
+      }
+      router.push(submitHref);
+    } catch (error) {
+      toast.error(t("errorSavingVisa", { error: String(error) }));
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  return (
-    <>
-      <form
-        className="card bg-base-100 p-6 w-full flex flex-col gap-4"
-        onSubmit={onSubmit}
+  const selectedCountries = form.countries
+    .map((code) => getCountryName(code, locale))
+    .join(" · ");
+
+  if (step === 0) {
+    return (
+      <WizardShell
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
+        stepTitle={t("typeQuestion")}
+        onClose={() => router.push(cancelHref)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(1),
+          enabled: Boolean(form.type),
+          variant: "primary",
+        }}
       >
-        <div className="flex items-center">
-          <h1 className="text-lg flex-1">Create visa</h1>
-          <div className="flex-0 flex flex-row gap-2">
-            <Link href={"/visas"} className="btn btn-square flex-0">
-              x
-            </Link>
-          </div>
-        </div>
-        <hr />
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Name</span>
-          </div>
-          <input
-            name="name"
-            type="text"
-            required
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Visa number (optional)</span>
-          </div>
-          <input
-            name="visaNumber"
-            type="text"
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Document number (optional)</span>
-          </div>
-          <input
-            name="documentNumber"
-            type="text"
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Type</span>
-          </div>
-          <select
-            name="type"
-            className="input input-bordered w-full max-w-xs"
-            onChange={typeOnChange}
-            required
-          >
-            <option value={undefined}>Select Type</option>
-            {Object.keys(VISA_TYPES_DISPLAY_MAP).map((key) => (
-              <option key={key} value={key}>
-                {VISA_TYPES_DISPLAY_MAP[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Countries</span>
-            <button
-              className="btn btn-xs"
-              onClick={(e) => {
-                e.preventDefault();
-                (
-                  document.getElementById(
-                    "countries_modal"
-                  ) as HTMLDialogElement | null
-                )?.showModal();
-              }}
+        <Stack gap="lg">
+          <AlertBox tone="warn" title={t("chooseVisaTemplate")}>
+            <Text variant="small" tone="muted">
+              {t("chooseVisaTemplateHint")}
+            </Text>
+          </AlertBox>
+          <OptionList maxHeight="46vh" className="overscroll-contain">
+            {(Object.keys(VISA_TYPE) as VisaTypeKey[]).map((key) => {
+              const meta = VISA_TYPE_META[key];
+              return (
+                <OptionRow
+                  key={key}
+                  variant="type"
+                  flag={<span>{meta.flag}</span>}
+                  title={t(`types.${key}`)}
+                  subtitle={t(`typeDescs.${key}`)}
+                  selected={form.type === key}
+                  onClick={() => {
+                    const preset =
+                      key === "SCHENGEN"
+                        ? {
+                            countries: SCHENGEN_COUNTRIES,
+                            totalMaxLen: 90,
+                            rollingPeriodLen: 180,
+                            mustExitBeforeExpiry: true,
+                            includeEntryAndExitDates: true,
+                          }
+                        : key === "ESTA"
+                          ? {
+                              countries: ["US"],
+                              tripMaxLen: 90,
+                              mustExitBeforeExpiry: false,
+                              includeEntryAndExitDates: true,
+                            }
+                          : key === "CA_ETA"
+                            ? {
+                                countries: ["CA"],
+                                tripMaxLen: 180,
+                                mustExitBeforeExpiry: true,
+                                includeEntryAndExitDates: true,
+                              }
+                            : key === "AU_EVISITOR"
+                              ? {
+                                  countries: ["AU"],
+                                  tripMaxLen: 30,
+                                  mustExitBeforeExpiry: true,
+                                  includeEntryAndExitDates: true,
+                                }
+                              : key === "NZETA"
+                                ? {
+                                    countries: ["NZ"],
+                                    tripMaxLen: 180,
+                                    mustExitBeforeExpiry: true,
+                                    includeEntryAndExitDates: true,
+                                  }
+                                : {
+                                    countries: [],
+                                    mustExitBeforeExpiry: true,
+                                    includeEntryAndExitDates: true,
+                                  };
+                    patch({ type: key, ...preset });
+                  }}
+                />
+              );
+            })}
+          </OptionList>
+        </Stack>
+      </WizardShell>
+    );
+  }
+
+  if (step === 1) {
+    return (
+      <WizardShell
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
+        stepTitle={t("nameStep")}
+        onClose={() => router.push(cancelHref)}
+        onBack={lockedType ? null : () => setStep(0)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(2),
+          enabled: Boolean(form.name.trim()),
+          variant: "primary",
+        }}
+      >
+        <Stack gap="lg">
+          <Field label={t("name")}>
+            <Input
+              value={form.name}
+              onChange={(e) => patch({ name: e.target.value })}
+              placeholder={t("namePlaceholder")}
+            />
+          </Field>
+          <Field label={t("number")} optional>
+            <Input
+              value={form.visaNumber}
+              onChange={(e) => patch({ visaNumber: e.target.value })}
+              placeholder={t("optional")}
+            />
+          </Field>
+          <Field label={t("documentNumber")} optional>
+            <Input
+              value={form.documentNumber}
+              onChange={(e) => patch({ documentNumber: e.target.value })}
+              placeholder={t("optional")}
+            />
+          </Field>
+          <FactGrid cols={2}>
+            <Fact label={t("typeQuestion")} value={t(`types.${form.type}`)} />
+            <Fact
+              label={t("countriesStep")}
+              value={form.countries.length || "—"}
+            />
+          </FactGrid>
+        </Stack>
+      </WizardShell>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <WizardShell
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
+        stepTitle={t("countriesStep")}
+        onClose={() => router.push(cancelHref)}
+        onBack={() => setStep(1)}
+        primary={{
+          label: t("continue"),
+          onClick: () => setStep(3),
+          enabled: form.countries.length > 0,
+          variant: "primary",
+        }}
+      >
+        <Stack gap="lg">
+          <Stack gap="sm" className="flex-row flex-wrap items-center">
+            <Btn
+              variant="outline"
+              size="sm"
+              onClick={() => patch({ countries: SCHENGEN_COUNTRIES })}
             >
-              Select
-            </button>
-          </div>
-          <div className="flex flex-col gap-2">
-            {countries
-              .sort((a, b) => (a > b ? 1 : -1))
-              .map((countryCode) => (
-                <p key={countryCode}>{COUNTRY_LABELS[countryCode]}</p>
-              ))}
-          </div>
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">Valid from</span>
-          </div>
-          <input
-            name="validFrom"
-            type="date"
-            className="input input-bordered w-full max-w-xs"
-            required
-            defaultValue={convertDateToString(new Date())}
+              {t("selectSchengen")}
+            </Btn>
+            <Btn
+              variant="ghost"
+              size="sm"
+              onClick={() => patch({ countries: [] })}
+            >
+              {t("clear")}
+            </Btn>
+            <Text variant="meta" tone="muted" className="ml-auto">
+              {t("selectedCount", { count: form.countries.length })}
+            </Text>
+          </Stack>
+
+          <Input
+            placeholder={t("searchCountry")}
+            value={countrySearch}
+            onChange={(e) => setCountrySearch(e.target.value)}
           />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa have an expiry, if so when is it?
-            </span>
-          </div>
-          <input
-            name="expires"
-            type="date"
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa have a maximum number of trips you can take, if so
-              how many?
-            </span>
-          </div>
-          <input
-            name="maxNumTrips"
-            type="number"
-            value={maxNumTrips}
-            onChange={(e) =>
-              setMaxNumTrips(
-                e.target.value ? parseInt(e.currentTarget.value) : ""
-              )
-            }
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa have a maximum number of days any single trip can
-              be, if so how many?
-            </span>
-          </div>
-          <input
-            name="tripMaxLen"
-            type="number"
-            value={tripMaxLen}
-            onChange={(e) =>
-              setTripMaxLen(
-                e.target.value ? parseInt(e.currentTarget.value) : ""
-              )
-            }
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa have a total maximum number of days (e.g. 90), if
-              so how many?
-            </span>
-          </div>
-          <input
-            name="totalMaxLen"
-            type="number"
-            value={totalMaxLen}
-            onChange={(e) =>
-              setTotalMaxLen(
-                e.target.value ? parseInt(e.currentTarget.value) : ""
-              )
-            }
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa have a rolling period (e.g. in the last 180 days),
-              if so what is it?
-            </span>
-          </div>
-          <input
-            name="rollingPeriodLen"
-            type="number"
-            value={rollingPeriodLen}
-            onChange={(e) =>
-              setRollingPeriodLen(
-                e.target.value ? parseInt(e.currentTarget.value) : ""
-              )
-            }
-            className="input input-bordered w-full max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa require you to exit the country before it expires?
-            </span>
-          </div>
-          <input
-            name="mustExitBeforeExpiry"
-            type="checkbox"
-            checked={mustExitBeforeExpiry}
-            onChange={(e) => setMustExitBeforeExpiry(e.target.checked)}
-            className="checkbox input-bordered max-w-xs"
-          />
-        </label>
-        <label className="form-control w-full max-w-xs">
-          <div className="label">
-            <span className="label-text">
-              Does this visa include both the entry and exit date when counting
-              the number of days?
-            </span>
-          </div>
-          <input
-            name="includeEntryAndExitDates"
-            type="checkbox"
-            checked={includeEntryAndExitDates}
-            onChange={(e) => setIncludeEntryAndExitDates(e.target.checked)}
-            className="checkbox input-bordered max-w-xs"
-          />
-        </label>
-        <button type="submit" className="btn btn-primary w-fit">
-          Create
-        </button>
-      </form>
-      <CountryModel countries={countries} setCountries={setCountries} />
-    </>
+
+          <OptionList maxHeight="56vh" className="overscroll-contain">
+            {filteredCountries.map(({ code, label }) => {
+              const name = getCountryName(code, locale) ?? label;
+              const emoji = COUNTRY_EMOJIS[code] ?? "•";
+              return (
+                <OptionRow
+                  key={code}
+                  flag={<span className="text-lg">{emoji}</span>}
+                  title={name}
+                  subtitle={code}
+                  selected={form.countries.includes(code)}
+                  onClick={() =>
+                    patch({
+                      countries: form.countries.includes(code)
+                        ? form.countries.filter((selected) => selected !== code)
+                        : [...form.countries, code],
+                    })
+                  }
+                />
+              );
+            })}
+          </OptionList>
+        </Stack>
+      </WizardShell>
+    );
+  }
+
+  if (step === 3) {
+    const isFinalStep = maxSteps === 4;
+    return (
+      <WizardShell
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
+        stepTitle={t("validityStep")}
+        onClose={() => router.push(cancelHref)}
+        onBack={() => setStep(2)}
+        primary={{
+          label: submitting
+            ? "…"
+            : isFinalStep
+              ? mode === "edit"
+                ? t("save")
+                : t("create")
+              : t("continue"),
+          onClick: isFinalStep ? handleSubmit : () => setStep(4),
+          enabled: Boolean(form.validFrom) && !submitting,
+          variant: isFinalStep ? "accent" : "primary",
+        }}
+      >
+        <Stack gap="lg">
+          <AlertBox tone="ok" title={form.name || t(`types.${form.type}`)}>
+            <Text variant="small" tone="muted">
+              {t("validityHint")}
+            </Text>
+          </AlertBox>
+          <Field label={t("validFrom")}>
+            <DatePicker
+              value={form.validFrom}
+              onChange={(value) => patch({ validFrom: value })}
+            />
+          </Field>
+          <Field label={t("expiresOn")} hint={t("expiresHint")} optional>
+            <DatePicker
+              value={form.expires}
+              minDate={form.validFrom || asIso(new Date())}
+              onChange={(value) => patch({ expires: value })}
+            />
+          </Field>
+          <Checkbox
+            checked={form.mustExitBeforeExpiry}
+            onChange={(checked) => patch({ mustExitBeforeExpiry: checked })}
+          >
+            <div className="space-y-1">
+              <div className="font-semibold text-fg">{t("mustLeave")}</div>
+              <Text variant="small" tone="muted">
+                {t("mustLeaveHint")}
+              </Text>
+            </div>
+          </Checkbox>
+          <Checkbox
+            checked={form.includeEntryAndExitDates}
+            onChange={(checked) => patch({ includeEntryAndExitDates: checked })}
+          >
+            <div className="space-y-1">
+              <div className="font-semibold text-fg">{t("countBothDays")}</div>
+              <Text variant="small" tone="muted">
+                {t("countBothDaysHint")}
+              </Text>
+            </div>
+          </Checkbox>
+        </Stack>
+      </WizardShell>
+    );
+  }
+
+  return (
+    <WizardShell
+      title={shellTitle}
+      step={displayedStep}
+      totalSteps={displayedTotalSteps}
+      stepTitle={t("rulesStep")}
+      onClose={() => router.push(cancelHref)}
+      onBack={() => setStep(3)}
+      primary={{
+        label: submitting ? "…" : mode === "edit" ? t("save") : t("create"),
+        onClick: handleSubmit,
+        enabled: !submitting,
+        variant: "accent",
+      }}
+    >
+      <Stack gap="lg">
+        <AlertBox
+          tone="warn"
+          title={selectedCountries || t(`types.${form.type}`)}
+        >
+          <Text variant="small" tone="muted">
+            {t("limitsHint")}
+          </Text>
+        </AlertBox>
+
+        <Grid cols={2} gap="md">
+          <Field label={t("rollingLimit")}>
+            <Input
+              type="number"
+              value={form.totalMaxLen}
+              onChange={(e) =>
+                patch({
+                  totalMaxLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
+                })
+              }
+              placeholder={t("exampleDays", { count: 90 })}
+            />
+          </Field>
+          <Field label={t("rollingWindow")}>
+            <Input
+              type="number"
+              value={form.rollingPeriodLen}
+              onChange={(e) =>
+                patch({
+                  rollingPeriodLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
+                })
+              }
+              placeholder={t("exampleDays", { count: 180 })}
+            />
+          </Field>
+        </Grid>
+
+        <Grid cols={2} gap="md">
+          <Field label={t("maxTrips")} optional>
+            <Input
+              type="number"
+              value={form.maxNumTrips}
+              onChange={(e) =>
+                patch({
+                  maxNumTrips: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
+                })
+              }
+              placeholder={t("optional")}
+            />
+          </Field>
+          <Field label={t("maxDaysPerTrip")} optional>
+            <Input
+              type="number"
+              value={form.tripMaxLen}
+              onChange={(e) =>
+                patch({
+                  tripMaxLen: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : "",
+                })
+              }
+              placeholder={t("optional")}
+            />
+          </Field>
+        </Grid>
+      </Stack>
+    </WizardShell>
   );
 }

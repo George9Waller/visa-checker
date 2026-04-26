@@ -1,53 +1,49 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import NextAuthProvider from "./context/NextAuthProvider";
-import SignOut from "./components/SignOut";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Suspense } from "react";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { getLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { AppShell } from "./design";
+import { APP_NAME } from "./constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Visa checker",
+  title: APP_NAME,
   description:
     "Helps track your time abroad so you can remain legal and compliant",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
-      <body className={inter.className + " min-h-screen"}>
-        <NextAuthProvider>
-          <div className="navbar bg-base-100">
-            <div className="flex-1">
-              <Link href="/" className="btn btn-ghost text-xl">
-                Visa checker
-              </Link>
-            </div>
-            <div className="flex-none flex flex-row gap-2">
-              <Link href="/" className="btn btn-accent">
-                Calendar
-              </Link>
-              <Link href="/visas" className="btn btn-primary">
-                Visas
-              </Link>
-              <SignOut />
-            </div>
-          </div>
-          <Suspense>
-            <main className="flex flex-col items-center justify-between py-12 max-w-screen-lg mx-auto">
-              {children}
-            </main>
-          </Suspense>
-        </NextAuthProvider>
-        <ToastContainer />
+    <html lang={locale}>
+      <body className={inter.className}>
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <NextAuthProvider>
+            <ThemeProvider />
+            <AppShell theme="system">
+              <main>{children}</main>
+            </AppShell>
+          </NextAuthProvider>
+        </NextIntlClientProvider>
+        <ToastContainer
+          toastStyle={{
+            backgroundColor: "var(--bg-raised)",
+            color: "var(--fg)",
+            border: "1px solid var(--border)",
+          }}
+        />
       </body>
     </html>
   );

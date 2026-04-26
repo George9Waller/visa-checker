@@ -1,0 +1,50 @@
+import CreateVisaWizard from "@/app/visas/create/page";
+import { getVisaDetailSummary } from "../../server-actions";
+import { VisaTypeKey } from "../../constants";
+import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
+
+export default async function RenewVisaPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const locale = await getLocale();
+  const t = await getTranslations("visa");
+  const summary = await getVisaDetailSummary(id);
+
+  if (!summary) {
+    redirect({ href: "/visas", locale });
+    throw new Error("Unreachable");
+  }
+
+  return (
+    <CreateVisaWizard
+      title={t("renew")}
+      mode="create"
+      cancelHref={`/visas/${id}`}
+      submitHref="/visas"
+      redirectToCreatedVisa
+      lockedType={summary.visa.type as VisaTypeKey}
+      renewedFromId={summary.visa.id}
+      initialVisa={{
+        id: summary.visa.id,
+        type: summary.visa.type as VisaTypeKey,
+        name: summary.visa.name,
+        visaNumber: "",
+        documentNumber: "",
+        countries: summary.visa.countries,
+        validFrom: "",
+        expires: "",
+        mustExitBeforeExpiry: summary.visa.mustExitBeforeExpiry,
+        includeEntryAndExitDates: summary.visa.includeEntryAndExitDates,
+        totalMaxLen: summary.visa.totalMaxLen ?? "",
+        rollingPeriodLen: summary.visa.rollingPeriodLen ?? "",
+        maxNumTrips: summary.visa.maxNumTrips ?? "",
+        tripMaxLen: summary.visa.tripMaxLen ?? "",
+      }}
+    />
+  );
+}

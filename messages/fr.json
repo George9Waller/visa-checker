@@ -1,0 +1,448 @@
+{
+  "nav": {
+    "trips": "Voyages",
+    "visas": "Visas",
+    "atlas": "Atlas"
+  },
+  "common": {
+    "back": "Retour",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "optional": "Facultatif",
+    "pickDate": "Choisir une date",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "today": "Aujourd'hui",
+    "clear": "Effacer",
+    "currentlyIn": "Actuellement en",
+    "live": "En direct",
+    "visaPrefix": "Visa",
+    "day": "{count, plural, one {Jour} other {Jours}}",
+    "countryCount": "{count, plural, one {# pays} other {# pays}}",
+    "dayCount": "{count, plural, one {# jour} other {# jours}}",
+    "tripCount": "{count, plural, one {# voyage} other {# voyages}}",
+    "daysUsedInWindow": "{used} / {limit} jours utilisés sur les {window} derniers jours",
+    "yes": "Oui",
+    "no": "Non",
+    "review": "Examiner",
+    "saving": "Enregistrement",
+    "moreWarnings": "{count, plural, one {# avertissement de plus} other {# avertissements de plus}}"
+  },
+  "signin": {
+    "established": "ÉTABLI · {year}",
+    "kicker": "— UN CARNET DE TERRAIN POUR",
+    "headlinePart1": "Les visas,",
+    "headlinePart2": "suivi",
+    "headlinePart3": "avec élégance.",
+    "body": "Enregistrez chaque voyage, suivez vos jours, et n'oubliez jamais si vous avez dépassé votre quota.",
+    "promiseTrips": "Voyages",
+    "promiseTripsLabel": "Enregistrés.",
+    "promiseDays": "Jours",
+    "promiseDaysLabel": "Comptés.",
+    "promiseVisas": "Visas",
+    "promiseVisasLabel": "Suivis.",
+    "howItWorksTitle": "— COMMENT ÇA MARCHE",
+    "howItWorksCount": "3 ÉTAPES",
+    "step1Title": "Ajoutez vos visas",
+    "step1Desc": "Schengen, entrée unique, résidence — choisissez un type, définissez les règles une fois.",
+    "step2Title": "Enregistrez chaque voyage",
+    "step2Desc": "Pays, dates, une note. Passé ou futur, tout est registré.",
+    "step3Title": "Lisez les calculs",
+    "step3Desc": "Comptages, fenêtres glissantes, alertes d'expiration — tout discrètement.",
+    "signInWith": "Se connecter avec {provider}",
+    "disclaimerLabel": "Avertissement",
+    "disclaimer": "Cette application aide à suivre vos données de voyage, mais ne remplace pas un conseil officiel en immigration.",
+    "devSignIn": "Se connecter en tant qu'utilisateur dev"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "appearance": "Apparence",
+    "language": "Langue",
+    "signOut": "Se déconnecter",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Auto",
+    "account": "Compte",
+    "initials": "Initiales",
+    "email": "E-mail",
+    "signedInAs": "Connecté en tant que {name}",
+    "project": "Projet",
+    "locales": {
+      "en": "English",
+      "fr": "Français"
+    }
+  },
+  "fab": {
+    "newEntry": "Nouvelle entrée",
+    "trip": "Voyage",
+    "tripDesc": "Enregistrer un voyage",
+    "visa": "Visa",
+    "visaDesc": "Ajouter un visa ou permis"
+  },
+  "dashboard": {
+    "title": "Voyages",
+    "upcoming": "À venir",
+    "past": "Passés",
+    "beginning": "Début des voyages",
+    "noMore": "Pas d'autres voyages",
+    "noTrips": "Aucun voyage",
+    "addFirst": "Ajouter votre premier voyage",
+    "currentlyIn": "Actuellement en",
+    "live": "En direct",
+    "dayOf": "Jour {day}",
+    "daysToGo": "{days} jours restants",
+    "nextTrip": "Prochain voyage",
+    "addTrip": "Voyage",
+    "addTripDescription": "Planifier ou enregistrer un voyage"
+  },
+  "trip": {
+    "create": "Nouveau voyage",
+    "edit": "Modifier le voyage",
+    "destination": "Où allez-vous ?",
+    "chooseDestination": "Choisissez une destination",
+    "destinationHintSelected": "Vous pouvez affiner les détails du voyage une fois la destination sélectionnée.",
+    "destinationHintUnselected": "Choisissez un pays suggéré ou recherchez dans la liste complète ci-dessous.",
+    "recentlyVisited": "Récemment visités",
+    "recentTripsHint": "Pays de vos derniers voyages terminés.",
+    "mostVisited": "Les plus visités",
+    "mostVisitedHint": "Pays vers lesquels vous voyagez le plus souvent.",
+    "details": "Détails du voyage",
+    "visa": "Visa",
+    "currentlyIn": "Actuellement en",
+    "pastTrip": "Voyage passé",
+    "upcoming": "À venir",
+    "name": "Nom du voyage",
+    "namePlaceholder": "ex. Vacances d'été",
+    "startDate": "Date de départ",
+    "endDate": "Date de retour",
+    "length": "Durée",
+    "lengthValue": "{count, plural, one {# jour} other {# jours}}",
+    "days": "jours",
+    "visaStatus": "Statut du visa",
+    "requiresVisa": "Ce voyage nécessite un visa",
+    "requiresVisaHint": "Sélectionner le visa couvrant ce voyage",
+    "selectedVisa": "Visa sélectionné",
+    "visaOptions": "Options de visa",
+    "createVisaBeforeTravel": "Créez un visa pour ce pays avant de voyager.",
+    "noVisas": "Aucun visa correspondant",
+    "searchCountry": "Rechercher un pays…",
+    "step1": "Destination",
+    "step2": "Dates et nom",
+    "step3": "Visa",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "save": "Enregistrer",
+    "delete": "Supprimer le voyage",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce voyage ?",
+    "from": "Du",
+    "to": "Au",
+    "country": "Pays",
+    "visaFree": "Pas de visa requis",
+    "tripCovered": "Voyage couvert",
+    "tripCoveredByVisa": "{visaName} couvre ce voyage.",
+    "noVisaRequired": "Aucun visa requis pour ce voyage.",
+    "visaCurrentlyValid": "Ce visa est actuellement valide pour le voyage.",
+    "noVisaLinked": "Aucun visa lié",
+    "validForTrip": "Valide pour ce voyage",
+    "needsReview": "À vérifier",
+    "saving": "Enregistrement",
+    "moreIssues": "{count, plural, one {# problème de plus} other {# problèmes de plus}}",
+    "errorLoadingVisaOptions": "Erreur lors du chargement des options de visa : {error}",
+    "errorSavingTrip": "Erreur lors de l'enregistrement du voyage : {error}",
+    "visitedToday": "Visité aujourd'hui",
+    "visitedYesterday": "Visité hier",
+    "visitedDaysAgo": "Visité il y a {days} jours",
+    "frequentlyVisited": "Fréquemment visité",
+    "visitedTimes": "{count, plural, one {Visité une fois} other {Visité # fois}}",
+    "loadingMatchingVisas": "Chargement des visas correspondants...",
+    "pickVisaCoversTrip": "Choisissez un visa qui couvre ce voyage.",
+    "noVisasCoverDestination": "Aucun visa ne couvre encore cette destination.",
+    "visaFreeNotice": "Ce voyage sera marqué comme sans visa et pourra être lié plus tard si nécessaire."
+  },
+  "visa": {
+    "create": "Nouveau visa",
+    "edit": "Modifier le visa",
+    "renew": "Renouveler le visa",
+    "all": "Tous les visas",
+    "noVisasYet": "Aucun visa pour le moment",
+    "addFirstVisa": "Ajoutez votre premier visa pour commencer à suivre la couverture.",
+    "renewedFromThisChain": "Renouvelé à partir de cette chaîne",
+    "earlierVisa": "Visa précédent",
+    "tapToReview": "Touchez un visa pour consulter ses voyages, sa couverture et sa validité restante.",
+    "typeQuestion": "Quel type de visa ?",
+    "chooseVisaTemplate": "Choisissez un modèle de visa",
+    "chooseVisaTemplateHint": "Les modèles préremplissent les règles des cas courants. Vous pouvez toujours modifier chaque limite ensuite.",
+    "nameStep": "Nommer ce visa",
+    "countriesStep": "Pays couverts",
+    "validityStep": "Quand est-il valide ?",
+    "rulesStep": "Règles de jours",
+    "validity": "Validité",
+    "validityHint": "Cette étape détermine quand le visa peut être utilisé et si le départ doit avoir lieu avant l'expiration.",
+    "configuration": "Configuration",
+    "limitsHint": "Configurez les limites restantes pour ce visa.",
+    "singleTripMax": "Maximum d'un seul voyage",
+    "totalStayMax": "Durée totale maximale",
+    "rollingPeriod": "Période glissante",
+    "identifiers": "Identifiants",
+    "renewalHistory": "Historique des renouvellements",
+    "projection": "Projection",
+    "projectionTitle": "Jours restants sur l'année à venir",
+    "projectionAssumption": "En supposant que vos voyages actuels restent planifiés.",
+    "todayMarker": "AUJOURD'HUI",
+    "minRemaining": "MIN {remaining}",
+    "daysRemainingLegend": "JOURS RESTANTS",
+    "tightZoneLegend": "ZONE TENDUE",
+    "aggregates": "Utilisation",
+    "alerts": "Alertes",
+    "upcomingIssues": "Problèmes à venir",
+    "coverage": "Couverture",
+    "typeLabel": "Type",
+    "countriesLabel": "Pays",
+    "renewedFrom": "Renouvelé depuis",
+    "renewedBy": "Renouvelé par",
+    "openEnded": "Sans date de fin",
+    "expiresOnDate": "Expire le {date}",
+    "expired": "Expiré",
+    "expiring": "Expire bientôt",
+    "renewed": "Renouvelé",
+    "name": "Nom du visa",
+    "namePlaceholder": "ex. Schengen 2025",
+    "number": "Numéro de visa",
+    "documentNumber": "Numéro de document",
+    "validFrom": "Valide à partir du",
+    "expiresOn": "Expire le",
+    "expiresHint": "Laisser vide si illimité",
+    "mustLeave": "Doit quitter le pays avant l'expiration",
+    "rollingLimit": "Limite glissante (jours)",
+    "rollingWindow": "Fenêtre glissante (jours)",
+    "totalMax": "Maximum total de jours",
+    "maxTrips": "Nb max de voyages",
+    "maxDaysPerTrip": "Nb max de jours par voyage",
+    "countBothDays": "Compter le jour d'entrée et de sortie",
+    "mustLeaveHint": "Laisser coché lorsque le visa expire.",
+    "countBothDaysHint": "Les jours d'entrée et de sortie comptent dans la limite.",
+    "selectSchengen": "Sélectionner Schengen",
+    "clear": "Effacer",
+    "searchCountry": "Rechercher des pays…",
+    "selectedCount": "{count, plural, one {# sélectionné} other {# sélectionnés}}",
+    "step1": "Type",
+    "step2": "Identité",
+    "step3": "Pays",
+    "step4": "Validité",
+    "step5": "Règles",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "save": "Enregistrer",
+    "delete": "Supprimer le visa",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce visa ? Les voyages liés resteront, mais ne seront plus reliés.",
+    "validUntil": "Valide jusqu'au",
+    "expires": "Expire",
+    "status": "Statut",
+    "simulation": "Date de calcul",
+    "simulationDesc": "Modifier la date pour voir l'utilisation de votre visa à un autre moment.",
+    "apply": "Appliquer",
+    "simulating": "Simulation · Date",
+    "reset": "Réinitialiser à aujourd'hui",
+    "aggregates": "Utilisation",
+    "projection": "Projection",
+    "trips": "Voyages sur ce visa",
+    "coverage": "Pays couverts",
+    "inWindow": "dans la fenêtre",
+    "noTrips": "Aucun voyage lié à ce visa.",
+    "types": {
+      "SCHENGEN": "Schengen",
+      "ESTA": "ESTA",
+      "CA_ETA": "eTA Canada",
+      "AU_EVISITOR": "eVisitor Australie",
+      "NZETA": "NZeTA Nouvelle-Zélande",
+      "OTHER": "Autre"
+    },
+    "typeDescs": {
+      "SCHENGEN": "Fenêtre glissante (90 en 180)",
+      "ESTA": "Durée fixe, entrée unique",
+      "CA_ETA": "Durée fixe",
+      "AU_EVISITOR": "Entrées multiples",
+      "NZETA": "Durée fixe",
+      "OTHER": "Configurer chaque règle"
+    },
+    "optional": "Facultatif"
+  },
+  "status": {
+    "valid": "Valide",
+    "tight": "Serré",
+    "noVisa": "Pas de visa",
+    "unlinked": "Non lié",
+    "expired": "Expiré",
+    "notYet": "Pas encore",
+    "validated": "Validé",
+    "noVisaNeeded": "Visa non requis",
+    "noVisaAssigned": "Aucun visa attribué",
+    "visaInvalid": "Visa invalide"
+  },
+  "copy": {
+    "labels": {
+      "thisTrip": "ce voyage",
+      "thisVisa": "ce visa",
+      "trip": "voyage",
+      "visa": "Visa",
+      "review": "Examiner"
+    },
+    "cards": {
+      "CURRENTLY_TRAVELING": {
+        "label": "Voyage en cours"
+      },
+      "ROLLING_WINDOW_USAGE": {
+        "label": "Fenêtre glissante",
+        "sublabel": "Derniers {windowDays} jours",
+        "remainingDays": "{remaining} jours restants"
+      },
+      "ALLOWANCE_REMAINING": {
+        "label": "Quota restant",
+        "sublabel": "{remaining} jours restants",
+        "remainingDays": "{remaining} jours restants"
+      },
+      "ENTRIES_REMAINING": {
+        "label": "Entrées restantes",
+        "sublabel": "{remainingEntries} sur {maxEntries} restantes",
+        "remainingEntries": "{remainingEntries} entrées restantes"
+      },
+      "NEXT_EXPIRY": {
+        "label": "Prochaine expiration",
+        "sublabel": "{daysUntilExpiry} jours restants"
+      },
+      "NEXT_TRIP": {
+        "label": "Prochain voyage",
+        "sublabel": "Dans {daysUntilStart} jours",
+        "durationDays": "{durationDays, plural, one {# jour} other {# jours}}"
+      }
+    },
+    "tripIssues": {
+      "TRIP_NO_VISA_LINKED": {
+        "title": "Aucun visa lié",
+        "detail": "{tripLabel} a besoin d'un visa lié avant le départ."
+      },
+      "TRIP_VISA_EXPIRED": {
+        "title": "Visa expiré pour {tripName}",
+        "detail": "{visaLabel} a expiré le {expires}."
+      },
+      "TRIP_VISA_WILL_BE_EXPIRED": {
+        "title": "Le visa expirera pendant {tripName}",
+        "detail": "{visaLabel} expire le {expires} avant la fin de {tripLabel}."
+      },
+      "TRIP_VISA_NOT_YET_VALID": {
+        "title": "Visa pas encore valide pour {tripName}",
+        "detail": "{visaLabel} devient valide le {validFrom}."
+      },
+      "TRIP_COUNTRY_NOT_COVERED": {
+        "title": "Pays non couvert",
+        "detail": "{visaLabel} ne couvre pas {countryCode}."
+      },
+      "TRIP_EXCEEDS_SINGLE_TRIP_LIMIT": {
+        "title": "Voyage trop long",
+        "detail": "{tripLabel} dure {tripLength} jours, ce qui dépasse la limite de {limit} jours du {visaLabel}."
+      },
+      "TRIP_EXCEEDS_TOTAL_ALLOWANCE": {
+        "title": "Quota dépassé",
+        "detail": "{visaLabel} a déjà {used} jours utilisés, ce qui dépasse le quota de {limit} jours."
+      },
+      "TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT": {
+        "title": "Limite glissante dépassée",
+        "detail": "{visaLabel} a déjà {used} jours utilisés, ce qui dépasse la limite glissante de {limit} jours."
+      },
+      "TRIP_EXCEEDS_ENTRY_LIMIT": {
+        "title": "Plus d'entrées disponibles",
+        "detail": "{visaLabel} a déjà utilisé {used} entrées, ce qui dépasse la limite de {limit} entrées."
+      },
+      "TRIP_MUST_LEAVE_BEFORE_EXPIRY_BREACH": {
+        "title": "Départ avant expiration obligatoire",
+        "detail": "{tripLabel} se termine le {tripEndDate}, après l'expiration de {visaLabel}."
+      }
+    },
+    "alerts": {
+      "VISA_OVER_LIMIT_NOW": {
+        "title": "{visaLabel} dépasse déjà la limite",
+        "detail": "{used} sur {limit} déjà utilisés."
+      },
+      "VISA_EXPIRED": {
+        "title": "{visaLabel} a expiré",
+        "detail": "Expiré le {expires}."
+      },
+      "VISA_WILL_EXCEED_ON_PLANNED_TRIP": {
+        "title": "{tripLabel} dépassera la limite",
+        "detail": "{visaLabel} devrait dépasser la limite d'ici le {tripStartDate}."
+      },
+      "VISA_EXPIRES_DURING_TRIP": {
+        "title": "{visaLabel} expire pendant {tripLabel}",
+        "detail": "{tripLabel} se termine le {tripEndDate}."
+      },
+      "VISA_NOT_YET_VALID_FOR_TRIP": {
+        "title": "{visaLabel} pas encore valide pour {tripLabel}",
+        "detail": "Valide à partir du {validFrom}."
+      },
+      "VISA_MUST_LEAVE_BEFORE_EXPIRY_BREACH": {
+        "title": "{visaLabel} doit se terminer avant l'expiration",
+        "detail": "{tripLabel} se termine le {tripEndDate}."
+      },
+      "VISA_EXPIRING_SOON": {
+        "title": "{visaLabel} expire bientôt",
+        "detail": "{daysUntilExpiry} jours restants."
+      },
+      "VISA_EXPIRING_WITH_UPCOMING_TRIPS": {
+        "title": "L'expiration de {visaLabel} chevauche les voyages à venir",
+        "detail": "{daysUntilExpiry} jours avant expiration."
+      },
+      "VISA_APPROACHING_ALLOWANCE": {
+        "title": "Le quota de {visaLabel} baisse",
+        "detail": "{remaining} jours restants."
+      },
+      "VISA_LAST_ENTRY_CONSUMED": {
+        "title": "Dernière entrée consommée pour {visaLabel}",
+        "detail": "Une ré-entrée lors d'un futur voyage peut échouer."
+      },
+      "ROLLING_WINDOW_RESETS_SOON": {
+        "title": "La fenêtre glissante de {visaLabel} change bientôt",
+        "detail": "Un jour comptabilisé sortira de la fenêtre glissante le {nextResetDate}."
+      },
+      "VISA_VALID_SOON": {
+        "title": "{visaLabel} sera bientôt valide",
+        "detail": "Encore {daysUntilValid} jours avant le début de validité."
+      },
+      "LONG_GAP_SINCE_LAST_TRIP": {
+        "title": "Longue pause depuis le dernier voyage pour {visaLabel}",
+        "detail": "{gapDays} jours depuis le dernier voyage."
+      }
+    }
+  },
+  "atlas": {
+    "title": "Atlas",
+    "share": "Partager",
+    "back": "Retour",
+    "allYears": "Toutes les années",
+    "daysAbroad": "Jours à l'étranger",
+    "daysAbroadInYear": "Jours à l'étranger en {year}",
+    "countries": "Pays",
+    "trips": "Voyages",
+    "days": "jours",
+    "section1": "L'année, en ruban",
+    "section2": "Les plus aimés",
+    "section3": "Rythme de voyage",
+    "section4": "Récords",
+    "noHistory": "Aucun historique de voyage.",
+    "home": "Maison",
+    "abroad": "À l'étranger",
+    "past365": "Derniers 365 jours",
+    "longestTrip": "PLUS LONG VOYAGE",
+    "busiestMonth": "MOIS LE PLUS CHARGÉ",
+    "longestStreak": "PLUS LONG SÉJOUR À L'ÉTRANGER",
+    "currentStreak": "SÉJOUR ACTUEL",
+    "avgTripLength": "DURÉE MOY. D'UN VOYAGE",
+    "daysAway": "jours à l'étranger",
+    "consecutiveDays": "jours consécutifs",
+    "daysRunning": "jours en cours",
+    "sharePreview": "Aperçu du partage",
+    "copy": "Copier",
+    "copied": "Copié",
+    "saveImage": "Enregistrer l'image",
+    "saving": "Enregistrement…"
+  }
+}

@@ -1,68 +1,146 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import { getVisas } from "./server-actions";
-import PrivateText from "../components/PrivateText";
+import { VisaTypeKey } from "./constants";
+import {
+  EmptyState,
+  FAB,
+  Icon,
+  PageContainer,
+  PageHeader,
+  Stack,
+  Text,
+  VisaListRow,
+} from "@/app/design";
+import { getVisaFlag } from "./utils";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export default async function Home() {
-  const visas = await getVisas();
+const formatDate = (value: Date, locale: string) =>
+  value.toLocaleDateString(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+export default async function VisasPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("visa");
+  const fabT = await getTranslations("fab");
+  const statusT = await getTranslations("status");
+  const visaGroups = await getVisas();
+  const today = new Date();
+
+  const renderVisaRow = (
+    visa: (typeof visaGroups)[number]["primary"],
+    muted = false,
+    kicker?: string
+  ) => {
+    const isExpired = Boolean(visa.expires && visa.expires < today);
+    const isExpiringSoon =
+      Boolean(visa.expires) &&
+      !isExpired &&
+      (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
+    const statusTone = muted
+      ? "muted"
+      : isExpired
+        ? "danger"
+        : isExpiringSoon
+          ? "warn"
+          : "ok";
+
+    return (
+      <VisaListRow
+        key={visa.id}
+        href={`/visas/${visa.id}`}
+        flag={getVisaFlag(visa.type as VisaTypeKey, visa.countries)}
+        title={visa.name}
+        kicker={
+          kicker ??
+          [
+            t(`types.${visa.type}`),
+            visa.expires
+              ? t("expiresOnDate", { date: formatDate(visa.expires, locale) })
+              : t("openEnded"),
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        }
+        countryCount={visa.countries.length}
+        statusTone={statusTone}
+        statusLabel={
+          muted
+            ? t("renewed")
+            : isExpired
+              ? statusT("expired")
+              : isExpiringSoon
+                ? t("expiring")
+                : statusT("valid")
+        }
+        muted={muted}
+      />
+    );
+  };
 
   return (
-    <div className="card bg-base-100 p-6 w-full flex flex-col gap-4">
-      <div className="flex items-center">
-        <h1 className="text-lg flex-1">Visas</h1>
-        <div className="flex-0 flex flex-row gap-2">
-          <Link href="/visas/create" className="btn btn-primary">
-            Create visa
-          </Link>
-          <Link href={"/"} className="btn btn-square flex-0">
-            x
-          </Link>
+    <>
+      <PageHeader title={t("all")} backHref="/" />
+      <PageContainer>
+        <Stack className="gap-4">
+          {visaGroups.length === 0 ? (
+            <EmptyState
+              icon="passport"
+              title={t("noVisasYet")}
+              message={t("addFirstVisa")}
+              action={{
+                label: t("create"),
+                href: "/visas/create",
+              }}
+            />
+          ) : (
+            visaGroups.map((group) => (
+              <div key={group.primary.id} className="space-y-2">
+                {renderVisaRow(group.primary)}
+                {group.history.length > 0 && (
+                  <div className="ml-4 border-l border-border/70 pl-4">
+                    {group.history.map((visa, index) =>
+                      renderVisaRow(
+                        visa,
+                        true,
+                        index === 0
+                          ? t("renewedFromThisChain")
+                          : t("earlierVisa")
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </Stack>
+
+        {visaGroups.length > 0 && (
+          <Text className="mt-4 text-sm text-fg-muted">{t("tapToReview")}</Text>
+        )}
+
+        <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+          <FAB
+            actions={[
+              {
+                href: "/trips/create",
+                icon: <Icon name="calendar" size="sm" />,
+                title: fabT("trip"),
+                description: fabT("tripDesc"),
+              },
+              {
+                href: "/visas/create",
+                icon: <Icon name="passport" size="sm" />,
+                title: fabT("visa"),
+                description: fabT("visaDesc"),
+              },
+            ]}
+          />
         </div>
-      </div>
-      <hr />
-      <div className="flex flex-col">
-        {visas.length === 0 && <p>You have no visas created</p>}
-        {visas.map((visa) => (
-          <div
-            key={visa.id}
-            className="rounded shadow-md p-4 flex flex-row items-center"
-          >
-            <h2 className="flex-1">
-              {visa.name}
-              {visa.visaNumber && (
-                <>
-                  {" "}
-                  ·{" "}
-                  <PrivateText>
-                    <span className="font-mono">{visa.visaNumber}</span>
-                  </PrivateText>
-                </>
-              )}
-            </h2>
-            <div className="flex-0 flex items-center gap-2">
-              {!visa.expires || (visa.expires && visa.expires > new Date()) ? (
-                <button className="btn btn-sm btn-outline btn-success">
-                  ✅ In date
-                  {visa.expires &&
-                    ` until ${new Date(visa.expires).toLocaleDateString("en-GB")}`}
-                </button>
-              ) : (
-                <button className="btn btn-sm btn-outline btn-error">
-                  ❌ Expired{" "}
-                  {visa.expires && new Date(visa.expires).toLocaleDateString("en-GB")}
-                </button>
-              )}
-              <Link
-                href={`/visas/${visa.id}`}
-                className="btn btn-sm btn-outline"
-              >
-                Info
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      </PageContainer>
+    </>
   );
 }

@@ -44,4 +44,18 @@ export const SCHENGEN_COUNTRIES = [
   "ES", // Spain
   "SE", // Sweden
   "CH", // Switzerland
-]
+];
+
+export type VisaTypeKey = keyof typeof VISA_TYPE;
+
+export const VISA_TYPE_META: Record<
+  VisaTypeKey,
+  { flag: string; desc: string }
+> = {
+  SCHENGEN: { flag: "🇪🇺", desc: "Rolling window (90 in 180)" },
+  ESTA: { flag: "🇺🇸", desc: "Fixed duration, single entry" },
+  CA_ETA: { flag: "🇨🇦", desc: "Fixed duration" },
+  AU_EVISITOR: { flag: "🇦🇺", desc: "Multiple entry" },
+  NZETA: { flag: "🇳🇿", desc: "Fixed duration" },
+  OTHER: { flag: "⚙️", desc: "Configure every rule" },
+};
