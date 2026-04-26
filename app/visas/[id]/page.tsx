@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import {
   AlertBox,
+  Divider,
   Fact,
   FactGrid,
   PageContainer,
@@ -22,21 +23,28 @@ import {
   toneFromSeverity,
   uniqueAlertsForDisplay,
 } from "@/app/structured-copy";
-import { getVisaDetailSummary } from "../server-actions";
-import { VISA_TYPES_DISPLAY_MAP } from "../constants";
 import Link from "next/link";
+import { getVisaDetailSummary } from "../server-actions";
+import { VISA_TYPES_DISPLAY_MAP, VisaTypeKey } from "../constants";
 import { redirect } from "next/navigation";
 import VisaSimulationControl from "./VisaSimulationControl";
 import VisaDetailActions from "./VisaDetailActions";
+import SensitiveValue from "./SensitiveValue";
+import { getVisaFlag } from "../utils";
 
 const formatDate = (date: Date | null) =>
   date
     ? date.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
-        year: "numeric",
+      year: "numeric",
       })
     : "Open-ended";
+
+const formatCount = (value: number, singular: string, plural: string) =>
+  `${value} ${value === 1 ? singular : plural}`;
+
+const formatBoolean = (value: boolean) => (value ? "Yes" : "No");
 
 export default async function VisaDetail({
   params,
@@ -89,39 +97,166 @@ export default async function VisaDetail({
             candidate.title === item.title && candidate.detail === item.detail
         ) === index
     );
+  const expiresSoon =
+    summary.visa.expires &&
+    summary.visa.expires.getTime() - referenceDate.getTime() <= 30 * 86400000;
+  const canRenew = Boolean(summary.visa.expires && (summary.visa.expires < referenceDate || expiresSoon));
+  const previousVisa = summary.visa.renewedFrom;
+  const nextVisa = summary.visa.renewals[0] ?? null;
 
   return (
     <div>
       <PageHeader
         kicker={VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
         title={summary.visa.name}
-        flag={summary.visa.countries[0] ? COUNTRY_EMOJIS[summary.visa.countries[0]] ?? "🪪" : "🪪"}
+        flag={getVisaFlag(summary.visa.type as VisaTypeKey, summary.visa.countries)}
         backHref="/visas"
-        actions={<VisaDetailActions visaId={summary.visa.id} />}
+        actions={
+          <VisaDetailActions
+            visaId={summary.visa.id}
+            renewHref={canRenew ? `/visas/${summary.visa.id}/renew` : null}
+          />
+        }
       />
       <PageContainer>
         <Stack className="gap-6">
           <Stack className="gap-3">
             <Text className="font-semibold text-lg">Validity</Text>
             <FactGrid cols={2}>
-            <Fact
-              label="Valid from"
-              value={formatDate(summary.visa.validFrom)}
-            />
-            <Fact
-              label="Expires"
-              value={formatDate(summary.visa.expires)}
-            />
-            <Fact
-              label="Type"
-              value={VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
-            />
-            <Fact
-              label="Countries"
-              value={summary.visa.countries.length}
-            />
+              <Fact
+                label="Valid from"
+                value={formatDate(summary.visa.validFrom)}
+              />
+              <Fact
+                label="Expires"
+                value={formatDate(summary.visa.expires)}
+              />
+              <Fact
+                label="Type"
+                value={VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
+              />
+              <Fact
+                label="Countries"
+                value={summary.visa.countries.length}
+              />
             </FactGrid>
           </Stack>
+
+          <Divider />
+
+          <Stack className="gap-3">
+            <Text className="font-semibold text-lg">Configuration</Text>
+            <FactGrid cols={2}>
+              {summary.visa.tripMaxLen != null && (
+                <Fact
+                  label="Maximum single trip"
+                  value={formatCount(summary.visa.tripMaxLen, "day", "days")}
+                />
+              )}
+              {summary.visa.totalMaxLen != null && (
+                <Fact
+                  label="Maximum total stay"
+                  value={formatCount(summary.visa.totalMaxLen, "day", "days")}
+                />
+              )}
+              {summary.visa.maxNumTrips != null && (
+                <Fact
+                  label="Maximum trips"
+                  value={formatCount(summary.visa.maxNumTrips, "trip", "trips")}
+                />
+              )}
+              {summary.visa.rollingPeriodLen != null && (
+                <Fact
+                  label="Rolling period"
+                  value={formatCount(
+                    summary.visa.rollingPeriodLen,
+                    "day",
+                    "days"
+                  )}
+                />
+              )}
+              <Fact
+                label="Must exit before expiry"
+                value={formatBoolean(summary.visa.mustExitBeforeExpiry)}
+              />
+              <Fact
+                label="Include entry and exit dates"
+                value={formatBoolean(summary.visa.includeEntryAndExitDates)}
+              />
+            </FactGrid>
+          </Stack>
+
+          {(summary.visa.visaNumber || summary.visa.documentNumber) && (
+            <>
+              <Divider />
+              <Stack className="gap-3">
+                <Text className="font-semibold text-lg">Identifiers</Text>
+                <FactGrid cols={2}>
+                  {summary.visa.visaNumber && (
+                    <Fact
+                      label="Visa number"
+                      value={
+                        <SensitiveValue
+                          label="visa number"
+                          value={summary.visa.visaNumber}
+                        />
+                      }
+                    />
+                  )}
+                  {summary.visa.documentNumber && (
+                    <Fact
+                      label="Document number"
+                      value={
+                        <SensitiveValue
+                          label="document number"
+                          value={summary.visa.documentNumber}
+                        />
+                      }
+                    />
+                  )}
+                </FactGrid>
+              </Stack>
+            </>
+          )}
+
+          {(previousVisa || nextVisa) && (
+            <>
+              <Divider />
+              <Stack className="gap-3">
+                <Text className="font-semibold text-lg">Renewal history</Text>
+                <FactGrid cols={2}>
+                  {previousVisa && (
+                    <Fact
+                      label="Renewed from"
+                      value={
+                        <Link
+                          href={`/visas/${previousVisa.id}`}
+                          className="text-fg underline decoration-fg/30 underline-offset-2 transition-colors hover:text-fg-muted"
+                        >
+                          {previousVisa.name}
+                        </Link>
+                      }
+                    />
+                  )}
+                  {nextVisa && (
+                    <Fact
+                      label="Renewed by"
+                      value={
+                        <Link
+                          href={`/visas/${nextVisa.id}`}
+                          className="text-fg underline decoration-fg/30 underline-offset-2 transition-colors hover:text-fg-muted"
+                        >
+                          {nextVisa.name}
+                        </Link>
+                      }
+                    />
+                  )}
+                </FactGrid>
+              </Stack>
+            </>
+          )}
+
+          <Divider />
 
           {summary.projection && summary.rollingWindowTripIds.length > 0 && (
             <Stack className="gap-3">

@@ -18,6 +18,7 @@ export interface VisaListRowProps {
   usage?: { used: number; limit: number };
   onClick?: () => void;
   href?: string;
+  muted?: boolean;
 }
 
 export function VisaListRow({
@@ -30,12 +31,14 @@ export function VisaListRow({
   usage,
   onClick,
   href,
+  muted,
 }: VisaListRowProps) {
   const countryLabel =
     countryCount === 1 ? "1 country" : `${countryCount ?? 0} countries`;
   const classes = cn(
     "w-full rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
-    "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken"
+    "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",
+    muted && "border-dashed bg-bg-sunken/70 opacity-70"
   );
 
   return href ? (

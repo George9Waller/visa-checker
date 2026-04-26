@@ -37,6 +37,9 @@ model Visa {
     rollingPeriodLen         Int?
     mustExitBeforeExpiry     Boolean    @default(true)
     includeEntryAndExitDates Boolean    @default(false)
+    renewedFromId            String?    @unique
+    renewedFrom              Visa?      @relation("VisaRenewalChain", fields: [renewedFromId], references: [id], onDelete: SetNull)
+    renewals                 Visa[]     @relation("VisaRenewalChain")
     VisaTrip                 VisaTrip[]
 
     @@index([user_id])

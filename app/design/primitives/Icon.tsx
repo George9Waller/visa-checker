@@ -1,8 +1,8 @@
 import { cn } from '../cn';
-import { icons } from '../icons';
+import { IconName, icons } from '../icons';
 
 export interface IconProps {
-  name: string;
+  name: IconName;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }

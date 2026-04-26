@@ -1,5 +1,7 @@
 import { ProjectionPoint } from "@/app/visas/evaluation";
 
+export type { ProjectionPoint } from "@/app/visas/evaluation";
+
 export interface SchengenProjectionChartProps {
   points: ProjectionPoint[];
   limit: number;

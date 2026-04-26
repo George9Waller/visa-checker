@@ -55,6 +55,7 @@ export type VisaMinAggregateOutputType = {
   rollingPeriodLen: number | null
   mustExitBeforeExpiry: boolean | null
   includeEntryAndExitDates: boolean | null
+  renewedFromId: string | null
 }
 
 export type VisaMaxAggregateOutputType = {
@@ -72,6 +73,7 @@ export type VisaMaxAggregateOutputType = {
   rollingPeriodLen: number | null
   mustExitBeforeExpiry: boolean | null
   includeEntryAndExitDates: boolean | null
+  renewedFromId: string | null
 }
 
 export type VisaCountAggregateOutputType = {
@@ -90,6 +92,7 @@ export type VisaCountAggregateOutputType = {
   rollingPeriodLen: number
   mustExitBeforeExpiry: number
   includeEntryAndExitDates: number
+  renewedFromId: number
   _all: number
 }
 
@@ -123,6 +126,7 @@ export type VisaMinAggregateInputType = {
   rollingPeriodLen?: true
   mustExitBeforeExpiry?: true
   includeEntryAndExitDates?: true
+  renewedFromId?: true
 }
 
 export type VisaMaxAggregateInputType = {
@@ -140,6 +144,7 @@ export type VisaMaxAggregateInputType = {
   rollingPeriodLen?: true
   mustExitBeforeExpiry?: true
   includeEntryAndExitDates?: true
+  renewedFromId?: true
 }
 
 export type VisaCountAggregateInputType = {
@@ -158,6 +163,7 @@ export type VisaCountAggregateInputType = {
   rollingPeriodLen?: true
   mustExitBeforeExpiry?: true
   includeEntryAndExitDates?: true
+  renewedFromId?: true
   _all?: true
 }
 
@@ -263,6 +269,7 @@ export type VisaGroupByOutputType = {
   rollingPeriodLen: number | null
   mustExitBeforeExpiry: boolean
   includeEntryAndExitDates: boolean
+  renewedFromId: string | null
   _count: VisaCountAggregateOutputType | null
   _avg: VisaAvgAggregateOutputType | null
   _sum: VisaSumAggregateOutputType | null
@@ -304,6 +311,9 @@ export type VisaWhereInput = {
   rollingPeriodLen?: Prisma.IntNullableFilter<"Visa"> | number | null
   mustExitBeforeExpiry?: Prisma.BoolFilter<"Visa"> | boolean
   includeEntryAndExitDates?: Prisma.BoolFilter<"Visa"> | boolean
+  renewedFromId?: Prisma.StringNullableFilter<"Visa"> | string | null
+  renewedFrom?: Prisma.XOR<Prisma.VisaNullableScalarRelationFilter, Prisma.VisaWhereInput> | null
+  renewals?: Prisma.VisaListRelationFilter
   VisaTrip?: Prisma.VisaTripListRelationFilter
 }
 
@@ -323,11 +333,15 @@ export type VisaOrderByWithRelationInput = {
   rollingPeriodLen?: Prisma.SortOrderInput | Prisma.SortOrder
   mustExitBeforeExpiry?: Prisma.SortOrder
   includeEntryAndExitDates?: Prisma.SortOrder
+  renewedFromId?: Prisma.SortOrderInput | Prisma.SortOrder
+  renewedFrom?: Prisma.VisaOrderByWithRelationInput
+  renewals?: Prisma.VisaOrderByRelationAggregateInput
   VisaTrip?: Prisma.VisaTripOrderByRelationAggregateInput
 }
 
 export type VisaWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  renewedFromId?: string
   AND?: Prisma.VisaWhereInput | Prisma.VisaWhereInput[]
   OR?: Prisma.VisaWhereInput[]
   NOT?: Prisma.VisaWhereInput | Prisma.VisaWhereInput[]
@@ -345,8 +359,10 @@ export type VisaWhereUniqueInput = Prisma.AtLeast<{
   rollingPeriodLen?: Prisma.IntNullableFilter<"Visa"> | number | null
   mustExitBeforeExpiry?: Prisma.BoolFilter<"Visa"> | boolean
   includeEntryAndExitDates?: Prisma.BoolFilter<"Visa"> | boolean
+  renewedFrom?: Prisma.XOR<Prisma.VisaNullableScalarRelationFilter, Prisma.VisaWhereInput> | null
+  renewals?: Prisma.VisaListRelationFilter
   VisaTrip?: Prisma.VisaTripListRelationFilter
-}, "id">
+}, "id" | "renewedFromId">
 
 export type VisaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -364,6 +380,7 @@ export type VisaOrderByWithAggregationInput = {
   rollingPeriodLen?: Prisma.SortOrderInput | Prisma.SortOrder
   mustExitBeforeExpiry?: Prisma.SortOrder
   includeEntryAndExitDates?: Prisma.SortOrder
+  renewedFromId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.VisaCountOrderByAggregateInput
   _avg?: Prisma.VisaAvgOrderByAggregateInput
   _max?: Prisma.VisaMaxOrderByAggregateInput
@@ -390,6 +407,7 @@ export type VisaScalarWhereWithAggregatesInput = {
   rollingPeriodLen?: Prisma.IntNullableWithAggregatesFilter<"Visa"> | number | null
   mustExitBeforeExpiry?: Prisma.BoolWithAggregatesFilter<"Visa"> | boolean
   includeEntryAndExitDates?: Prisma.BoolWithAggregatesFilter<"Visa"> | boolean
+  renewedFromId?: Prisma.StringNullableWithAggregatesFilter<"Visa"> | string | null
 }
 
 export type VisaCreateInput = {
@@ -408,6 +426,8 @@ export type VisaCreateInput = {
   rollingPeriodLen?: number | null
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFrom?: Prisma.VisaCreateNestedOneWithoutRenewalsInput
+  renewals?: Prisma.VisaCreateNestedManyWithoutRenewedFromInput
   VisaTrip?: Prisma.VisaTripCreateNestedManyWithoutVisaInput
 }
 
@@ -427,6 +447,8 @@ export type VisaUncheckedCreateInput = {
   rollingPeriodLen?: number | null
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: string | null
+  renewals?: Prisma.VisaUncheckedCreateNestedManyWithoutRenewedFromInput
   VisaTrip?: Prisma.VisaTripUncheckedCreateNestedManyWithoutVisaInput
 }
 
@@ -446,6 +468,8 @@ export type VisaUpdateInput = {
   rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
   includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFrom?: Prisma.VisaUpdateOneWithoutRenewalsNestedInput
+  renewals?: Prisma.VisaUpdateManyWithoutRenewedFromNestedInput
   VisaTrip?: Prisma.VisaTripUpdateManyWithoutVisaNestedInput
 }
 
@@ -465,6 +489,8 @@ export type VisaUncheckedUpdateInput = {
   rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
   includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  renewals?: Prisma.VisaUncheckedUpdateManyWithoutRenewedFromNestedInput
   VisaTrip?: Prisma.VisaTripUncheckedUpdateManyWithoutVisaNestedInput
 }
 
@@ -484,6 +510,7 @@ export type VisaCreateManyInput = {
   rollingPeriodLen?: number | null
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: string | null
 }
 
 export type VisaUpdateManyMutationInput = {
@@ -520,6 +547,7 @@ export type VisaUncheckedUpdateManyInput = {
   rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
   includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StringNullableListFilter<$PrismaModel = never> = {
@@ -528,6 +556,21 @@ export type StringNullableListFilter<$PrismaModel = never> = {
   hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
   hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
   isEmpty?: boolean
+}
+
+export type VisaNullableScalarRelationFilter = {
+  is?: Prisma.VisaWhereInput | null
+  isNot?: Prisma.VisaWhereInput | null
+}
+
+export type VisaListRelationFilter = {
+  every?: Prisma.VisaWhereInput
+  some?: Prisma.VisaWhereInput
+  none?: Prisma.VisaWhereInput
+}
+
+export type VisaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type VisaCountOrderByAggregateInput = {
@@ -546,6 +589,7 @@ export type VisaCountOrderByAggregateInput = {
   rollingPeriodLen?: Prisma.SortOrder
   mustExitBeforeExpiry?: Prisma.SortOrder
   includeEntryAndExitDates?: Prisma.SortOrder
+  renewedFromId?: Prisma.SortOrder
 }
 
 export type VisaAvgOrderByAggregateInput = {
@@ -570,6 +614,7 @@ export type VisaMaxOrderByAggregateInput = {
   rollingPeriodLen?: Prisma.SortOrder
   mustExitBeforeExpiry?: Prisma.SortOrder
   includeEntryAndExitDates?: Prisma.SortOrder
+  renewedFromId?: Prisma.SortOrder
 }
 
 export type VisaMinOrderByAggregateInput = {
@@ -587,6 +632,7 @@ export type VisaMinOrderByAggregateInput = {
   rollingPeriodLen?: Prisma.SortOrder
   mustExitBeforeExpiry?: Prisma.SortOrder
   includeEntryAndExitDates?: Prisma.SortOrder
+  renewedFromId?: Prisma.SortOrder
 }
 
 export type VisaSumOrderByAggregateInput = {
@@ -603,6 +649,26 @@ export type VisaScalarRelationFilter = {
 
 export type VisaCreatecountriesInput = {
   set: string[]
+}
+
+export type VisaCreateNestedOneWithoutRenewalsInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewalsInput, Prisma.VisaUncheckedCreateWithoutRenewalsInput>
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewalsInput
+  connect?: Prisma.VisaWhereUniqueInput
+}
+
+export type VisaCreateNestedManyWithoutRenewedFromInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput> | Prisma.VisaCreateWithoutRenewedFromInput[] | Prisma.VisaUncheckedCreateWithoutRenewedFromInput[]
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewedFromInput | Prisma.VisaCreateOrConnectWithoutRenewedFromInput[]
+  createMany?: Prisma.VisaCreateManyRenewedFromInputEnvelope
+  connect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+}
+
+export type VisaUncheckedCreateNestedManyWithoutRenewedFromInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput> | Prisma.VisaCreateWithoutRenewedFromInput[] | Prisma.VisaUncheckedCreateWithoutRenewedFromInput[]
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewedFromInput | Prisma.VisaCreateOrConnectWithoutRenewedFromInput[]
+  createMany?: Prisma.VisaCreateManyRenewedFromInputEnvelope
+  connect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -622,6 +688,44 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type VisaUpdateOneWithoutRenewalsNestedInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewalsInput, Prisma.VisaUncheckedCreateWithoutRenewalsInput>
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewalsInput
+  upsert?: Prisma.VisaUpsertWithoutRenewalsInput
+  disconnect?: Prisma.VisaWhereInput | boolean
+  delete?: Prisma.VisaWhereInput | boolean
+  connect?: Prisma.VisaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VisaUpdateToOneWithWhereWithoutRenewalsInput, Prisma.VisaUpdateWithoutRenewalsInput>, Prisma.VisaUncheckedUpdateWithoutRenewalsInput>
+}
+
+export type VisaUpdateManyWithoutRenewedFromNestedInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput> | Prisma.VisaCreateWithoutRenewedFromInput[] | Prisma.VisaUncheckedCreateWithoutRenewedFromInput[]
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewedFromInput | Prisma.VisaCreateOrConnectWithoutRenewedFromInput[]
+  upsert?: Prisma.VisaUpsertWithWhereUniqueWithoutRenewedFromInput | Prisma.VisaUpsertWithWhereUniqueWithoutRenewedFromInput[]
+  createMany?: Prisma.VisaCreateManyRenewedFromInputEnvelope
+  set?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  disconnect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  delete?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  connect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  update?: Prisma.VisaUpdateWithWhereUniqueWithoutRenewedFromInput | Prisma.VisaUpdateWithWhereUniqueWithoutRenewedFromInput[]
+  updateMany?: Prisma.VisaUpdateManyWithWhereWithoutRenewedFromInput | Prisma.VisaUpdateManyWithWhereWithoutRenewedFromInput[]
+  deleteMany?: Prisma.VisaScalarWhereInput | Prisma.VisaScalarWhereInput[]
+}
+
+export type VisaUncheckedUpdateManyWithoutRenewedFromNestedInput = {
+  create?: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput> | Prisma.VisaCreateWithoutRenewedFromInput[] | Prisma.VisaUncheckedCreateWithoutRenewedFromInput[]
+  connectOrCreate?: Prisma.VisaCreateOrConnectWithoutRenewedFromInput | Prisma.VisaCreateOrConnectWithoutRenewedFromInput[]
+  upsert?: Prisma.VisaUpsertWithWhereUniqueWithoutRenewedFromInput | Prisma.VisaUpsertWithWhereUniqueWithoutRenewedFromInput[]
+  createMany?: Prisma.VisaCreateManyRenewedFromInputEnvelope
+  set?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  disconnect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  delete?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  connect?: Prisma.VisaWhereUniqueInput | Prisma.VisaWhereUniqueInput[]
+  update?: Prisma.VisaUpdateWithWhereUniqueWithoutRenewedFromInput | Prisma.VisaUpdateWithWhereUniqueWithoutRenewedFromInput[]
+  updateMany?: Prisma.VisaUpdateManyWithWhereWithoutRenewedFromInput | Prisma.VisaUpdateManyWithWhereWithoutRenewedFromInput[]
+  deleteMany?: Prisma.VisaScalarWhereInput | Prisma.VisaScalarWhereInput[]
+}
+
 export type VisaCreateNestedOneWithoutVisaTripInput = {
   create?: Prisma.XOR<Prisma.VisaCreateWithoutVisaTripInput, Prisma.VisaUncheckedCreateWithoutVisaTripInput>
   connectOrCreate?: Prisma.VisaCreateOrConnectWithoutVisaTripInput
@@ -634,6 +738,190 @@ export type VisaUpdateOneRequiredWithoutVisaTripNestedInput = {
   upsert?: Prisma.VisaUpsertWithoutVisaTripInput
   connect?: Prisma.VisaWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.VisaUpdateToOneWithWhereWithoutVisaTripInput, Prisma.VisaUpdateWithoutVisaTripInput>, Prisma.VisaUncheckedUpdateWithoutVisaTripInput>
+}
+
+export type VisaCreateWithoutRenewalsInput = {
+  id?: string
+  user_id: string
+  name: string
+  type: string
+  validFrom: Date | string
+  expires?: Date | string | null
+  visaNumber?: string | null
+  documentNumber?: string | null
+  countries?: Prisma.VisaCreatecountriesInput | string[]
+  maxNumTrips?: number | null
+  tripMaxLen?: number | null
+  totalMaxLen?: number | null
+  rollingPeriodLen?: number | null
+  mustExitBeforeExpiry?: boolean
+  includeEntryAndExitDates?: boolean
+  renewedFrom?: Prisma.VisaCreateNestedOneWithoutRenewalsInput
+  VisaTrip?: Prisma.VisaTripCreateNestedManyWithoutVisaInput
+}
+
+export type VisaUncheckedCreateWithoutRenewalsInput = {
+  id?: string
+  user_id: string
+  name: string
+  type: string
+  validFrom: Date | string
+  expires?: Date | string | null
+  visaNumber?: string | null
+  documentNumber?: string | null
+  countries?: Prisma.VisaCreatecountriesInput | string[]
+  maxNumTrips?: number | null
+  tripMaxLen?: number | null
+  totalMaxLen?: number | null
+  rollingPeriodLen?: number | null
+  mustExitBeforeExpiry?: boolean
+  includeEntryAndExitDates?: boolean
+  renewedFromId?: string | null
+  VisaTrip?: Prisma.VisaTripUncheckedCreateNestedManyWithoutVisaInput
+}
+
+export type VisaCreateOrConnectWithoutRenewalsInput = {
+  where: Prisma.VisaWhereUniqueInput
+  create: Prisma.XOR<Prisma.VisaCreateWithoutRenewalsInput, Prisma.VisaUncheckedCreateWithoutRenewalsInput>
+}
+
+export type VisaCreateWithoutRenewedFromInput = {
+  id?: string
+  user_id: string
+  name: string
+  type: string
+  validFrom: Date | string
+  expires?: Date | string | null
+  visaNumber?: string | null
+  documentNumber?: string | null
+  countries?: Prisma.VisaCreatecountriesInput | string[]
+  maxNumTrips?: number | null
+  tripMaxLen?: number | null
+  totalMaxLen?: number | null
+  rollingPeriodLen?: number | null
+  mustExitBeforeExpiry?: boolean
+  includeEntryAndExitDates?: boolean
+  renewals?: Prisma.VisaCreateNestedManyWithoutRenewedFromInput
+  VisaTrip?: Prisma.VisaTripCreateNestedManyWithoutVisaInput
+}
+
+export type VisaUncheckedCreateWithoutRenewedFromInput = {
+  id?: string
+  user_id: string
+  name: string
+  type: string
+  validFrom: Date | string
+  expires?: Date | string | null
+  visaNumber?: string | null
+  documentNumber?: string | null
+  countries?: Prisma.VisaCreatecountriesInput | string[]
+  maxNumTrips?: number | null
+  tripMaxLen?: number | null
+  totalMaxLen?: number | null
+  rollingPeriodLen?: number | null
+  mustExitBeforeExpiry?: boolean
+  includeEntryAndExitDates?: boolean
+  renewals?: Prisma.VisaUncheckedCreateNestedManyWithoutRenewedFromInput
+  VisaTrip?: Prisma.VisaTripUncheckedCreateNestedManyWithoutVisaInput
+}
+
+export type VisaCreateOrConnectWithoutRenewedFromInput = {
+  where: Prisma.VisaWhereUniqueInput
+  create: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput>
+}
+
+export type VisaCreateManyRenewedFromInputEnvelope = {
+  data: Prisma.VisaCreateManyRenewedFromInput | Prisma.VisaCreateManyRenewedFromInput[]
+  skipDuplicates?: boolean
+}
+
+export type VisaUpsertWithoutRenewalsInput = {
+  update: Prisma.XOR<Prisma.VisaUpdateWithoutRenewalsInput, Prisma.VisaUncheckedUpdateWithoutRenewalsInput>
+  create: Prisma.XOR<Prisma.VisaCreateWithoutRenewalsInput, Prisma.VisaUncheckedCreateWithoutRenewalsInput>
+  where?: Prisma.VisaWhereInput
+}
+
+export type VisaUpdateToOneWithWhereWithoutRenewalsInput = {
+  where?: Prisma.VisaWhereInput
+  data: Prisma.XOR<Prisma.VisaUpdateWithoutRenewalsInput, Prisma.VisaUncheckedUpdateWithoutRenewalsInput>
+}
+
+export type VisaUpdateWithoutRenewalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  validFrom?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countries?: Prisma.VisaUpdatecountriesInput | string[]
+  maxNumTrips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tripMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  totalMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFrom?: Prisma.VisaUpdateOneWithoutRenewalsNestedInput
+  VisaTrip?: Prisma.VisaTripUpdateManyWithoutVisaNestedInput
+}
+
+export type VisaUncheckedUpdateWithoutRenewalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  validFrom?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countries?: Prisma.VisaUpdatecountriesInput | string[]
+  maxNumTrips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tripMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  totalMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  VisaTrip?: Prisma.VisaTripUncheckedUpdateManyWithoutVisaNestedInput
+}
+
+export type VisaUpsertWithWhereUniqueWithoutRenewedFromInput = {
+  where: Prisma.VisaWhereUniqueInput
+  update: Prisma.XOR<Prisma.VisaUpdateWithoutRenewedFromInput, Prisma.VisaUncheckedUpdateWithoutRenewedFromInput>
+  create: Prisma.XOR<Prisma.VisaCreateWithoutRenewedFromInput, Prisma.VisaUncheckedCreateWithoutRenewedFromInput>
+}
+
+export type VisaUpdateWithWhereUniqueWithoutRenewedFromInput = {
+  where: Prisma.VisaWhereUniqueInput
+  data: Prisma.XOR<Prisma.VisaUpdateWithoutRenewedFromInput, Prisma.VisaUncheckedUpdateWithoutRenewedFromInput>
+}
+
+export type VisaUpdateManyWithWhereWithoutRenewedFromInput = {
+  where: Prisma.VisaScalarWhereInput
+  data: Prisma.XOR<Prisma.VisaUpdateManyMutationInput, Prisma.VisaUncheckedUpdateManyWithoutRenewedFromInput>
+}
+
+export type VisaScalarWhereInput = {
+  AND?: Prisma.VisaScalarWhereInput | Prisma.VisaScalarWhereInput[]
+  OR?: Prisma.VisaScalarWhereInput[]
+  NOT?: Prisma.VisaScalarWhereInput | Prisma.VisaScalarWhereInput[]
+  id?: Prisma.StringFilter<"Visa"> | string
+  user_id?: Prisma.StringFilter<"Visa"> | string
+  name?: Prisma.StringFilter<"Visa"> | string
+  type?: Prisma.StringFilter<"Visa"> | string
+  validFrom?: Prisma.DateTimeFilter<"Visa"> | Date | string
+  expires?: Prisma.DateTimeNullableFilter<"Visa"> | Date | string | null
+  visaNumber?: Prisma.StringNullableFilter<"Visa"> | string | null
+  documentNumber?: Prisma.StringNullableFilter<"Visa"> | string | null
+  countries?: Prisma.StringNullableListFilter<"Visa">
+  maxNumTrips?: Prisma.IntNullableFilter<"Visa"> | number | null
+  tripMaxLen?: Prisma.IntNullableFilter<"Visa"> | number | null
+  totalMaxLen?: Prisma.IntNullableFilter<"Visa"> | number | null
+  rollingPeriodLen?: Prisma.IntNullableFilter<"Visa"> | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFilter<"Visa"> | boolean
+  includeEntryAndExitDates?: Prisma.BoolFilter<"Visa"> | boolean
+  renewedFromId?: Prisma.StringNullableFilter<"Visa"> | string | null
 }
 
 export type VisaCreateWithoutVisaTripInput = {
@@ -652,6 +940,8 @@ export type VisaCreateWithoutVisaTripInput = {
   rollingPeriodLen?: number | null
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFrom?: Prisma.VisaCreateNestedOneWithoutRenewalsInput
+  renewals?: Prisma.VisaCreateNestedManyWithoutRenewedFromInput
 }
 
 export type VisaUncheckedCreateWithoutVisaTripInput = {
@@ -670,6 +960,8 @@ export type VisaUncheckedCreateWithoutVisaTripInput = {
   rollingPeriodLen?: number | null
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: string | null
+  renewals?: Prisma.VisaUncheckedCreateNestedManyWithoutRenewedFromInput
 }
 
 export type VisaCreateOrConnectWithoutVisaTripInput = {
@@ -704,9 +996,89 @@ export type VisaUpdateWithoutVisaTripInput = {
   rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
   includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFrom?: Prisma.VisaUpdateOneWithoutRenewalsNestedInput
+  renewals?: Prisma.VisaUpdateManyWithoutRenewedFromNestedInput
 }
 
 export type VisaUncheckedUpdateWithoutVisaTripInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  validFrom?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countries?: Prisma.VisaUpdatecountriesInput | string[]
+  maxNumTrips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tripMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  totalMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  renewals?: Prisma.VisaUncheckedUpdateManyWithoutRenewedFromNestedInput
+}
+
+export type VisaCreateManyRenewedFromInput = {
+  id?: string
+  user_id: string
+  name: string
+  type: string
+  validFrom: Date | string
+  expires?: Date | string | null
+  visaNumber?: string | null
+  documentNumber?: string | null
+  countries?: Prisma.VisaCreatecountriesInput | string[]
+  maxNumTrips?: number | null
+  tripMaxLen?: number | null
+  totalMaxLen?: number | null
+  rollingPeriodLen?: number | null
+  mustExitBeforeExpiry?: boolean
+  includeEntryAndExitDates?: boolean
+}
+
+export type VisaUpdateWithoutRenewedFromInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  validFrom?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countries?: Prisma.VisaUpdatecountriesInput | string[]
+  maxNumTrips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tripMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  totalMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewals?: Prisma.VisaUpdateManyWithoutRenewedFromNestedInput
+  VisaTrip?: Prisma.VisaTripUpdateManyWithoutVisaNestedInput
+}
+
+export type VisaUncheckedUpdateWithoutRenewedFromInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  validFrom?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visaNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countries?: Prisma.VisaUpdatecountriesInput | string[]
+  maxNumTrips?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tripMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  totalMaxLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rollingPeriodLen?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mustExitBeforeExpiry?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  includeEntryAndExitDates?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  renewals?: Prisma.VisaUncheckedUpdateManyWithoutRenewedFromNestedInput
+  VisaTrip?: Prisma.VisaTripUncheckedUpdateManyWithoutVisaNestedInput
+}
+
+export type VisaUncheckedUpdateManyWithoutRenewedFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -730,10 +1102,12 @@ export type VisaUncheckedUpdateWithoutVisaTripInput = {
  */
 
 export type VisaCountOutputType = {
+  renewals: number
   VisaTrip: number
 }
 
 export type VisaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  renewals?: boolean | VisaCountOutputTypeCountRenewalsArgs
   VisaTrip?: boolean | VisaCountOutputTypeCountVisaTripArgs
 }
 
@@ -745,6 +1119,13 @@ export type VisaCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the VisaCountOutputType
    */
   select?: Prisma.VisaCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * VisaCountOutputType without action
+ */
+export type VisaCountOutputTypeCountRenewalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VisaWhereInput
 }
 
 /**
@@ -771,6 +1152,9 @@ export type VisaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   rollingPeriodLen?: boolean
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: boolean
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
+  renewals?: boolean | Prisma.Visa$renewalsArgs<ExtArgs>
   VisaTrip?: boolean | Prisma.Visa$VisaTripArgs<ExtArgs>
   _count?: boolean | Prisma.VisaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["visa"]>
@@ -791,6 +1175,8 @@ export type VisaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   rollingPeriodLen?: boolean
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: boolean
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
 }, ExtArgs["result"]["visa"]>
 
 export type VisaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -809,6 +1195,8 @@ export type VisaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   rollingPeriodLen?: boolean
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: boolean
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
 }, ExtArgs["result"]["visa"]>
 
 export type VisaSelectScalar = {
@@ -827,19 +1215,28 @@ export type VisaSelectScalar = {
   rollingPeriodLen?: boolean
   mustExitBeforeExpiry?: boolean
   includeEntryAndExitDates?: boolean
+  renewedFromId?: boolean
 }
 
-export type VisaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "name" | "type" | "validFrom" | "expires" | "visaNumber" | "documentNumber" | "countries" | "maxNumTrips" | "tripMaxLen" | "totalMaxLen" | "rollingPeriodLen" | "mustExitBeforeExpiry" | "includeEntryAndExitDates", ExtArgs["result"]["visa"]>
+export type VisaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "name" | "type" | "validFrom" | "expires" | "visaNumber" | "documentNumber" | "countries" | "maxNumTrips" | "tripMaxLen" | "totalMaxLen" | "rollingPeriodLen" | "mustExitBeforeExpiry" | "includeEntryAndExitDates" | "renewedFromId", ExtArgs["result"]["visa"]>
 export type VisaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
+  renewals?: boolean | Prisma.Visa$renewalsArgs<ExtArgs>
   VisaTrip?: boolean | Prisma.Visa$VisaTripArgs<ExtArgs>
   _count?: boolean | Prisma.VisaCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type VisaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type VisaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type VisaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
+}
+export type VisaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  renewedFrom?: boolean | Prisma.Visa$renewedFromArgs<ExtArgs>
+}
 
 export type $VisaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Visa"
   objects: {
+    renewedFrom: Prisma.$VisaPayload<ExtArgs> | null
+    renewals: Prisma.$VisaPayload<ExtArgs>[]
     VisaTrip: Prisma.$VisaTripPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -858,6 +1255,7 @@ export type $VisaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     rollingPeriodLen: number | null
     mustExitBeforeExpiry: boolean
     includeEntryAndExitDates: boolean
+    renewedFromId: string | null
   }, ExtArgs["result"]["visa"]>
   composites: {}
 }
@@ -1252,6 +1650,8 @@ readonly fields: VisaFieldRefs;
  */
 export interface Prisma__VisaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  renewedFrom<T extends Prisma.Visa$renewedFromArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Visa$renewedFromArgs<ExtArgs>>): Prisma.Prisma__VisaClient<runtime.Types.Result.GetResult<Prisma.$VisaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  renewals<T extends Prisma.Visa$renewalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Visa$renewalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VisaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   VisaTrip<T extends Prisma.Visa$VisaTripArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Visa$VisaTripArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VisaTripPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1297,6 +1697,7 @@ export interface VisaFieldRefs {
   readonly rollingPeriodLen: Prisma.FieldRef<"Visa", 'Int'>
   readonly mustExitBeforeExpiry: Prisma.FieldRef<"Visa", 'Boolean'>
   readonly includeEntryAndExitDates: Prisma.FieldRef<"Visa", 'Boolean'>
+  readonly renewedFromId: Prisma.FieldRef<"Visa", 'String'>
 }
     
 
@@ -1551,6 +1952,10 @@ export type VisaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.VisaCreateManyInput | Prisma.VisaCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VisaIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1621,6 +2026,10 @@ export type VisaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Visas to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VisaIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1687,6 +2096,49 @@ export type VisaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Visas to delete.
    */
   limit?: number
+}
+
+/**
+ * Visa.renewedFrom
+ */
+export type Visa$renewedFromArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Visa
+   */
+  select?: Prisma.VisaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Visa
+   */
+  omit?: Prisma.VisaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VisaInclude<ExtArgs> | null
+  where?: Prisma.VisaWhereInput
+}
+
+/**
+ * Visa.renewals
+ */
+export type Visa$renewalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Visa
+   */
+  select?: Prisma.VisaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Visa
+   */
+  omit?: Prisma.VisaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VisaInclude<ExtArgs> | null
+  where?: Prisma.VisaWhereInput
+  orderBy?: Prisma.VisaOrderByWithRelationInput | Prisma.VisaOrderByWithRelationInput[]
+  cursor?: Prisma.VisaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VisaScalarFieldEnum | Prisma.VisaScalarFieldEnum[]
 }
 
 /**

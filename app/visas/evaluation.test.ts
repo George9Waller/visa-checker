@@ -37,6 +37,7 @@ const makeVisa = (overrides: Partial<EvaluationVisa> = {}): EvaluationVisa => ({
   mustExitBeforeExpiry: true,
   includeEntryAndExitDates: true,
   linkedTrips: [],
+  renewalSuccessorId: null,
   ...overrides,
 });
 
@@ -186,5 +187,27 @@ describe("evaluateVisaPortfolio", () => {
     expect(result.alerts.map((alert) => alert.kind)).toContain(
       AlertKind.LONG_GAP_SINCE_LAST_TRIP
     );
+  });
+
+  it("suppresses expiry alerts for visas that have been renewed", () => {
+    const renewedVisa = makeVisa({
+      expires: d("2024-02-01"),
+      renewalSuccessorId: "visa-2",
+    });
+
+    const result = evaluateVisaPortfolio({
+      visas: [renewedVisa],
+      trips: [],
+      referenceDate: d("2024-03-01"),
+    });
+
+    expect(
+      result.alerts.some(
+        (alert) =>
+          alert.kind === AlertKind.VISA_EXPIRED ||
+          alert.kind === AlertKind.VISA_EXPIRING_SOON ||
+          alert.kind === AlertKind.VISA_EXPIRING_WITH_UPCOMING_TRIPS
+      )
+    ).toBe(false);
   });
 });

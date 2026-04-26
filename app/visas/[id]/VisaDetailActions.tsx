@@ -6,12 +6,25 @@ import { useTransition } from "react";
 import { deleteVisa } from "../server-actions";
 import { Icon, IconBtn } from "@/app/design";
 
-export default function VisaDetailActions({ visaId }: { visaId: string }) {
+export default function VisaDetailActions({
+  visaId,
+  renewHref,
+}: {
+  visaId: string;
+  renewHref?: string | null;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   return (
     <div className="flex items-center gap-1">
+      {renewHref && (
+        <Link href={renewHref} title="Renew visa">
+          <IconBtn>
+            <Icon name="arrow-right" size="md" />
+          </IconBtn>
+        </Link>
+      )}
       <Link href={`/visas/${visaId}/edit`} title="Edit visa">
         <IconBtn>
           <Icon name="edit" size="md" />

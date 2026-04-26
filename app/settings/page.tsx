@@ -140,6 +140,17 @@ export default function SettingsPage() {
             {t("signOut")}
           </Btn>
         )}
+
+        <FactGrid cols={1}>
+          <Fact
+            label={t("project")}
+            value={
+              <Link href="https://github.com/George9Waller/visa-checker">
+                https://github.com/George9Waller/visa-checker
+              </Link>
+            }
+          />
+        </FactGrid>
       </Stack>
     </PageContainer>
   );

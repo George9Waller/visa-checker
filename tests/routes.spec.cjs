@@ -139,13 +139,32 @@ test("visa detail shows projection, trips, and coverage", async ({ page }) => {
     page.getByText("Schengen Explorer", { exact: true })
   ).toBeVisible();
   await expect(page.getByText("Validity")).toBeVisible();
+  await expect(page.getByText("Configuration")).toBeVisible();
+  await expect(page.getByText("Maximum total stay")).toBeVisible();
+  await expect(page.getByText("90 days", { exact: true })).toBeVisible();
+  await expect(page.getByText("Rolling period")).toBeVisible();
+  await expect(page.getByText("180 days", { exact: true })).toBeVisible();
+  await expect(page.getByText("Identifiers")).toBeVisible();
+  const visaNumber = page.locator('[data-sensitive-value="visa number"]');
+  const documentNumber = page.locator(
+    '[data-sensitive-value="document number"]'
+  );
+  await expect(visaNumber).toHaveClass(/blur-md/);
+  await expect(documentNumber).toHaveClass(/blur-md/);
+  await page
+    .getByRole("button", { name: /Reveal visa number/i })
+    .click();
+  await expect(visaNumber).not.toHaveClass(/blur-md/);
+  await expect(page.getByText("SCH-2401", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: /Reveal document number/i })
+    .click();
+  await expect(documentNumber).not.toHaveClass(/blur-md/);
+  await expect(page.getByText("P1234567", { exact: true })).toBeVisible();
   await expect(page.getByText("Projection")).toBeVisible();
   await expect(page.getByText("Usage", { exact: true })).toBeVisible();
   await expect(page.getByText("Trips", { exact: true })).toBeVisible();
   await expect(page.getByText("Coverage", { exact: true })).toBeVisible();
-  await expect(
-    page.getByText("Barcelona sprint", { exact: true })
-  ).toBeVisible();
 });
 
 test("settings shows account and preference controls", async ({ page }) => {
@@ -215,4 +234,44 @@ test("visa create flow creates a visa and returns to the visas list", async ({
 
   await page.waitForURL("/visas");
   await expect(page.getByText("US Travel Test")).toBeVisible();
+});
+
+test("visa edit flow updates the visa and restores the original", async ({
+  page,
+}) => {
+  await page.goto(`/visas/${ids.activeVisaId}/edit`);
+
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await expect(page.getByLabel(/Visa name|Nom du visa/i)).toHaveValue(
+    "Schengen Explorer"
+  );
+  await page
+    .getByLabel(/Visa name|Nom du visa/i)
+    .fill("Schengen Explorer Edited");
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await page
+    .getByRole("button", { name: /Save changes|Enregistrer/i })
+    .click();
+
+  await page.waitForURL(`/visas/${ids.activeVisaId}`);
+  await expect(
+    page.getByText("Schengen Explorer Edited", { exact: true })
+  ).toBeVisible();
+
+  await page.goto(`/visas/${ids.activeVisaId}/edit`);
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await page
+    .getByLabel(/Visa name|Nom du visa/i)
+    .fill("Schengen Explorer");
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await page
+    .getByRole("button", { name: /Save changes|Enregistrer/i })
+    .click();
+
+  await page.waitForURL(`/visas/${ids.activeVisaId}`);
+  await expect(
+    page.getByText("Schengen Explorer", { exact: true })
+  ).toBeVisible();
 });

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { prisma } from "../constants-server";
 import { getDaysBetweenDates } from "../server-actions";
+import { buildVisaChainGroups } from "./chains";
 import {
   AggregateRuleKind,
   AlertSeverity,
@@ -18,7 +19,7 @@ export const getVisas = async () => {
     throw new Error("Authentication required");
   }
 
-  return await prisma.visa.findMany({
+  const visas = await prisma.visa.findMany({
     where: {
       user_id: (session.user as any).id,
     },
@@ -29,6 +30,8 @@ export const getVisas = async () => {
       expires: true,
       type: true,
       visaNumber: true,
+      validFrom: true,
+      renewedFromId: true,
     },
     orderBy: [
       {
@@ -36,6 +39,8 @@ export const getVisas = async () => {
       },
     ],
   });
+
+  return buildVisaChainGroups(visas);
 };
 
 export const getVisa = async (id: string) => {
@@ -81,6 +86,19 @@ export const getVisaDetailSummary = async (
       rollingPeriodLen: true,
       mustExitBeforeExpiry: true,
       includeEntryAndExitDates: true,
+      renewedFromId: true,
+      renewedFrom: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      renewals: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       VisaTrip: {
         select: {
           trip: {
@@ -125,6 +143,7 @@ export const getVisaDetailSummary = async (
       rollingPeriodLen: visa.rollingPeriodLen,
       mustExitBeforeExpiry: visa.mustExitBeforeExpiry,
       includeEntryAndExitDates: visa.includeEntryAndExitDates,
+      renewalSuccessorId: visa.renewals[0]?.id ?? null,
       linkedTrips: visa.VisaTrip.map(({ trip }) => ({
         ...trip,
         linkedVisaId: visa.id,
@@ -165,6 +184,51 @@ export const createVisa = async (
   mustExitBeforeExpiry?: boolean,
   includeEntryAndExitDates?: boolean,
   visaNumber?: string,
+  documentNumber?: string,
+  renewedFromId?: string
+) => {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    throw new Error("Authentication required");
+  }
+
+  const visa = await prisma.visa.create({
+    data: {
+      user_id: (session.user as any).id,
+      name,
+      type,
+      validFrom: new Date(validFrom),
+      expires: expires ? new Date(expires) : undefined,
+      visaNumber,
+      documentNumber,
+      countries,
+      maxNumTrips,
+      tripMaxLen,
+      totalMaxLen,
+      rollingPeriodLen,
+      mustExitBeforeExpiry,
+      includeEntryAndExitDates,
+      renewedFromId,
+    },
+  });
+
+  return visa;
+};
+
+export const updateVisa = async (
+  visaId: string,
+  name: string,
+  type: string,
+  validFrom: string,
+  countries: string[],
+  maxNumTrips?: number,
+  tripMaxLen?: number,
+  totalMaxLen?: number,
+  rollingPeriodLen?: number,
+  expires?: string,
+  mustExitBeforeExpiry?: boolean,
+  includeEntryAndExitDates?: boolean,
+  visaNumber?: string,
   documentNumber?: string
 ) => {
   const session = await getServerSession(authOptions);
@@ -172,7 +236,11 @@ export const createVisa = async (
     throw new Error("Authentication required");
   }
 
-  await prisma.visa.create({
+  await prisma.visa.update({
+    where: {
+      user_id: (session.user as any).id,
+      id: visaId,
+    },
     data: {
       user_id: (session.user as any).id,
       name,

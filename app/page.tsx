@@ -52,6 +52,7 @@ export default async function Home() {
               size="sm"
               className="rounded-full h-[40px]"
             >
+              <Icon name="passport" />
               Visas
             </Btn>
             <ProfileAvatar />
@@ -106,14 +107,14 @@ export default async function Home() {
           {upcoming.trips.length === 0 ? (
             <Stack className="gap-3">
               <EmptyState
+                icon="calendar"
                 title="No upcoming trips"
                 message="Add your first trip to start tracking visas."
+                action={{
+                  label: "Add trip",
+                  href: "/trips/create",
+                }}
               />
-              <div>
-                <Btn as={Link} href="/trips/create" variant="primary">
-                  Add trip
-                </Btn>
-              </div>
             </Stack>
           ) : (
             upcoming.trips.map((trip, index) => (
@@ -152,57 +153,65 @@ export default async function Home() {
           )}
         </Stack>
 
-        <Stack className="gap-2">
-          <Text className="font-semibold text-lg">Past</Text>
-          {past.trips.map((trip, index) => (
-            <TripTimelineRow
-              key={trip.id}
-              href={`/trips/${trip.id}`}
-              date={new Date(trip.startDate)}
-              month={new Date(trip.startDate).toLocaleDateString("en-GB", {
-                month: "short",
-              })}
-              title={
-                trip.name ?? COUNTRY_NAMES[trip.countryCode] ?? trip.countryCode
-              }
-              flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
-              meta={formatDateRange(trip.startDate, trip.endDate)}
-              length={trip.durationDays}
-              statusTone={
-                trip.visaRequired ? (trip.visaValid ? "ok" : "danger") : "muted"
-              }
-              statusLabel={
-                trip.visaRequired
-                  ? trip.visaValid
-                    ? "valid"
-                    : "invalid"
-                  : "visa-free"
-              }
-              isPast
-              isLast={index === past.trips.length - 1}
-            />
-          ))}
-        </Stack>
+        {past.trips.length > 0 && (
+          <Stack className="gap-2">
+            <Text className="font-semibold text-lg">Past</Text>
+            {past.trips.map((trip, index) => (
+              <TripTimelineRow
+                key={trip.id}
+                href={`/trips/${trip.id}`}
+                date={new Date(trip.startDate)}
+                month={new Date(trip.startDate).toLocaleDateString("en-GB", {
+                  month: "short",
+                })}
+                title={
+                  trip.name ??
+                  COUNTRY_NAMES[trip.countryCode] ??
+                  trip.countryCode
+                }
+                flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
+                meta={formatDateRange(trip.startDate, trip.endDate)}
+                length={trip.durationDays}
+                statusTone={
+                  trip.visaRequired
+                    ? trip.visaValid
+                      ? "ok"
+                      : "danger"
+                    : "muted"
+                }
+                statusLabel={
+                  trip.visaRequired
+                    ? trip.visaValid
+                      ? "valid"
+                      : "invalid"
+                    : "visa-free"
+                }
+                isPast
+                isLast={index === past.trips.length - 1}
+              />
+            ))}
+          </Stack>
+        )}
       </Stack>
 
-        <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
-          <FAB
-            actions={[
-              {
-                href: "/trips/create",
-                icon: <Icon name="calendar" size="sm" />,
-                title: "Plan trip",
-                description: "Create an upcoming journey",
-              },
-              {
-                href: "/visas/create",
-                icon: <Icon name="visa-card" size="sm" />,
-                title: "Add visa",
-                description: "Save a visa or permit",
-              },
-            ]}
-          />
-        </div>
+      <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+        <FAB
+          actions={[
+            {
+              href: "/trips/create",
+              icon: <Icon name="calendar" size="sm" />,
+              title: "Plan trip",
+              description: "Create an upcoming journey",
+            },
+            {
+              href: "/visas/create",
+              icon: <Icon name="passport" size="sm" />,
+              title: "Add visa",
+              description: "Save a visa or permit",
+            },
+          ]}
+        />
+      </div>
     </PageContainer>
   );
 }

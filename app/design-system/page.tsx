@@ -65,7 +65,15 @@ export default function DesignSystemShowcase() {
       const trip = i > 10 && i < 30 ? (i - 10) * 2 : 0;
       const recovery = i > 50 ? (i - 50) * 1.2 : 0;
       const used = Math.min(90, Math.max(0, base + trip - recovery));
-      return { date, remaining: Math.round(90 - used) };
+      const remainingDays = Math.round(90 - used);
+      return {
+        date: date.toISOString(),
+        usedDays: used,
+        remainingDays,
+        limit: 90,
+        inDangerZone: remainingDays <= 15,
+        triggeredTripIds: [],
+      };
     });
   }, [chartToday]);
 

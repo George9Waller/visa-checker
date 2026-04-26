@@ -14,8 +14,9 @@ import { Sun } from './Sun';
 import { Trash } from './Trash';
 import { User } from './User';
 import { VisaCard } from './VisaCard';
+import { Passport } from './Passport';
 
-export const icons: Record<string, ComponentType> = {
+export const icons = {
   'arrow-right': ArrowRight,
   'calendar': Calendar,
   'check': Check,
@@ -31,6 +32,7 @@ export const icons: Record<string, ComponentType> = {
   'trash': Trash,
   'user': User,
   'visa-card': VisaCard,
+  'passport': Passport
 };
 
 export type IconName = keyof typeof icons;

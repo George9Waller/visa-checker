@@ -1,11 +1,8 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
 import { getVisas } from "./server-actions";
-import { VISA_TYPES_DISPLAY_MAP } from "./constants";
+import { VISA_TYPES_DISPLAY_MAP, VisaTypeKey } from "./constants";
 import {
-  Btn,
-  DashboardHeader,
   EmptyState,
   FAB,
   Icon,
@@ -15,7 +12,7 @@ import {
   Text,
   VisaListRow,
 } from "@/app/design";
-import { COUNTRY_EMOJIS } from "@/app/constants";
+import { getVisaFlag } from "./utils";
 
 const formatDate = (value: Date) =>
   value.toLocaleDateString("en-GB", {
@@ -25,16 +22,64 @@ const formatDate = (value: Date) =>
   });
 
 export default async function VisasPage() {
-  const visas = await getVisas();
+  const visaGroups = await getVisas();
   const today = new Date();
-  const weekday = today.toLocaleDateString("en-GB", { weekday: "long" });
+
+  const renderVisaRow = (
+    visa: (typeof visaGroups)[number]["primary"],
+    muted = false,
+    kicker?: string
+  ) => {
+    const isExpired = Boolean(visa.expires && visa.expires < today);
+    const isExpiringSoon =
+      Boolean(visa.expires) &&
+      !isExpired &&
+      (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
+    const statusTone = muted
+      ? "muted"
+      : isExpired
+        ? "danger"
+        : isExpiringSoon
+          ? "warn"
+          : "ok";
+
+    return (
+      <VisaListRow
+        key={visa.id}
+        href={`/visas/${visa.id}`}
+        flag={getVisaFlag(visa.type as VisaTypeKey, visa.countries)}
+        title={visa.name}
+        kicker={
+          kicker ??
+          [
+            VISA_TYPES_DISPLAY_MAP[visa.type],
+            visa.expires ? `Expires ${formatDate(visa.expires)}` : "Open-ended",
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        }
+        countryCount={visa.countries.length}
+        statusTone={statusTone}
+        statusLabel={
+          muted
+            ? "renewed"
+            : isExpired
+              ? "expired"
+              : isExpiringSoon
+                ? "expiring"
+                : "valid"
+        }
+        muted={muted}
+      />
+    );
+  };
 
   return (
     <>
       <PageHeader title="All visas" backHref="/" />
       <PageContainer>
         <Stack className="gap-4">
-          {visas.length === 0 ? (
+          {visaGroups.length === 0 ? (
             <EmptyState
               icon="passport"
               title="No visas yet"
@@ -45,48 +90,28 @@ export default async function VisasPage() {
               }}
             />
           ) : (
-            visas.map((visa) => {
-              const isExpired = Boolean(visa.expires && visa.expires < today);
-              const isExpiringSoon =
-                Boolean(visa.expires) &&
-                !isExpired &&
-                (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
-              const statusTone = isExpired
-                ? "danger"
-                : isExpiringSoon
-                  ? "warn"
-                  : "ok";
-
-              return (
-                <VisaListRow
-                  key={visa.id}
-                  href={`/visas/${visa.id}`}
-                  flag={COUNTRY_EMOJIS[visa.countries[0] ?? ""] ?? "🛂"}
-                  title={visa.name}
-                  kicker={[
-                    VISA_TYPES_DISPLAY_MAP[visa.type],
-                    visa.expires
-                      ? `Expires ${formatDate(visa.expires)}`
-                      : "Open-ended",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  countryCount={visa.countries.length}
-                  statusTone={statusTone}
-                  statusLabel={
-                    isExpired
-                      ? "expired"
-                      : isExpiringSoon
-                        ? "expiring"
-                        : "valid"
-                  }
-                />
-              );
-            })
+            visaGroups.map((group) => (
+              <div key={group.primary.id} className="space-y-2">
+                {renderVisaRow(group.primary)}
+                {group.history.length > 0 && (
+                  <div className="ml-4 border-l border-border/70 pl-4">
+                    {group.history.map((visa, index) =>
+                      renderVisaRow(
+                        visa,
+                        true,
+                        index === 0
+                          ? "Renewed from this chain"
+                          : "Earlier visa"
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </Stack>
 
-        {visas.length > 0 && (
+        {visaGroups.length > 0 && (
           <Text className="mt-4 text-sm text-fg-muted">
             Tap a visa to review its trips, coverage, and remaining validity.
           </Text>

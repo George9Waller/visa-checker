@@ -101,7 +101,8 @@ export const VisaScalarFieldEnum = {
   totalMaxLen: 'totalMaxLen',
   rollingPeriodLen: 'rollingPeriodLen',
   mustExitBeforeExpiry: 'mustExitBeforeExpiry',
-  includeEntryAndExitDates: 'includeEntryAndExitDates'
+  includeEntryAndExitDates: 'includeEntryAndExitDates',
+  renewedFromId: 'renewedFromId'
 } as const
 
 export type VisaScalarFieldEnum = (typeof VisaScalarFieldEnum)[keyof typeof VisaScalarFieldEnum]

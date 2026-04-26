@@ -2,7 +2,7 @@ import { PropsWithChildren } from 'react';
 import { cn } from '../cn';
 
 export interface FactGridProps extends PropsWithChildren {
-  cols?: 2 | 3 | 4;
+  cols?: 1 | 2 | 3 | 4;
   className?: string;
 }
 
@@ -12,6 +12,7 @@ export function FactGrid({
   children,
 }: FactGridProps) {
   const colClasses: Record<number, string> = {
+    1: 'grid-cols-1',
     2: 'grid-cols-2',
     3: 'grid-cols-3',
     4: 'grid-cols-4',

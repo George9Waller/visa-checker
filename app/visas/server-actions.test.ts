@@ -1,11 +1,19 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-// Mock Prisma and Next-auth before importing the module under test
-vi.mock("../constants-server", () => ({
-  prisma: {
-    visa: { findUnique: vi.fn() },
+const { getServerSessionMock, prismaMock } = vi.hoisted(() => ({
+  getServerSessionMock: vi.fn(),
+  prismaMock: {
+    visa: { findUnique: vi.fn(), update: vi.fn(), create: vi.fn() },
     visaTrip: { findMany: vi.fn(), create: vi.fn(), deleteMany: vi.fn() },
   },
+}));
+
+vi.mock("next-auth", () => ({
+  getServerSession: getServerSessionMock,
+}));
+// Mock Prisma and Next-auth before importing the module under test
+vi.mock("../constants-server", () => ({
+  prisma: prismaMock,
 }));
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
 vi.mock("../../generated/prisma/client", () => ({
@@ -13,9 +21,11 @@ vi.mock("../../generated/prisma/client", () => ({
 }));
 
 import { prisma } from "../constants-server";
-import { visaInfoForDate } from "./server-actions";
+import { createVisa, updateVisa, visaInfoForDate } from "./server-actions";
 
 const mockFindUnique = prisma.visa.findUnique as ReturnType<typeof vi.fn>;
+const mockUpdate = prisma.visa.update as ReturnType<typeof vi.fn>;
+const mockCreate = prisma.visa.create as ReturnType<typeof vi.fn>;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -61,7 +71,10 @@ const makeTrip = (overrides: Partial<Trip> = {}): Trip => ({
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("visaInfoForDate — early exits", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+  });
 
   it("returns error summary when visa is not found", async () => {
     mockFindUnique.mockResolvedValue(null);
@@ -98,7 +111,10 @@ describe("visaInfoForDate — early exits", () => {
 });
 
 describe("visaInfoForDate — individual trip validation", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+  });
 
   it("treats trip start exactly on validFrom as valid", async () => {
     mockFindUnique.mockResolvedValue({
@@ -260,6 +276,89 @@ describe("visaInfoForDate — individual trip validation", () => {
       (r: { name: string }) => r.name === "End Date"
     );
     expect(endDateResult?.valid).toBe(false);
+  });
+});
+
+describe("visa updates", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+  });
+
+  it("updates the visa with the provided fields", async () => {
+    mockUpdate.mockResolvedValue({
+      id: "visa-1",
+    });
+
+    await updateVisa(
+      "visa-1",
+      "Edited visa",
+      "SCHENGEN",
+      "2024-01-01",
+      ["FR", "DE"],
+      2,
+      90,
+      180,
+      180,
+      "2024-12-31",
+      true,
+      true,
+      "V-123",
+      "D-456"
+    );
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          user_id: "user-1",
+          id: "visa-1",
+        },
+        data: expect.objectContaining({
+          name: "Edited visa",
+          type: "SCHENGEN",
+          countries: ["FR", "DE"],
+          visaNumber: "V-123",
+          documentNumber: "D-456",
+        }),
+      })
+    );
+  });
+});
+
+describe("visa creation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+  });
+
+  it("links a renewal to its predecessor when provided", async () => {
+    mockCreate.mockResolvedValue({ id: "visa-new" });
+
+    await createVisa(
+      "Renewed visa",
+      "SCHENGEN",
+      "2024-06-01",
+      ["FR", "DE"],
+      2,
+      90,
+      180,
+      180,
+      "2025-06-01",
+      true,
+      true,
+      "V-123",
+      "D-456",
+      "visa-old"
+    );
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          renewedFromId: "visa-old",
+          name: "Renewed visa",
+        }),
+      })
+    );
   });
 });
 

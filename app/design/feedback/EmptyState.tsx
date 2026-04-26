@@ -3,9 +3,11 @@ import Link from "next/link";
 import { cn } from "../cn";
 import { Text } from "../primitives/Text";
 import { Btn } from "../primitives/Btn";
+import { Icon } from "../primitives/Icon";
+import { IconName } from "../icons";
 
 export interface EmptyStateProps {
-  icon?: ReactNode;
+  icon?: IconName;
   title: string;
   message?: string;
   action?: { label: string; onClick?: () => void; href?: string };
@@ -19,7 +21,7 @@ export function EmptyState({
   action,
   className,
 }: EmptyStateProps) {
-  return (
+  const content = (
     <div
       className={cn(
         "flex flex-col items-center gap-4 rounded-[var(--radius)] border border-dashed border-border-strong",
@@ -30,15 +32,15 @@ export function EmptyState({
     >
       {icon && (
         <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-bg text-4xl text-fg shadow-sm">
-          {icon}
+          <Icon name={icon} size="lg" />
         </div>
       )}
       <div className="flex flex-col gap-2">
         <div className="font-body text-lg font-bold text-fg">{title}</div>
         {message && <Text variant="small">{message}</Text>}
       </div>
-      {action && (
-        action.href ? (
+      {action &&
+        (action.href ? (
           <Btn as={Link} href={action.href} size="sm" variant="ghost">
             {action.label}
           </Btn>
@@ -46,8 +48,9 @@ export function EmptyState({
           <Btn size="sm" variant="ghost" onClick={action.onClick}>
             {action.label}
           </Btn>
-        )
-      )}
+        ))}
     </div>
   );
+
+  return content;
 }

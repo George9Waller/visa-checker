@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
-import { SCHENGEN_COUNTRIES, VISA_TYPE } from "../constants";
-import { createVisa } from "../server-actions";
+import { SCHENGEN_COUNTRIES, VISA_TYPE, VISA_TYPE_META, VisaTypeKey } from "../constants";
+import { createVisa, updateVisa } from "../server-actions";
 import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
 import {
   AlertBox,
@@ -24,18 +24,24 @@ import {
   FactGrid,
 } from "@/app/design";
 
-type VisaTypeKey = keyof typeof VISA_TYPE;
-
-const VISA_TYPE_META: Record<VisaTypeKey, { flag: string; desc: string }> = {
-  SCHENGEN: { flag: "🇪🇺", desc: "Rolling window (90 in 180)" },
-  ESTA: { flag: "🇺🇸", desc: "Fixed duration, single entry" },
-  CA_ETA: { flag: "🇨🇦", desc: "Fixed duration" },
-  AU_EVISITOR: { flag: "🇦🇺", desc: "Multiple entry" },
-  NZETA: { flag: "🇳🇿", desc: "Fixed duration" },
-  OTHER: { flag: "⚙️", desc: "Configure every rule" },
+type FormData = {
+  type: VisaTypeKey;
+  name: string;
+  visaNumber: string;
+  documentNumber: string;
+  countries: string[];
+  validFrom: string;
+  expires: string;
+  mustExitBeforeExpiry: boolean;
+  includeEntryAndExitDates: boolean;
+  totalMaxLen: number | "";
+  rollingPeriodLen: number | "";
+  maxNumTrips: number | "";
+  tripMaxLen: number | "";
 };
 
-type FormData = {
+type VisaDraft = {
+  id: string;
   type: VisaTypeKey;
   name: string;
   visaNumber: string;
@@ -71,15 +77,57 @@ const totalSteps = (type: VisaTypeKey) => (type === "OTHER" ? 5 : 4);
 
 const asIso = (date: Date) => date.toISOString().split("T")[0];
 
-export default function CreateVisaWizard() {
+const formFromDraft = (draft?: VisaDraft | null): FormData =>
+  draft
+    ? {
+        type: draft.type,
+        name: draft.name,
+        visaNumber: draft.visaNumber,
+        documentNumber: draft.documentNumber,
+        countries: draft.countries,
+        validFrom: draft.validFrom,
+        expires: draft.expires,
+        mustExitBeforeExpiry: draft.mustExitBeforeExpiry,
+        includeEntryAndExitDates: draft.includeEntryAndExitDates,
+        totalMaxLen: draft.totalMaxLen,
+        rollingPeriodLen: draft.rollingPeriodLen,
+        maxNumTrips: draft.maxNumTrips,
+        tripMaxLen: draft.tripMaxLen,
+      }
+    : INITIAL;
+
+interface CreateVisaWizardProps {
+  title?: string;
+  mode?: "create" | "edit";
+  cancelHref?: string;
+  submitHref?: string;
+  initialVisa?: VisaDraft | null;
+  lockedType?: VisaTypeKey | null;
+  renewedFromId?: string | null;
+  redirectToCreatedVisa?: boolean;
+}
+
+export default function CreateVisaWizard({
+  title,
+  mode = "create",
+  cancelHref = "/visas",
+  submitHref = "/visas",
+  initialVisa = null,
+  lockedType = null,
+  renewedFromId = null,
+  redirectToCreatedVisa = false,
+}: CreateVisaWizardProps = {}) {
   const t = useTranslations("visa");
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormData>(INITIAL);
+  const [step, setStep] = useState(lockedType ? 1 : 0);
+  const [form, setForm] = useState<FormData>(() => formFromDraft(initialVisa));
   const [countrySearch, setCountrySearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const maxSteps = totalSteps(form.type);
+  const displayedStep = lockedType ? Math.max(step - 1, 0) : step;
+  const displayedTotalSteps = lockedType ? maxSteps - 1 : maxSteps;
+  const shellTitle = title ?? (mode === "edit" ? "Edit visa" : t("create"));
 
   const patch = (update: Partial<FormData>) =>
     setForm((current) => ({ ...current, ...update }));
@@ -106,7 +154,7 @@ export default function CreateVisaWizard() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await createVisa(
+      const payload = [
         form.name,
         form.type,
         form.validFrom,
@@ -119,11 +167,21 @@ export default function CreateVisaWizard() {
         form.mustExitBeforeExpiry,
         form.includeEntryAndExitDates,
         form.visaNumber || undefined,
-        form.documentNumber || undefined
-      );
-      router.push("/visas");
+        form.documentNumber || undefined,
+      ] as const;
+
+      if (mode === "edit" && initialVisa) {
+        await updateVisa(initialVisa.id, ...payload);
+      } else {
+        const visa = await createVisa(...payload, renewedFromId || undefined);
+        if (redirectToCreatedVisa && visa?.id) {
+          router.push(`/visas/${visa.id}`);
+          return;
+        }
+      }
+      router.push(submitHref);
     } catch (error) {
-      toast.error(`Error creating visa: ${error}`);
+      toast.error(`Error saving visa: ${error}`);
     } finally {
       setSubmitting(false);
     }
@@ -136,11 +194,11 @@ export default function CreateVisaWizard() {
   if (step === 0) {
     return (
       <WizardShell
-        title={t("create")}
-        step={0}
-        totalSteps={maxSteps}
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
         stepTitle={t("typeQuestion")}
-        onClose={() => router.push("/visas")}
+        onClose={() => router.push(cancelHref)}
         primary={{
           label: t("continue"),
           onClick: () => setStep(1),
@@ -180,7 +238,7 @@ export default function CreateVisaWizard() {
                           ? {
                               countries: ["US"],
                               tripMaxLen: 90,
-                              mustExitBeforeExpiry: true,
+                              mustExitBeforeExpiry: false,
                               includeEntryAndExitDates: true,
                             }
                           : key === "CA_ETA"
@@ -223,12 +281,12 @@ export default function CreateVisaWizard() {
   if (step === 1) {
     return (
       <WizardShell
-        title={t("create")}
-        step={1}
-        totalSteps={maxSteps}
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
         stepTitle={t("nameStep")}
-        onClose={() => router.push("/visas")}
-        onBack={() => setStep(0)}
+        onClose={() => router.push(cancelHref)}
+        onBack={lockedType ? null : () => setStep(0)}
         primary={{
           label: t("continue"),
           onClick: () => setStep(2),
@@ -273,11 +331,11 @@ export default function CreateVisaWizard() {
   if (step === 2) {
     return (
       <WizardShell
-        title={t("create")}
-        step={2}
-        totalSteps={maxSteps}
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
         stepTitle={t("countriesStep")}
-        onClose={() => router.push("/visas")}
+        onClose={() => router.push(cancelHref)}
         onBack={() => setStep(1)}
         primary={{
           label: t("continue"),
@@ -344,14 +402,20 @@ export default function CreateVisaWizard() {
     const isFinalStep = maxSteps === 4;
     return (
       <WizardShell
-        title={t("create")}
-        step={3}
-        totalSteps={maxSteps}
+        title={shellTitle}
+        step={displayedStep}
+        totalSteps={displayedTotalSteps}
         stepTitle={t("validityStep")}
-        onClose={() => router.push("/visas")}
+        onClose={() => router.push(cancelHref)}
         onBack={() => setStep(2)}
         primary={{
-          label: submitting ? "…" : isFinalStep ? t("create") : t("continue"),
+          label: submitting
+            ? "…"
+            : isFinalStep
+              ? mode === "edit"
+                ? t("save")
+                : t("create")
+              : t("continue"),
           onClick: isFinalStep ? handleSubmit : () => setStep(4),
           enabled: Boolean(form.validFrom) && !submitting,
           variant: isFinalStep ? "accent" : "primary",
@@ -407,14 +471,14 @@ export default function CreateVisaWizard() {
 
   return (
     <WizardShell
-      title={t("create")}
-      step={4}
-      totalSteps={maxSteps}
+      title={shellTitle}
+      step={displayedStep}
+      totalSteps={displayedTotalSteps}
       stepTitle={t("rulesStep")}
-      onClose={() => router.push("/visas")}
+      onClose={() => router.push(cancelHref)}
       onBack={() => setStep(3)}
       primary={{
-        label: submitting ? "…" : t("create"),
+        label: submitting ? "…" : mode === "edit" ? t("save") : t("create"),
         onClick: handleSubmit,
         enabled: !submitting,
         variant: "accent",

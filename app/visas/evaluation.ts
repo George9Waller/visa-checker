@@ -124,6 +124,7 @@ export type EvaluationVisa = Pick<
   | "visaNumber"
 > & {
   linkedTrips: EvaluationTrip[];
+  renewalSuccessorId?: string | null;
 };
 
 export type StructuredIssue = {
@@ -719,6 +720,8 @@ const buildVisaAlerts = (
     return alerts;
   }
 
+  const hasRenewalSuccessor = Boolean(visa.renewalSuccessorId);
+
   // Future dismissal persistence and renewal-linked suppression should hook in here
   // once fingerprints can be matched against dismissed alerts and predecessor/successor visas.
   if (
@@ -750,7 +753,11 @@ const buildVisaAlerts = (
     });
   }
 
-  if (visa.expires && startOfUtcDay(visa.expires).getTime() < today.getTime()) {
+  if (
+    !hasRenewalSuccessor &&
+    visa.expires &&
+    startOfUtcDay(visa.expires).getTime() < today.getTime()
+  ) {
     alerts.push({
       kind: AlertKind.VISA_EXPIRED,
       severity: AlertSeverity.DANGER,
@@ -800,6 +807,7 @@ const buildVisaAlerts = (
     }
 
     if (
+      !hasRenewalSuccessor &&
       tripEvaluation.issueKinds.includes(
         TripIssueKind.TRIP_VISA_WILL_BE_EXPIRED
       )
@@ -857,6 +865,7 @@ const buildVisaAlerts = (
     }
 
     if (
+      !hasRenewalSuccessor &&
       tripEvaluation.issueKinds.includes(
         TripIssueKind.TRIP_MUST_LEAVE_BEFORE_EXPIRY_BREACH
       )
@@ -891,6 +900,7 @@ const buildVisaAlerts = (
   if (visa.expires) {
     const daysUntilExpiry = diffDays(today, visa.expires, false);
     if (
+      !hasRenewalSuccessor &&
       startOfUtcDay(visa.expires).getTime() > today.getTime() &&
       daysUntilExpiry <= 30
     ) {
@@ -909,6 +919,7 @@ const buildVisaAlerts = (
         rankingScore: 500,
       });
     } else if (
+      !hasRenewalSuccessor &&
       startOfUtcDay(visa.expires).getTime() > today.getTime() &&
       daysUntilExpiry <= 90 &&
       upcomingTrips.length > 0

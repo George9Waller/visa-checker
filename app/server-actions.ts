@@ -244,6 +244,12 @@ export const getEvaluationInputs = async (userId: string) => {
         rollingPeriodLen: true,
         mustExitBeforeExpiry: true,
         includeEntryAndExitDates: true,
+        renewedFromId: true,
+        renewals: {
+          select: {
+            id: true,
+          },
+        },
         VisaTrip: {
           select: {
             trip: {
@@ -295,6 +301,7 @@ export const getEvaluationInputs = async (userId: string) => {
     rollingPeriodLen: visa.rollingPeriodLen,
     mustExitBeforeExpiry: visa.mustExitBeforeExpiry,
     includeEntryAndExitDates: visa.includeEntryAndExitDates,
+    renewalSuccessorId: visa.renewals[0]?.id ?? null,
     linkedTrips: visa.VisaTrip.map(({ trip }) => ({
       ...trip,
       linkedVisaId: visa.id,
