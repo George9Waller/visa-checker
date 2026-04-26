@@ -86,7 +86,7 @@ export default async function VisaDetail({
         );
         return {
           key: `${tripEvaluation.trip.id}-${issueKind}`,
-          title: titleForTripIssue(copyT, issueKind),
+          title: titleForTripIssue(copyT, issueKind, issue?.params),
           detail: detailForTripIssue(copyT, issueKind, issue?.params),
         };
       })

@@ -73,7 +73,10 @@ interface CreateTripWizardProps {
   submitHref?: string;
 }
 
-const formatLastVisited = (t: (key: string, values?: any) => string, value: string) => {
+const formatLastVisited = (
+  t: (key: string, values?: any) => string,
+  value: string
+) => {
   const now = new Date();
   const then = new Date(`${value}T00:00:00`);
   const diffDays = Math.max(
@@ -126,9 +129,7 @@ export default function CreateTripWizard({
   const [selectedVisaId, setSelectedVisaId] = useState<string | null>(
     initialVisaId
   );
-  const [visaCandidates, setVisaCandidates] = useState<TripVisaCandidate[]>(
-    []
-  );
+  const [visaCandidates, setVisaCandidates] = useState<TripVisaCandidate[]>([]);
   const [loadingVisas, setLoadingVisas] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -160,9 +161,7 @@ export default function CreateTripWizard({
 
   useEffect(() => {
     let cancelled = false;
-    const shouldLoad = Boolean(
-      visaRequired && country && startDate && endDate
-    );
+    const shouldLoad = Boolean(visaRequired && country && startDate && endDate);
 
     if (!shouldLoad) {
       setVisaCandidates([]);
@@ -318,7 +317,9 @@ export default function CreateTripWizard({
           {countrySuggestions.popular.length > 0 && (
             <Stack gap="md">
               <div>
-                <Text className="font-semibold text-base">{t("mostVisited")}</Text>
+                <Text className="font-semibold text-base">
+                  {t("mostVisited")}
+                </Text>
                 <Text variant="small" tone="muted">
                   {t("mostVisitedHint")}
                 </Text>
@@ -408,7 +409,6 @@ export default function CreateTripWizard({
             <Field label={t("startDate")}>
               <DatePicker
                 value={startDate}
-                minDate={asIso(new Date())}
                 onChange={(value) => {
                   setStartDate(value);
                   if (
@@ -456,9 +456,7 @@ export default function CreateTripWizard({
           title={name || selectedCountryName}
         >
           <Text variant="small" tone="muted">
-            {visaRequired
-              ? t("requiresVisaHint")
-              : t("visaFreeNotice")}
+            {visaRequired ? t("requiresVisaHint") : t("visaFreeNotice")}
           </Text>
         </AlertBox>
 
@@ -496,7 +494,11 @@ export default function CreateTripWizard({
                     candidate.status === "valid"
                       ? t("validForTrip")
                       : firstIssue
-                        ? detailForTripIssue(copyT, firstIssue.kind, firstIssue.params)
+                        ? detailForTripIssue(
+                            copyT,
+                            firstIssue.kind,
+                            firstIssue.params
+                          )
                         : issueKinds[0]
                           ? titleForTripIssue(copyT, issueKinds[0])
                           : t("needsReview");

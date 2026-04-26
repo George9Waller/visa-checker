@@ -1,7 +1,8 @@
 {
   "nav": {
     "trips": "Trips",
-    "visas": "Visas"
+    "visas": "Visas",
+    "atlas": "Atlas"
   },
   "common": {
     "back": "Back",
@@ -265,7 +266,8 @@
       "AU_EVISITOR": "Multiple entry",
       "NZETA": "Fixed duration",
       "OTHER": "Configure every rule"
-    }
+    },
+    "optional": "Optional"
   },
   "status": {
     "valid": "Valid",
@@ -298,11 +300,13 @@
       },
       "ALLOWANCE_REMAINING": {
         "label": "Allowance remaining",
-        "sublabel": "{remaining} days left"
+        "sublabel": "{remaining} days left",
+        "remainingDays": "{remaining} days left"
       },
       "ENTRIES_REMAINING": {
         "label": "Entries remaining",
-        "sublabel": "{remainingEntries} of {maxEntries} left"
+        "sublabel": "{remainingEntries} of {maxEntries} left",
+        "remainingEntries": "{remainingEntries} entries left"
       },
       "NEXT_EXPIRY": {
         "label": "Next expiry",
@@ -320,15 +324,15 @@
         "detail": "{tripLabel} needs a linked visa before departure."
       },
       "TRIP_VISA_EXPIRED": {
-        "title": "Visa expired",
+        "title": "Visa expired for {tripName}",
         "detail": "{visaLabel} expired on {expires}."
       },
       "TRIP_VISA_WILL_BE_EXPIRED": {
-        "title": "Visa expires during trip",
+        "title": "Visa expires during {tripName}",
         "detail": "{visaLabel} expires on {expires} before {tripLabel} ends."
       },
       "TRIP_VISA_NOT_YET_VALID": {
-        "title": "Visa not valid yet",
+        "title": "Visa not valid yet for {tripName}",
         "detail": "{visaLabel} becomes valid on {validFrom}."
       },
       "TRIP_COUNTRY_NOT_COVERED": {
@@ -410,5 +414,37 @@
         "detail": "{gapDays} days since travel."
       }
     }
+  },
+  "atlas": {
+    "title": "Atlas",
+    "share": "Share",
+    "back": "Back",
+    "allYears": "All years",
+    "daysAbroad": "Days abroad",
+    "daysAbroadInYear": "Days abroad in {year}",
+    "countries": "Countries",
+    "trips": "Trips",
+    "days": "days",
+    "section1": "The year, ribboned",
+    "section2": "Most-loved",
+    "section3": "Travel rhythm",
+    "section4": "Records",
+    "noHistory": "No travel history yet.",
+    "home": "Home",
+    "abroad": "Abroad",
+    "past365": "Past 365 days",
+    "longestTrip": "LONGEST TRIP",
+    "busiestMonth": "BUSIEST MONTH",
+    "longestStreak": "LONGEST STREAK ABROAD",
+    "currentStreak": "CURRENT STREAK",
+    "avgTripLength": "AVG. TRIP LENGTH",
+    "daysAway": "days away",
+    "consecutiveDays": "consecutive days",
+    "daysRunning": "days running",
+    "sharePreview": "Share preview",
+    "copy": "Copy",
+    "copied": "Copied",
+    "saveImage": "Save image",
+    "saving": "Saving…"
   }
 }

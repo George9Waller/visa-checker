@@ -55,6 +55,15 @@ export default async function Home() {
           <>
             <Btn
               as={Link}
+              href="/atlas"
+              variant="outline"
+              size="sm"
+              className="rounded-full h-[40px]"
+            >
+              {navT("atlas")}
+            </Btn>
+            <Btn
+              as={Link}
               href="/visas"
               variant="outline"
               size="sm"

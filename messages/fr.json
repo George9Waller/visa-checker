@@ -1,7 +1,8 @@
 {
   "nav": {
     "trips": "Voyages",
-    "visas": "Visas"
+    "visas": "Visas",
+    "atlas": "Atlas"
   },
   "common": {
     "back": "Retour",
@@ -263,7 +264,8 @@
       "AU_EVISITOR": "Entrées multiples",
       "NZETA": "Durée fixe",
       "OTHER": "Configurer chaque règle"
-    }
+    },
+    "optional": "Facultatif"
   },
   "status": {
     "valid": "Valide",
@@ -296,11 +298,13 @@
       },
       "ALLOWANCE_REMAINING": {
         "label": "Quota restant",
-        "sublabel": "{remaining} jours restants"
+        "sublabel": "{remaining} jours restants",
+        "remainingDays": "{remaining} jours restants"
       },
       "ENTRIES_REMAINING": {
         "label": "Entrées restantes",
-        "sublabel": "{remainingEntries} sur {maxEntries} restantes"
+        "sublabel": "{remainingEntries} sur {maxEntries} restantes",
+        "remainingEntries": "{remainingEntries} entrées restantes"
       },
       "NEXT_EXPIRY": {
         "label": "Prochaine expiration",
@@ -318,15 +322,15 @@
         "detail": "{tripLabel} a besoin d'un visa lié avant le départ."
       },
       "TRIP_VISA_EXPIRED": {
-        "title": "Visa expiré",
+        "title": "Visa expiré pour {tripName}",
         "detail": "{visaLabel} a expiré le {expires}."
       },
       "TRIP_VISA_WILL_BE_EXPIRED": {
-        "title": "Le visa expirera pendant le voyage",
+        "title": "Le visa expirera pendant {tripName}",
         "detail": "{visaLabel} expire le {expires} avant la fin de {tripLabel}."
       },
       "TRIP_VISA_NOT_YET_VALID": {
-        "title": "Visa pas encore valide",
+        "title": "Visa pas encore valide pour {tripName}",
         "detail": "{visaLabel} devient valide le {validFrom}."
       },
       "TRIP_COUNTRY_NOT_COVERED": {
@@ -408,5 +412,37 @@
         "detail": "{gapDays} jours depuis le dernier voyage."
       }
     }
+  },
+  "atlas": {
+    "title": "Atlas",
+    "share": "Partager",
+    "back": "Retour",
+    "allYears": "Toutes les années",
+    "daysAbroad": "Jours à l'étranger",
+    "daysAbroadInYear": "Jours à l'étranger en {year}",
+    "countries": "Pays",
+    "trips": "Voyages",
+    "days": "jours",
+    "section1": "L'année, en ruban",
+    "section2": "Les plus aimés",
+    "section3": "Rythme de voyage",
+    "section4": "Récords",
+    "noHistory": "Aucun historique de voyage.",
+    "home": "Maison",
+    "abroad": "À l'étranger",
+    "past365": "Derniers 365 jours",
+    "longestTrip": "PLUS LONG VOYAGE",
+    "busiestMonth": "MOIS LE PLUS CHARGÉ",
+    "longestStreak": "PLUS LONG SÉJOUR À L'ÉTRANGER",
+    "currentStreak": "SÉJOUR ACTUEL",
+    "avgTripLength": "DURÉE MOY. D'UN VOYAGE",
+    "daysAway": "jours à l'étranger",
+    "consecutiveDays": "jours consécutifs",
+    "daysRunning": "jours en cours",
+    "sharePreview": "Aperçu du partage",
+    "copy": "Copier",
+    "copied": "Copié",
+    "saveImage": "Enregistrer l'image",
+    "saving": "Enregistrement…"
   }
 }

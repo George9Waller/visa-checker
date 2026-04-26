@@ -33,13 +33,11 @@ export default async function RenewVisaPage({
         id: summary.visa.id,
         type: summary.visa.type as VisaTypeKey,
         name: summary.visa.name,
-        visaNumber: summary.visa.visaNumber ?? "",
-        documentNumber: summary.visa.documentNumber ?? "",
+        visaNumber: "",
+        documentNumber: "",
         countries: summary.visa.countries,
-        validFrom: summary.visa.validFrom.toISOString().split("T")[0],
-        expires: summary.visa.expires
-          ? summary.visa.expires.toISOString().split("T")[0]
-          : "",
+        validFrom: "",
+        expires: "",
         mustExitBeforeExpiry: summary.visa.mustExitBeforeExpiry,
         includeEntryAndExitDates: summary.visa.includeEntryAndExitDates,
         totalMaxLen: summary.visa.totalMaxLen ?? "",

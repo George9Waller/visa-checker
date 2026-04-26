@@ -13,6 +13,8 @@ import { getTripDetailSummary } from "./trips/server-actions";
 import { COUNTRY_EMOJIS, getCountryName } from "./constants";
 import { formatDateRange } from "./utils";
 import { getLocale, getTranslations } from "next-intl/server";
+import { getVisaFlag } from "./visas/utils";
+import { VisaTypeKey } from "./visas/constants";
 
 export async function Card({ card }: { card: DashboardCard }) {
   const locale = await getLocale();
@@ -37,8 +39,6 @@ export async function Card({ card }: { card: DashboardCard }) {
         ? "border-warn/40"
         : "";
 
-  console.log(card);
-
   if (card.kind == "CURRENTLY_TRAVELING" && tripDetailSummary) {
     return (
       <TripHeroCard
@@ -60,7 +60,13 @@ export async function Card({ card }: { card: DashboardCard }) {
     );
   }
 
-  if (card.kind === "ROLLING_WINDOW_USAGE") {
+  if (
+    [
+      "ROLLING_WINDOW_USAGE",
+      "ALLOWANCE_REMAINING",
+      "ENTRIES_REMAINING",
+    ].includes(card.kind)
+  ) {
     return (
       <StatCard
         href={href}
@@ -79,8 +85,41 @@ export async function Card({ card }: { card: DashboardCard }) {
           max={card.params.limit as number}
         />
         <Text variant="meta" tone="muted">
-          {copyT("cards.ROLLING_WINDOW_USAGE.remainingDays", {
-            remaining: Number(card.params.remaining ?? 0),
+          {card.kind === "ENTRIES_REMAINING"
+            ? copyT("cards.ENTRIES_REMAINING.remainingEntries", {
+                remaining: Number(card.params.remaining ?? 0),
+              })
+            : copyT(`cards.${card.kind}.remainingDays`, {
+                remaining: Number(card.params.remaining ?? 0),
+              })}
+        </Text>
+      </StatCard>
+    );
+  }
+
+  if (card.kind === "NEXT_EXPIRY") {
+    const expiry = new Date(card.params.expiryDate as string);
+    return (
+      <StatCard
+        href={href}
+        label={copy.label}
+        sublabel={copy.sublabel}
+        className={cardClassName}
+      >
+        <div className="flex items-center gap-2 min-w-0 mb-1">
+          <Flag size="md">
+            {getVisaFlag(
+              card.params.visaType as VisaTypeKey,
+              card.params.countries as string[]
+            )}
+          </Flag>
+          <Display level={4}>{card.params.visaName as string}</Display>
+        </div>
+        <Text className="text-sm text-fg-muted">
+          {expiry.toLocaleDateString(locale, {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
           })}
         </Text>
       </StatCard>
@@ -113,7 +152,8 @@ export async function Card({ card }: { card: DashboardCard }) {
             day: "2-digit",
             month: "2-digit",
           })}{" "}
-          · {copyT("cards.NEXT_TRIP.durationDays", {
+          ·{" "}
+          {copyT("cards.NEXT_TRIP.durationDays", {
             durationDays: Number(card.params.durationDays ?? 0),
           })}
         </Text>
@@ -133,12 +173,6 @@ export async function Card({ card }: { card: DashboardCard }) {
       label={copy.label}
       sublabel={copy.sublabel}
       className={cardClassName}
-    >
-      <Text className="text-sm text-fg-muted">
-        {card.kind === "NEXT_EXPIRY"
-          ? (card.params.expiryDate?.toString() ?? "")
-          : ""}
-      </Text>
-    </StatCard>
+    ></StatCard>
   );
 }

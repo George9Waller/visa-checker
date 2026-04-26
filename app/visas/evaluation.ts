@@ -176,7 +176,7 @@ export type DashboardCard = {
   visaName?: string;
   tripId?: string;
   rankingScore: number;
-  params: Record<string, string | number | boolean | null | ProjectionPoint[]>;
+  params: Record<string, string | number | boolean | null | ProjectionPoint[] | string[]>;
 };
 
 export type ProjectionPoint = {
@@ -1206,9 +1206,9 @@ const buildDashboardCards = (
       visaId: entriesRemaining.visa.visa.id,
       rankingScore: entriesRemaining.snapshot.remaining < 0 ? 780 : 580,
       params: {
-        usedEntries: entriesRemaining.snapshot.used,
-        maxEntries: entriesRemaining.snapshot.limit,
-        remainingEntries: entriesRemaining.snapshot.remaining,
+        used: entriesRemaining.snapshot.used,
+        limit: entriesRemaining.snapshot.limit,
+        remaining: entriesRemaining.snapshot.remaining,
       },
     });
   }
@@ -1235,6 +1235,9 @@ const buildDashboardCards = (
         params: {
           daysUntilExpiry,
           expiryDate: isoDate(nextExpiry.visa.expires),
+          visaType: nextExpiry.visa.type,
+          countries: nextExpiry.visa.countries,
+          visaName: nextExpiry.visa.name,
         },
       });
     }

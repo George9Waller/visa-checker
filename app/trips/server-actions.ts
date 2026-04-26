@@ -114,6 +114,7 @@ const buildTripVisaCandidateList = async (
       },
     },
   });
+  console.log("Visas for country:", visas, selectedVisaId);
 
   const results: TripVisaCandidate[] = [];
   for (const visa of visas) {

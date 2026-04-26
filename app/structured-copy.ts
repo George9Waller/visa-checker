@@ -41,16 +41,23 @@ const tripIssueKey = (issueKind: TripIssueKind) => {
   }
 };
 
-export const titleForTripIssue = (t: Translator, issueKind: TripIssueKind) =>
-  t(`tripIssues.${tripIssueKey(issueKind)}.title`);
+export const titleForTripIssue = (
+  t: Translator,
+  issueKind: TripIssueKind,
+  params: Record<string, any> = {}
+) => t(`tripIssues.${tripIssueKey(issueKind)}.title`, params);
 
 export const detailForTripIssue = (
   t: Translator,
   issueKind: TripIssueKind,
   params: Record<string, any> = {}
 ) => {
-  const tripLabel = params.tripName ? `${params.tripName}` : t("labels.thisTrip");
-  const visaLabel = params.visaName ? `${params.visaName}` : t("labels.thisVisa");
+  const tripLabel = params.tripName
+    ? `${params.tripName}`
+    : t("labels.thisTrip");
+  const visaLabel = params.visaName
+    ? `${params.visaName}`
+    : t("labels.thisVisa");
   switch (issueKind) {
     case TripIssueKind.TRIP_NO_VISA_LINKED:
       return t("tripIssues.TRIP_NO_VISA_LINKED.detail", { tripLabel });
@@ -155,12 +162,20 @@ const alertKey = (alertKind: AlertKind) => {
 };
 
 export const copyForAlert = (t: Translator, alert: StructuredAlert) => {
-  const visaLabel = alert.params.visaName ? `${alert.params.visaName}` : t("labels.visa");
-  const tripLabel = alert.params.tripName ? `${alert.params.tripName}` : t("labels.trip");
+  const visaLabel = alert.params.visaName
+    ? `${alert.params.visaName}`
+    : t("labels.visa");
+  const tripLabel = alert.params.tripName
+    ? `${alert.params.tripName}`
+    : t("labels.trip");
+
   switch (alert.kind) {
     case AlertKind.VISA_OVER_LIMIT_NOW:
       return {
-        title: t("alerts.VISA_OVER_LIMIT_NOW.title", { visaLabel }),
+        title: t("alerts.VISA_OVER_LIMIT_NOW.title", {
+          ...alert.params,
+          visaLabel,
+        }),
         detail: t("alerts.VISA_OVER_LIMIT_NOW.detail", {
           used: alert.params.used,
           limit: alert.params.limit,
@@ -168,7 +183,7 @@ export const copyForAlert = (t: Translator, alert: StructuredAlert) => {
       };
     case AlertKind.VISA_EXPIRED:
       return {
-        title: t("alerts.VISA_EXPIRED.title", { visaLabel }),
+        title: t("alerts.VISA_EXPIRED.title", { ...alert.params, visaLabel }),
         detail: t("alerts.VISA_EXPIRED.detail", {
           expires: alert.params.expires,
         }),
@@ -176,109 +191,142 @@ export const copyForAlert = (t: Translator, alert: StructuredAlert) => {
     case AlertKind.VISA_WILL_EXCEED_ON_PLANNED_TRIP:
       return {
         title: t("alerts.VISA_WILL_EXCEED_ON_PLANNED_TRIP.title", {
+          ...alert.params,
           tripLabel,
         }),
         detail: t("alerts.VISA_WILL_EXCEED_ON_PLANNED_TRIP.detail", {
+          ...alert.params,
           visaLabel,
-          tripStartDate: alert.params.tripStartDate,
         }),
       };
     case AlertKind.VISA_EXPIRES_DURING_TRIP:
       return {
         title: t("alerts.VISA_EXPIRES_DURING_TRIP.title", {
+          ...alert.params,
           visaLabel,
           tripLabel,
         }),
         detail: t("alerts.VISA_EXPIRES_DURING_TRIP.detail", {
+          ...alert.params,
           tripLabel,
-          tripEndDate: alert.params.tripEndDate,
         }),
       };
     case AlertKind.VISA_NOT_YET_VALID_FOR_TRIP:
       return {
         title: t("alerts.VISA_NOT_YET_VALID_FOR_TRIP.title", {
+          ...alert.params,
           visaLabel,
           tripLabel,
         }),
         detail: t("alerts.VISA_NOT_YET_VALID_FOR_TRIP.detail", {
-          validFrom: alert.params.validFrom,
+          ...alert.params,
         }),
       };
     case AlertKind.VISA_MUST_LEAVE_BEFORE_EXPIRY_BREACH:
       return {
         title: t("alerts.VISA_MUST_LEAVE_BEFORE_EXPIRY_BREACH.title", {
+          ...alert.params,
           visaLabel,
         }),
         detail: t("alerts.VISA_MUST_LEAVE_BEFORE_EXPIRY_BREACH.detail", {
+          ...alert.params,
           tripLabel,
-          tripEndDate: alert.params.tripEndDate,
         }),
       };
     case AlertKind.VISA_EXPIRING_SOON:
       return {
-        title: t("alerts.VISA_EXPIRING_SOON.title", { visaLabel }),
+        title: t("alerts.VISA_EXPIRING_SOON.title", {
+          ...alert.params,
+          visaLabel,
+        }),
         detail: t("alerts.VISA_EXPIRING_SOON.detail", {
-          daysUntilExpiry: alert.params.daysUntilExpiry,
+          ...alert.params,
         }),
       };
     case AlertKind.VISA_EXPIRING_WITH_UPCOMING_TRIPS:
       return {
         title: t("alerts.VISA_EXPIRING_WITH_UPCOMING_TRIPS.title", {
+          ...alert.params,
           visaLabel,
         }),
         detail: t("alerts.VISA_EXPIRING_WITH_UPCOMING_TRIPS.detail", {
-          daysUntilExpiry: alert.params.daysUntilExpiry,
+          ...alert.params,
         }),
       };
     case AlertKind.VISA_APPROACHING_ALLOWANCE:
       return {
-        title: t("alerts.VISA_APPROACHING_ALLOWANCE.title", { visaLabel }),
+        title: t("alerts.VISA_APPROACHING_ALLOWANCE.title", {
+          ...alert.params,
+          visaLabel,
+        }),
         detail: t("alerts.VISA_APPROACHING_ALLOWANCE.detail", {
-          remaining: alert.params.remaining,
+          ...alert.params,
         }),
       };
     case AlertKind.VISA_LAST_ENTRY_CONSUMED:
       return {
-        title: t("alerts.VISA_LAST_ENTRY_CONSUMED.title", { visaLabel }),
-        detail: t("alerts.VISA_LAST_ENTRY_CONSUMED.detail"),
+        title: t("alerts.VISA_LAST_ENTRY_CONSUMED.title", {
+          ...alert.params,
+          visaLabel,
+        }),
+        detail: t("alerts.VISA_LAST_ENTRY_CONSUMED.detail", {
+          ...alert.params,
+        }),
       };
     case AlertKind.ROLLING_WINDOW_RESETS_SOON:
       return {
-        title: t("alerts.ROLLING_WINDOW_RESETS_SOON.title", { visaLabel }),
+        title: t("alerts.ROLLING_WINDOW_RESETS_SOON.title", {
+          ...alert.params,
+          visaLabel,
+        }),
         detail: t("alerts.ROLLING_WINDOW_RESETS_SOON.detail", {
-          nextResetDate: alert.params.nextResetDate,
+          ...alert.params,
         }),
       };
     case AlertKind.VISA_VALID_SOON:
       return {
-        title: t("alerts.VISA_VALID_SOON.title", { visaLabel }),
+        title: t("alerts.VISA_VALID_SOON.title", {
+          ...alert.params,
+          visaLabel,
+        }),
         detail: t("alerts.VISA_VALID_SOON.detail", {
-          daysUntilValid: alert.params.daysUntilValid,
+          ...alert.params,
         }),
       };
     case AlertKind.LONG_GAP_SINCE_LAST_TRIP:
       return {
         title: t("alerts.LONG_GAP_SINCE_LAST_TRIP.title", {
+          ...alert.params,
           visaLabel,
         }),
         detail: t("alerts.LONG_GAP_SINCE_LAST_TRIP.detail", {
-          gapDays: alert.params.gapDays,
+          ...alert.params,
         }),
       };
     default:
       return {
-        title: titleForTripIssue(t, alert.kind as TripIssueKind),
-        detail: detailForTripIssue(t, alert.kind as TripIssueKind, alert.params),
+        title: titleForTripIssue(t, alert.kind as TripIssueKind, alert.params),
+        detail: detailForTripIssue(
+          t,
+          alert.kind as TripIssueKind,
+          alert.params
+        ),
       };
   }
 };
 
-export const alertSignatureForDisplay = (t: Translator, alert: StructuredAlert) => {
+export const alertSignatureForDisplay = (
+  t: Translator,
+  alert: StructuredAlert
+) => {
   const copy = copyForAlert(t, alert);
   return `${copy.title}::${copy.detail ?? ""}`;
 };
 
-export const uniqueAlertsForDisplay = (t: Translator, alerts: StructuredAlert[]) => {
+export const uniqueAlertsForDisplay = (
+  t: Translator,
+  alerts: StructuredAlert[]
+) => {
   const seen = new Set<string>();
   return alerts.filter((alert) => {
     const signature = alertSignatureForDisplay(t, alert);

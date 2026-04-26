@@ -135,7 +135,7 @@ export default async function VisasPage() {
               },
               {
                 href: "/visas/create",
-                icon: <Icon name="visa-card" size="sm" />,
+                icon: <Icon name="passport" size="sm" />,
                 title: fabT("visa"),
                 description: fabT("visaDesc"),
               },
