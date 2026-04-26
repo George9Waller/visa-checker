@@ -1,17 +1,25 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { getProviders } from "next-auth/react";
 import { cn } from "@/app/design/cn";
-import { APP_ESTABLISHED_YEAR } from "../constants";
-import { getProviders, signIn } from "next-auth/react";
+import { Stack, Text } from "@/app/design";
+import { APP_ESTABLISHED_YEAR, APP_NAME } from "../constants";
+import { SignInButton } from "./SignInButton";
 
 export default async function SignInClient() {
-  const providers = await getProviders();
-  const t = useTranslations("signin");
+  const [providers, t] = await Promise.all([
+    getProviders(),
+    getTranslations("signin"),
+  ]);
+  const authProviders = providers
+    ? Object.values(providers).filter(
+        (provider) => provider.id !== "credentials"
+      )
+    : [];
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-bg text-fg pb-40">
-      {/* SVG Grid Backdrop */}
+    <div className="relative min-h-screen flex flex-col bg-bg text-fg pb-45">
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.55]"
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.55]"
         viewBox="0 0 400 800"
         preserveAspectRatio="none"
         style={{ zIndex: 0 }}
@@ -43,20 +51,19 @@ export default async function SignInClient() {
         <rect width="100%" height="100%" fill="url(#grid)" />
       </svg>
 
-      {/* Masthead Header */}
-      <header className="relative z-10 px-[22px] pt-5 flex flex-col gap-0">
+      <header className="relative z-10 flex flex-col gap-0 px-[22px] pt-5">
         <div className="flex justify-between font-mono text-[11px] tracking-[0.22em] opacity-70">
+          <Text>{APP_NAME}</Text>
           <span className="opacity-55">
             {t("established", { year: APP_ESTABLISHED_YEAR })}
           </span>
         </div>
-        <div className="h-px bg-fg opacity-85 mt-[10px]" />
-        <div className="h-px bg-fg opacity-18 mt-[3px]" />
+        <div className="mt-[10px] h-px bg-fg opacity-85" />
+        <div className="mt-[3px] h-px bg-fg opacity-18" />
       </header>
 
-      {/* Hero Section */}
       <section className="relative z-10 px-[22px] pt-7">
-        <div className="font-mono text-[11px] tracking-[0.28em] opacity-60 mb-[14px]">
+        <div className="mb-[14px] font-mono text-[11px] tracking-[0.28em] opacity-60">
           {t("kicker")}
         </div>
         <h1 className="font-display text-[clamp(54px,14vw,72px)] leading-[0.92] tracking-[-0.025em] mb-0">
@@ -66,43 +73,39 @@ export default async function SignInClient() {
           <br />
           {t("headlinePart3")}
         </h1>
-        <p className="font-body text-[15.5px] text-fg-muted leading-[1.55] mt-[22px] max-w-[360px]">
+        <p className="mt-[22px] max-w-[360px] font-body text-[15.5px] leading-[1.55] text-fg-muted">
           {t("body")}
         </p>
       </section>
 
-      {/* Promise Strip — 3 Columns */}
-      <section className="relative z-10 mx-[22px] mt-[26px] border-t border-fg border-b border-fg/25 grid grid-cols-3">
-        {/* Trips */}
-        <div className="px-3 py-[14px] border-r border-fg/22">
-          <div className="font-mono text-[10px] tracking-[0.24em] opacity-50 mb-2">
+      <section className="relative z-10 mx-[22px] mt-[26px] grid grid-cols-3 border-b border-fg/25 border-t border-fg">
+        <div className="border-r border-fg/22 px-3 py-[14px]">
+          <div className="mb-2 font-mono text-[10px] tracking-[0.24em] opacity-50">
             01
           </div>
-          <div className="font-display text-[28px] leading-none mb-1">
+          <div className="mb-1 font-display text-[28px] leading-none">
             {t("promiseTrips")}
           </div>
           <div className="font-display text-[15px] italic opacity-55">
             {t("promiseTripsLabel")}
           </div>
         </div>
-        {/* Days */}
-        <div className="px-3 py-[14px] border-r border-fg/22">
-          <div className="font-mono text-[10px] tracking-[0.24em] opacity-50 mb-2">
+        <div className="border-r border-fg/22 px-3 py-[14px]">
+          <div className="mb-2 font-mono text-[10px] tracking-[0.24em] opacity-50">
             02
           </div>
-          <div className="font-display text-[28px] leading-none mb-1">
+          <div className="mb-1 font-display text-[28px] leading-none">
             {t("promiseDays")}
           </div>
           <div className="font-display text-[15px] italic opacity-55">
             {t("promiseDaysLabel")}
           </div>
         </div>
-        {/* Visas */}
         <div className="px-3 py-[14px]">
-          <div className="font-mono text-[10px] tracking-[0.24em] opacity-50 mb-2">
+          <div className="mb-2 font-mono text-[10px] tracking-[0.24em] opacity-50">
             03
           </div>
-          <div className="font-display text-[28px] leading-none mb-1">
+          <div className="mb-1 font-display text-[28px] leading-none">
             {t("promiseVisas")}
           </div>
           <div className="font-display text-[15px] italic opacity-55">
@@ -111,9 +114,8 @@ export default async function SignInClient() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="relative z-10 px-[22px] pt-7">
-        <div className="flex justify-between mb-[14px]">
+        <div className="mb-[14px] flex justify-between">
           <div className="font-mono text-[11px] tracking-[0.28em] opacity-60">
             {t("howItWorksTitle")}
           </div>
@@ -121,7 +123,7 @@ export default async function SignInClient() {
             {t("howItWorksCount")}
           </div>
         </div>
-        <ol className="list-none m-0 p-0 space-y-0">
+        <ol className="m-0 list-none p-0 space-y-0">
           {[
             { title: t("step1Title"), desc: t("step1Desc"), roman: "I" },
             { title: t("step2Title"), desc: t("step2Desc"), roman: "II" },
@@ -130,18 +132,18 @@ export default async function SignInClient() {
             <li
               key={idx}
               className={cn(
-                "grid grid-cols-[44px_1fr] gap-[14px] py-[14px] border-t border-fg/22",
+                "grid grid-cols-[44px_1fr] gap-[14px] border-t border-fg/22 py-[14px]",
                 idx === 2 && "border-b"
               )}
             >
-              <div className="font-display italic text-accent text-[32px] leading-none font-feature-settings-smcp">
+              <div className="font-display text-[32px] leading-none italic text-accent font-feature-settings-smcp">
                 {step.roman}
               </div>
               <div>
-                <div className="font-display text-[22px] leading-[1.1] tracking-[-0.01em] mb-1">
+                <div className="mb-1 font-display text-[22px] leading-[1.1] tracking-[-0.01em]">
                   {step.title}
                 </div>
-                <p className="font-body text-[13.5px] leading-[1.5] text-fg-muted m-0">
+                <p className="m-0 font-body text-[13.5px] leading-[1.5] text-fg-muted">
                   {step.desc}
                 </p>
               </div>
@@ -150,32 +152,32 @@ export default async function SignInClient() {
         </ol>
       </section>
 
-      {/* Footer CTA */}
-      <footer className="fixed bottom-0 left-0 right-0 z-10 px-[22px] py-7 flex flex-col bg-bg border-t border-fg/22">
-        {providers &&
-          Object.values(providers).map((provider) => (
+      <footer className="fixed bottom-0 left-0 right-0 z-10 flex flex-col border-t border-fg/22 bg-bg px-[22px] py-4">
+        <Stack gap="sm">
+          {authProviders.map((provider) => (
             <div key={provider.name}>
-              <button onClick={() => signIn(provider.id)}>
-                Sign in with {provider.name}
-              </button>
+              <SignInButton name={provider.name} id={provider.id} />
             </div>
           ))}
 
-        {/* Micro-print */}
-        <div className="flex justify-between mt-3 font-mono text-[10px] tracking-[0.18em] opacity-50">
-          <span>v {process.env.NEXT_PUBLIC_APP_VERSION}</span>
-        </div>
+          <p className="text-center font-body text-[11px] leading-[1.45] text-fg-muted">
+            {t("disclaimer")}
+          </p>
 
-        {/* Dev Sign-in (dev env only) */}
+          <div className="mt-3 flex justify-between font-mono text-[10px] tracking-[0.18em] opacity-50">
+            <span>v {process.env.NEXT_PUBLIC_APP_VERSION}</span>
+          </div>
+        </Stack>
+
         {process.env.NODE_ENV !== "production" && (
           <form
             action="/api/dev-login"
             method="post"
-            className="mt-4 flex justify-center"
+            className="flex justify-center"
           >
             <button
               type="submit"
-              className="font-mono text-[11px] tracking-[0.16em] opacity-50 hover:opacity-70 transition-opacity bg-none border-none cursor-pointer p-0"
+              className="cursor-pointer border-none bg-none p-0 font-mono text-[11px] tracking-[0.16em] opacity-50 transition-opacity hover:opacity-70"
             >
               {t("devSignIn")}
             </button>

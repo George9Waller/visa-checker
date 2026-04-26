@@ -24,7 +24,17 @@ export async function POST(request: NextRequest) {
     secret,
   });
 
-  const response = NextResponse.redirect(new URL("/", request.url));
+  const referer = request.headers.get("referer") ?? "";
+  const refererLocale = referer.match(/\/(en|fr)(?:\/|$)/)?.[1];
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+  const locale =
+    refererLocale === "fr" || refererLocale === "en"
+      ? refererLocale
+      : cookieLocale === "fr" || cookieLocale === "en"
+        ? cookieLocale
+        : "en";
+
+  const response = NextResponse.redirect(new URL(`/${locale}`, request.url));
   response.cookies.set({
     name: getCookieName(request),
     value: token,

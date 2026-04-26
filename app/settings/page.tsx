@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import {
   Btn,
   DashboardHeader,
@@ -17,7 +16,6 @@ import {
   Stack,
   Text,
 } from "@/app/design";
-import { setLocaleCookie } from "@/app/components/locale";
 import {
   type ColorScheme,
   getSavedScheme,
@@ -29,31 +27,16 @@ const LOCALES = [
   { code: "fr", label: "Français" },
 ];
 
-const getInitialLocale = () => {
-  if (typeof document === "undefined") {
-    return "en";
-  }
-  const match = document.cookie.match(/NEXT_LOCALE=([^;]+)/);
-  return match?.[1] ?? "en";
-};
-
 export default function SettingsPage() {
   const t = useTranslations("settings");
   const navT = useTranslations("nav");
+  const currentLocale = useLocale();
   const { data: session } = useSession();
-  const router = useRouter();
   const [scheme, setScheme] = useState<ColorScheme>(() => getSavedScheme());
-  const [currentLocale, setCurrentLocale] = useState(() => getInitialLocale());
 
   const handleScheme = (nextScheme: ColorScheme) => {
     setScheme(nextScheme);
     saveScheme(nextScheme);
-  };
-
-  const handleLocale = (code: string) => {
-    setLocaleCookie(code);
-    setCurrentLocale(code);
-    router.refresh();
   };
 
   const initials = session?.user?.name
@@ -126,19 +109,25 @@ export default function SettingsPage() {
           </Text>
           <OptionList maxHeight="none">
             {LOCALES.map((locale) => (
-              <OptionRow
-                key={locale.code}
-                title={t(`locales.${locale.code}`)}
-                subtitle={locale.code.toUpperCase()}
-                selected={currentLocale === locale.code}
-                onClick={() => handleLocale(locale.code)}
-              />
+              <Link locale={locale.code} href="/settings" key={locale.code}>
+                <OptionRow
+                  title={t(`locales.${locale.code}`)}
+                  subtitle={locale.code.toUpperCase()}
+                  selected={currentLocale === locale.code}
+                  onClick={() =>
+                    window.location.replace(`/${locale.code}/settings`)
+                  }
+                />
+              </Link>
             ))}
           </OptionList>
         </Stack>
 
         {session?.user && (
-          <Btn variant="danger" onClick={() => signOut({ callbackUrl: "/" })}>
+          <Btn
+            variant="danger"
+            onClick={() => signOut({ callbackUrl: `/${currentLocale}` })}
+          >
             {t("signOut")}
           </Btn>
         )}
@@ -147,9 +136,13 @@ export default function SettingsPage() {
           <Fact
             label={t("project")}
             value={
-              <Link href="https://github.com/George9Waller/visa-checker" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://github.com/George9Waller/visa-checker"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 https://github.com/George9Waller/visa-checker
-              </Link>
+              </a>
             }
           />
         </FactGrid>

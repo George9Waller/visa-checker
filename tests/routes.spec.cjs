@@ -25,7 +25,7 @@ const pickToday = async (page, labelText) => {
 };
 
 test("dashboard renders the seeded non-empty state", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/en");
 
   await expect(
     page.getByRole("heading", { name: /Trips|Voyages/i })
@@ -41,11 +41,22 @@ test("dashboard renders the seeded non-empty state", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("french dashboard renders without manual cookie setup", async ({
+  page,
+}) => {
+  await page.goto("/fr");
+
+  await expect(
+    page.getByRole("heading", { name: /Voyages/i })
+  ).toBeVisible();
+  await expect(page.getByText("À venir")).toBeVisible();
+});
+
 test("visas list shows seeded ordering and tones", async ({ page }) => {
-  await page.goto("/visas");
+  await page.goto("/en/visas");
 
   const rows = page
-    .locator('main a[href^="/visas/"]')
+    .locator('main a[href^="/en/visas/"]')
     .filter({ hasNotText: "Add visa" });
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText("Schengen Explorer");
@@ -59,7 +70,7 @@ test("visas list shows seeded ordering and tones", async ({ page }) => {
 test("trip detail shows the selected visa and coverage hierarchy", async ({
   page,
 }) => {
-  await page.goto(`/trips/${ids.currentTripId}`);
+  await page.goto(`/en/trips/${ids.currentTripId}`);
 
   await expect(
     page.getByText("Barcelona sprint", { exact: true })
@@ -81,7 +92,7 @@ test("trip detail shows the selected visa and coverage hierarchy", async ({
 });
 
 test("trip edit page opens with the current trip data", async ({ page }) => {
-  await page.goto(`/trips/${ids.currentTripId}/edit`);
+  await page.goto(`/en/trips/${ids.currentTripId}/edit`);
 
   await expect(page.getByText("Edit trip")).toBeVisible();
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
@@ -96,7 +107,7 @@ test("trip edit page opens with the current trip data", async ({ page }) => {
 test("trip edit flow updates the trip and relinks the visa", async ({
   page,
 }) => {
-  await page.goto(`/trips/${ids.currentTripId}/edit`);
+  await page.goto(`/en/trips/${ids.currentTripId}/edit`);
 
   await page
     .getByPlaceholder(/Search country|Rechercher un pays/i)
@@ -112,7 +123,7 @@ test("trip edit flow updates the trip and relinks the visa", async ({
   await page.getByRole("button", { name: /Japan Fast Track/ }).click();
   await page.getByRole("button", { name: /Save changes|Enregistrer/i }).click();
 
-  await page.waitForURL(`/trips/${ids.currentTripId}`);
+  await page.waitForURL(`/en/trips/${ids.currentTripId}`);
   await expect(page.getByText("Tokyo sprint", { exact: true })).toBeVisible();
   await expect(
     page.getByText("Japan Fast Track covers this trip.")
@@ -123,7 +134,7 @@ test("trip edit flow updates the trip and relinks the visa", async ({
 });
 
 test("visa detail shows projection, trips, and coverage", async ({ page }) => {
-  await page.goto(`/visas/${ids.activeVisaId}`);
+  await page.goto(`/en/visas/${ids.activeVisaId}`);
 
   await expect(
     page.getByText("Schengen Explorer", { exact: true })
@@ -158,7 +169,7 @@ test("visa detail shows projection, trips, and coverage", async ({ page }) => {
 });
 
 test("settings shows account and preference controls", async ({ page }) => {
-  await page.goto("/settings");
+  await page.goto("/en/settings");
 
   await expect(page.getByText("Account")).toBeVisible();
   await expect(page.getByText("Appearance")).toBeVisible();
@@ -170,7 +181,7 @@ test("settings shows account and preference controls", async ({ page }) => {
 test("trip create flow creates a trip and returns to the dashboard", async ({
   page,
 }) => {
-  await page.goto("/trips/create");
+  await page.goto("/en/trips/create");
 
   await expect(page.getByText("Recently visited")).toBeVisible();
   await expect(page.getByText("Most visited")).toBeVisible();
@@ -195,7 +206,7 @@ test("trip create flow creates a trip and returns to the dashboard", async ({
     .getByRole("button", { name: /Create trip|Créer le voyage/i })
     .click();
 
-  await page.waitForURL("/");
+  await page.waitForURL("/en");
   await expect(
     page.getByRole("link", { name: /Paris review/i }).first()
   ).toBeVisible();
@@ -204,7 +215,7 @@ test("trip create flow creates a trip and returns to the dashboard", async ({
 test("visa create flow creates a visa and returns to the visas list", async ({
   page,
 }) => {
-  await page.goto("/visas/create");
+  await page.goto("/en/visas/create");
 
   await page.getByRole("button", { name: /ESTA/ }).click();
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
@@ -226,14 +237,14 @@ test("visa create flow creates a visa and returns to the visas list", async ({
     .getByRole("button", { name: /Create visa|Créer le visa/i })
     .click();
 
-  await page.waitForURL("/visas");
+  await page.waitForURL("/en/visas");
   await expect(page.getByText("US Travel Test")).toBeVisible();
 });
 
 test("visa edit flow updates the visa and restores the original", async ({
   page,
 }) => {
-  await page.goto(`/visas/${ids.activeVisaId}/edit`);
+  await page.goto(`/en/visas/${ids.activeVisaId}/edit`);
 
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
   await expect(page.getByLabel(/Visa name|Nom du visa/i)).toHaveValue(
@@ -248,12 +259,12 @@ test("visa edit flow updates the visa and restores the original", async ({
     .getByRole("button", { name: /Save changes|Enregistrer/i })
     .click();
 
-  await page.waitForURL(`/visas/${ids.activeVisaId}`);
+  await page.waitForURL(`/en/visas/${ids.activeVisaId}`);
   await expect(
     page.getByText("Schengen Explorer Edited", { exact: true })
   ).toBeVisible();
 
-  await page.goto(`/visas/${ids.activeVisaId}/edit`);
+  await page.goto(`/en/visas/${ids.activeVisaId}/edit`);
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
   await page
     .getByLabel(/Visa name|Nom du visa/i)
@@ -264,7 +275,7 @@ test("visa edit flow updates the visa and restores the original", async ({
     .getByRole("button", { name: /Save changes|Enregistrer/i })
     .click();
 
-  await page.waitForURL(`/visas/${ids.activeVisaId}`);
+  await page.waitForURL(`/en/visas/${ids.activeVisaId}`);
   await expect(
     page.getByText("Schengen Explorer", { exact: true })
   ).toBeVisible();

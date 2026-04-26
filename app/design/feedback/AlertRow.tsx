@@ -1,5 +1,5 @@
 import { cn } from "../cn";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Tone, toneAlertClasses } from "../tokens";
 import { StatusPip } from "../primitives/StatusPip";
 import { Text } from "../primitives/Text";

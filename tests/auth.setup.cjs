@@ -13,10 +13,10 @@ test("bootstrap authenticated storage state", async ({ page }) => {
   );
 
   await mkdir(authDir, { recursive: true });
-  await page.goto("/signin", { waitUntil: "domcontentloaded" });
+  await page.goto("/en/signin", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Sign in as Dev User" }).click();
-  await page.waitForURL("**/", { waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/\/$/);
+  await page.waitForURL("**/en", { waitUntil: "networkidle" });
+  await expect(page).toHaveURL(/\/en$/);
   await expect(page.getByRole("heading", { name: "Trips" })).toBeVisible();
   await page.evaluate(() => {
     document.cookie = "NEXT_LOCALE=en;path=/;max-age=31536000";

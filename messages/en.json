@@ -28,6 +28,7 @@
     "moreWarnings": "{count, plural, one {# more warning} other {# more warnings}}"
   },
   "signin": {
+    "established": "EST. · {year}",
     "kicker": "— A FIELD-NOTEBOOK FOR",
     "headlinePart1": "Visas,",
     "headlinePart2": "tracked",
@@ -47,7 +48,8 @@
     "step2Desc": "Country, dates, a one-line note. Past or planned, it all goes in.",
     "step3Title": "Read the math",
     "step3Desc": "Day-counts, rolling windows, expiry alerts — quietly, in the background.",
-    "continueWithGoogle": "Continue with Google",
+    "signInWith": "Sign in with {provider}",
+    "disclaimer": "This app helps you track travel data, but it does not replace official immigration advice.",
     "devSignIn": "Sign in as Dev User"
   },
   "settings": {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { SCHENGEN_COUNTRIES, VISA_TYPE, VISA_TYPE_META, VisaTypeKey } from "../constants";
 import { createVisa, updateVisa } from "../server-actions";
 import { COUNTRY_EMOJIS, getCountryLabel, getCountryLabels, getCountryName } from "@/app/constants";

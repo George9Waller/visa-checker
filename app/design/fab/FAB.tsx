@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { cn } from "../cn";
 import { Icon } from "../primitives/Icon";
+import { Link } from "@/i18n/navigation";
 
 export interface FABAction {
   icon: React.ReactNode;

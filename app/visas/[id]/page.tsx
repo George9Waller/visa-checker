@@ -23,10 +23,9 @@ import {
   toneFromSeverity,
   uniqueAlertsForDisplay,
 } from "@/app/structured-copy";
-import Link from "next/link";
 import { getVisaDetailSummary } from "../server-actions";
 import { VisaTypeKey } from "../constants";
-import { redirect } from "next/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import VisaSimulationControl from "./VisaSimulationControl";
 import VisaDetailActions from "./VisaDetailActions";
 import SensitiveValue from "./SensitiveValue";
@@ -63,7 +62,8 @@ export default async function VisaDetail({
   const summary = await getVisaDetailSummary(id, referenceDate);
 
   if (!summary) {
-    redirect("/visas");
+    redirect({ href: "/visas", locale });
+    throw new Error("Unreachable");
   }
 
   const showAllTrips = show_outside_rolling_range?.toString() === "true";

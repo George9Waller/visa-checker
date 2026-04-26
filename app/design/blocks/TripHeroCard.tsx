@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { cn } from "../cn";
 import { Kicker } from "../primitives/Kicker";
 import { Display } from "../primitives/Display";

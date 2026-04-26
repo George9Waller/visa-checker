@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
 import CreateVisaWizard from "@/app/visas/create/page";
 import { getVisaDetailSummary } from "../../server-actions";
 import { VisaTypeKey } from "../../constants";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 export default async function EditVisaPage({
   params,
@@ -10,11 +11,13 @@ export default async function EditVisaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
   const t = await getTranslations("visa");
   const summary = await getVisaDetailSummary(id);
 
   if (!summary) {
-    redirect("/visas");
+    redirect({ href: "/visas", locale });
+    throw new Error("Unreachable");
   }
 
   return (

@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { OptionList, OptionRow, Stack, StatusBadge, Text } from "@/app/design";
 import { TripVisaCandidate, selectVisaForTrip } from "../server-actions";
 import {
