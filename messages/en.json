@@ -49,6 +49,7 @@
     "step3Title": "Read the math",
     "step3Desc": "Day-counts, rolling windows, expiry alerts — quietly, in the background.",
     "signInWith": "Sign in with {provider}",
+    "disclaimerLabel": "Disclaimer",
     "disclaimer": "This app helps you track travel data, but it does not replace official immigration advice.",
     "devSignIn": "Sign in as Dev User"
   },

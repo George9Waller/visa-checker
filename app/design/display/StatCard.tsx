@@ -46,9 +46,15 @@ export function StatCard({
     );
   }
 
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={classes}>
+        {content}
+      </button>
+    );
+  }
+
   return (
-    <button type="button" onClick={onClick} className={classes}>
-      {content}
-    </button>
+    <div className={classes}>{content}</div>
   );
 }

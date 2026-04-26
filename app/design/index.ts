@@ -28,6 +28,10 @@ export { Stack } from './layout/Stack';
 export { Row } from './layout/Row';
 export { Grid } from './layout/Grid';
 export { StickyBar } from './layout/StickyBar';
+export { PosterBackdrop } from './poster/PosterBackdrop';
+export { PosterMasthead } from './poster/PosterMasthead';
+export { PosterMetricCard } from './poster/PosterMetricCard';
+export { PosterStepList } from './poster/PosterStepList';
 
 // Forms
 export { Field } from './forms/Field';

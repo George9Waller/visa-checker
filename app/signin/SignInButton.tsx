@@ -4,24 +4,27 @@ import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Btn } from "../design";
 
-export function SignInButton({ name, id }: { name: string; id: string }) {
+export function SignInButton({
+  name,
+  id,
+  callbackUrl,
+}: {
+  name: string;
+  id: string;
+  callbackUrl: string;
+}) {
   const t = useTranslations("signin");
 
   return (
-    <div
+    <Btn
+      variant="primary"
+      size="md"
+      className="w-full justify-center"
       onClick={() => {
-        signIn(id);
+        void signIn(id, { callbackUrl });
       }}
     >
-      <Btn
-        as="button"
-        // href={provider.signinUrl}
-        variant="primary"
-        size="md"
-        className="w-full justify-center"
-      >
-        {t("signInWith", { provider: name })}
-      </Btn>
-    </div>
+      {t("signInWith", { provider: name })}
+    </Btn>
   );
 }

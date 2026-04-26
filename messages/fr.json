@@ -49,6 +49,7 @@
     "step3Title": "Lisez les calculs",
     "step3Desc": "Comptages, fenêtres glissantes, alertes d'expiration — tout discrètement.",
     "signInWith": "Se connecter avec {provider}",
+    "disclaimerLabel": "Avertissement",
     "disclaimer": "Cette application aide à suivre vos données de voyage, mais ne remplace pas un conseil officiel en immigration.",
     "devSignIn": "Se connecter en tant qu'utilisateur dev"
   },
