@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import CreateVisaWizard from "@/app/visas/create/page";
 import { getVisaDetailSummary } from "../../server-actions";
 import { VisaTypeKey } from "../../constants";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditVisaPage({
   params,
@@ -9,6 +10,7 @@ export default async function EditVisaPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations("visa");
   const summary = await getVisaDetailSummary(id);
 
   if (!summary) {
@@ -17,7 +19,7 @@ export default async function EditVisaPage({
 
   return (
     <CreateVisaWizard
-      title="Edit visa"
+      title={t("edit")}
       mode="edit"
       cancelHref={`/visas/${id}`}
       submitHref={`/visas/${id}`}

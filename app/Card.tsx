@@ -8,14 +8,17 @@ import {
   TripHeroCard,
 } from "@/app/design";
 import { copyForCard } from "./structured-copy";
-import { DashboardCard, ProjectionPoint } from "./visas/evaluation";
+import { DashboardCard } from "./visas/evaluation";
 import { getTripDetailSummary } from "./trips/server-actions";
-import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "./constants";
+import { COUNTRY_EMOJIS, getCountryName } from "./constants";
 import { formatDateRange } from "./utils";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function Card({ card }: { card: DashboardCard }) {
+  const locale = await getLocale();
+  const copyT = await getTranslations("copy");
   const today = new Date();
-  const copy = copyForCard(card);
+  const copy = copyForCard(copyT, card);
   const href = card.tripId
     ? `/trips/${card.tripId}`
     : card.visaId
@@ -43,13 +46,14 @@ export async function Card({ card }: { card: DashboardCard }) {
         flag={COUNTRY_EMOJIS[tripDetailSummary.trip.countryCode] ?? "✈"}
         title={
           tripDetailSummary.trip.name ??
-          COUNTRY_NAMES[tripDetailSummary.trip.countryCode] ??
+          getCountryName(tripDetailSummary.trip.countryCode, locale) ??
           tripDetailSummary.trip.countryCode
         }
         livePill
         subtitle={formatDateRange(
           tripDetailSummary.trip.startDate.toISOString(),
-          tripDetailSummary.trip.endDate.toISOString()
+          tripDetailSummary.trip.endDate.toISOString(),
+          locale
         )}
         className="col-span-2"
       />
@@ -75,7 +79,9 @@ export async function Card({ card }: { card: DashboardCard }) {
           max={card.params.limit as number}
         />
         <Text variant="meta" tone="muted">
-          {card.params.remaining as string} days left
+          {copyT("cards.ROLLING_WINDOW_USAGE.remainingDays", {
+            remaining: Number(card.params.remaining ?? 0),
+          })}
         </Text>
       </StatCard>
     );
@@ -98,16 +104,18 @@ export async function Card({ card }: { card: DashboardCard }) {
           <Display level={4}>{card.params.tripName as string}</Display>
         </div>
         <Text variant="meta" tone="muted">
-          {startDate.toLocaleDateString("en-GB", {
+          {startDate.toLocaleDateString(locale, {
             day: "2-digit",
             month: "2-digit",
           })}{" "}
           -{" "}
-          {endDate.toLocaleDateString("en-GB", {
+          {endDate.toLocaleDateString(locale, {
             day: "2-digit",
             month: "2-digit",
           })}{" "}
-          · {card.params.durationDays as string} days
+          · {copyT("cards.NEXT_TRIP.durationDays", {
+            durationDays: Number(card.params.durationDays ?? 0),
+          })}
         </Text>
         <div className="flex items-center gap-1.5">
           <StatusPip tone={card.tone} size="xs" />

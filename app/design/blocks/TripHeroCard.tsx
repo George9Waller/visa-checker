@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { cn } from "../cn";
 import { Kicker } from "../primitives/Kicker";
@@ -19,13 +22,15 @@ export interface TripHeroCardProps {
 export function TripHeroCard({
   flag,
   title,
-  kicker = "Currently in",
+  kicker,
   livePill,
   subtitle,
   onClick,
   href,
   className,
 }: TripHeroCardProps) {
+  const t = useTranslations("common");
+  const kickerLabel = kicker ?? t("currentlyIn");
   const classes = cn(
     "w-full overflow-hidden rounded-[calc(var(--radius)+2px)] border border-fg/10 text-left transition-all",
     "bg-fg text-bg shadow-sm hover:-translate-y-0.5 hover:shadow-md",
@@ -36,10 +41,10 @@ export function TripHeroCard({
   const content = (
     <>
       <div className="flex items-center justify-between gap-3">
-        <Kicker>{kicker}</Kicker>
+        <Kicker>{kickerLabel}</Kicker>
         {livePill && (
           <span className="rounded-full border border-current px-2 py-1 text-xs font-mono uppercase opacity-70">
-            LIVE
+            {t("live")}
           </span>
         )}
       </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { deleteVisa } from "../server-actions";
 import { Icon, IconBtn } from "@/app/design";
 
@@ -15,30 +16,27 @@ export default function VisaDetailActions({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("visa");
 
   return (
     <div className="flex items-center gap-1">
       {renewHref && (
-        <Link href={renewHref} title="Renew visa">
+        <Link href={renewHref} title={t("renew")}>
           <IconBtn>
             <Icon name="arrow-right" size="md" />
           </IconBtn>
         </Link>
       )}
-      <Link href={`/visas/${visaId}/edit`} title="Edit visa">
+      <Link href={`/visas/${visaId}/edit`} title={t("edit")}>
         <IconBtn>
           <Icon name="edit" size="md" />
         </IconBtn>
       </Link>
       <IconBtn
-        title="Delete visa"
+        title={t("delete")}
         disabled={isPending}
         onClick={() => {
-          if (
-            !confirm(
-              "Delete this visa? Linked trips will remain but become unlinked."
-            )
-          ) {
+          if (!confirm(t("deleteConfirm"))) {
             return;
           }
           startTransition(() => {

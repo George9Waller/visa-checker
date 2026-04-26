@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "../cn";
 import { Icon } from "../primitives/Icon";
 import { IconBtn } from "../primitives/IconBtn";
@@ -14,12 +15,10 @@ function toISO(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function fmtDate(d: Date): string {
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+function getViewDate(value?: string, minDate?: string): Date {
+  if (value) return parseISO(value);
+  if (minDate) return parseISO(minDate);
+  return new Date();
 }
 
 export interface DatePickerProps {
@@ -33,15 +32,29 @@ export interface DatePickerProps {
 export function DatePicker({
   value,
   onChange,
-  placeholder = "Pick a date",
+  placeholder,
   minDate,
   maxDate,
 }: DatePickerProps) {
+  const t = useTranslations("common");
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
-  const [viewDate, setViewDate] = useState(() =>
-    value ? parseISO(value) : new Date()
-  );
+  const [viewDate, setViewDate] = useState(() => getViewDate(value, minDate));
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (value) {
+      const newViewDate = parseISO(value);
+      setViewDate(newViewDate);
+      return;
+    }
+    if (minDate) {
+      const minViewDate = parseISO(minDate);
+      if (viewDate < minViewDate) {
+        setViewDate(minViewDate);
+      }
+    }
+  }, [value, minDate]);
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +75,11 @@ export function DatePicker({
   const selected = value ? parseISO(value) : null;
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
+  const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
+    new Intl.DateTimeFormat(locale, { weekday: "short" })
+      .format(new Date(Date.UTC(2024, 0, 1 + i)))
+      .replace(/\.$/, "")
+  );
   const startOffset = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
@@ -104,7 +122,13 @@ export function DatePicker({
         )}
       >
         <span className={value ? "text-fg" : "text-fg-faint"}>
-          {selected ? fmtDate(selected) : placeholder}
+          {selected
+            ? selected.toLocaleDateString(locale, {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : (placeholder ?? t("pickDate"))}
         </span>
         <Icon
           name="calendar"
@@ -116,22 +140,22 @@ export function DatePicker({
       {open && (
         <div className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-[calc(100vw-2rem)] -translate-x-1/2 rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-xl sm:left-0 sm:w-full sm:min-w-[360px] sm:translate-x-0">
           <div className="mb-3 flex items-center justify-between">
-            <IconBtn onClick={() => changeMonth(-1)} title="Previous month">
+            <IconBtn onClick={() => changeMonth(-1)} title={t("previousMonth")}>
               <Icon name="chevron-left" size="sm" />
             </IconBtn>
             <div className="font-display font-semibold text-md text-fg">
-              {viewDate.toLocaleDateString("en-GB", {
+              {viewDate.toLocaleDateString(locale, {
                 month: "long",
                 year: "numeric",
               })}
             </div>
-            <IconBtn onClick={() => changeMonth(1)} title="Next month">
+            <IconBtn onClick={() => changeMonth(1)} title={t("nextMonth")}>
               <Icon name="chevron-right" size="sm" />
             </IconBtn>
           </div>
 
           <div className="mb-2 grid grid-cols-7 gap-1">
-            {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+            {weekdayLabels.map((d, i) => (
               <div
                 key={i}
                 className="py-1 text-center font-mono text-[10px] tracking-wide text-fg-faint"
@@ -189,7 +213,7 @@ export function DatePicker({
               }}
               className="cursor-pointer border-none bg-transparent font-mono text-[11px] tracking-wide text-fg-muted transition-colors hover:text-fg"
             >
-              TODAY
+              {t("today")}
             </button>
             {value && (
               <button
@@ -200,7 +224,7 @@ export function DatePicker({
                 }}
                 className="cursor-pointer border-none bg-transparent font-mono text-[11px] tracking-wide text-fg-muted transition-colors hover:text-fg"
               >
-                CLEAR
+                {t("clear")}
               </button>
             )}
           </div>

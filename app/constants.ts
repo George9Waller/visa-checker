@@ -509,6 +509,37 @@ export const COUNTRY_LABELS = Object.fromEntries(
   ])
 );
 
+export const COUNTRY_CODES = Object.keys(COUNTRY_EMOJIS);
+
+export const getCountryName = (code: string, locale = "en") => {
+  const normalized = code?.toUpperCase?.() ?? "";
+  if (!normalized) {
+    return "";
+  }
+
+  try {
+    const localized = new Intl.DisplayNames([locale], { type: "region" }).of(
+      normalized
+    );
+    return localized ?? COUNTRY_NAMES[normalized] ?? normalized;
+  } catch {
+    return COUNTRY_NAMES[normalized] ?? normalized;
+  }
+};
+
+export const getCountryLabel = (code: string, locale = "en") =>
+  `${getCountryName(code, locale)} ${COUNTRY_EMOJIS[code] ?? ""}`.trim();
+
+export const getCountryNames = (locale = "en") =>
+  Object.fromEntries(
+    COUNTRY_CODES.map((code) => [code, getCountryName(code, locale)])
+  ) as Record<string, string>;
+
+export const getCountryLabels = (locale = "en") =>
+  Object.fromEntries(
+    COUNTRY_CODES.map((code) => [code, getCountryLabel(code, locale)])
+  ) as Record<string, string>;
+
 export const COLOURS: Record<string, string> = {
   "1": "#D58B77",
   "2": "#7B99B9",

@@ -1,11 +1,14 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { cn } from '../cn';
-import { Density, Tone } from '../tokens';
-import { StatusPip } from '../primitives/StatusPip';
-import { Flag } from '../primitives/Flag';
-import { Kicker } from '../primitives/Kicker';
-import { Display } from '../primitives/Display';
+"use client";
+
+import { ReactNode } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { cn } from "../cn";
+import { Density, Tone } from "../tokens";
+import { StatusPip } from "../primitives/StatusPip";
+import { Flag } from "../primitives/Flag";
+import { Kicker } from "../primitives/Kicker";
+import { Display } from "../primitives/Display";
 
 export interface TripTimelineRowProps {
   date: Date;
@@ -38,6 +41,7 @@ export function TripTimelineRow({
   onClick,
   href,
 }: TripTimelineRowProps) {
+  const t = useTranslations("common");
   const dateStr = String(date.getDate()).padStart(2, '0');
   const classes = cn(
     'w-full text-left grid gap-4 items-center',
@@ -72,7 +76,7 @@ export function TripTimelineRow({
             {length}
           </Display>
           <Kicker className="text-xs mt-0.5">
-            {length === 1 ? 'Day' : 'Days'}
+            {t("day", { count: length })}
           </Kicker>
         </div>
         <div className="flex items-center gap-1.5">

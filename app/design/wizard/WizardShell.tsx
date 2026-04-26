@@ -1,4 +1,7 @@
+"use client";
+
 import { PropsWithChildren } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "../cn";
 import { IconBtn } from "../primitives/IconBtn";
 import { Icon } from "../primitives/Icon";
@@ -31,13 +34,14 @@ export function WizardShell({
   primary,
   children,
 }: WizardShellProps) {
+  const t = useTranslations("common");
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <div className="border-b border-border/80 bg-bg/95 px-4 py-4 backdrop-blur md:px-6">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
             {onBack ? (
-              <IconBtn onClick={onBack} title="Back">
+              <IconBtn onClick={onBack} title={t("back")}>
                 <Icon name="chevron-left" size="sm" />
               </IconBtn>
             ) : (
@@ -52,7 +56,7 @@ export function WizardShell({
               </Display>
             </div>
           </div>
-          <IconBtn onClick={onClose} title="Close">
+          <IconBtn onClick={onClose} title={t("close")}>
             <Icon name="close" size="sm" />
           </IconBtn>
         </div>
@@ -90,7 +94,7 @@ export function WizardShell({
             onClick={onClose}
             className="w-full justify-center sm:w-auto sm:min-w-28"
           >
-            Cancel
+            {t("cancel")}
           </Btn>
         </div>
       </div>

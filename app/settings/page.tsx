@@ -10,6 +10,7 @@ import {
   DashboardHeader,
   Fact,
   FactGrid,
+  Icon,
   OptionList,
   OptionRow,
   PageContainer,
@@ -38,6 +39,7 @@ const getInitialLocale = () => {
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
+  const navT = useTranslations("nav");
   const { data: session } = useSession();
   const router = useRouter();
   const [scheme, setScheme] = useState<ColorScheme>(() => getSavedScheme());
@@ -67,7 +69,6 @@ export default function SettingsPage() {
     <PageContainer>
       <DashboardHeader
         date={new Date()}
-        weekday={new Date().toLocaleDateString("en-GB", { weekday: "long" })}
         title={t("title")}
         actions={
           <Btn
@@ -77,7 +78,8 @@ export default function SettingsPage() {
             size="sm"
             className="rounded-full h-[40px]"
           >
-            Trips
+            <Icon name="calendar" />
+            {navT("trips")}
           </Btn>
         }
       />
@@ -86,15 +88,15 @@ export default function SettingsPage() {
         {session?.user && (
           <Stack gap="sm">
             <Text variant="meta" tone="muted">
-              Account
+              {t("account")}
             </Text>
             <FactGrid cols={2}>
-              <Fact label="Initials" value={initials} />
-              <Fact label="Email" value={session.user.email ?? "—"} />
+              <Fact label={t("initials")} value={initials} />
+              <Fact label={t("email")} value={session.user.email ?? "—"} />
             </FactGrid>
             {session.user.name && (
               <Text variant="small" tone="muted">
-                Signed in as {session.user.name}
+                {t("signedInAs", { name: session.user.name })}
               </Text>
             )}
           </Stack>
@@ -126,7 +128,7 @@ export default function SettingsPage() {
             {LOCALES.map((locale) => (
               <OptionRow
                 key={locale.code}
-                title={locale.label}
+                title={t(`locales.${locale.code}`)}
                 subtitle={locale.code.toUpperCase()}
                 selected={currentLocale === locale.code}
                 onClick={() => handleLocale(locale.code)}
@@ -145,7 +147,7 @@ export default function SettingsPage() {
           <Fact
             label={t("project")}
             value={
-              <Link href="https://github.com/George9Waller/visa-checker">
+              <Link href="https://github.com/George9Waller/visa-checker" target="_blank" rel="noopener noreferrer">
                 https://github.com/George9Waller/visa-checker
               </Link>
             }

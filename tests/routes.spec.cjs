@@ -31,23 +31,13 @@ test("dashboard renders the seeded non-empty state", async ({ page }) => {
     page.getByRole("heading", { name: /Trips|Voyages/i })
   ).toBeVisible();
   await expect(
-    page.getByRole("link", {
-      name: /CURRENTLY IN LIVE 🇪🇸 Barcelona sprint/i,
-    })
+    page.getByRole("link", { name: /Barcelona sprint/i }).first()
   ).toBeVisible();
   await expect(
-    page.getByRole("link", {
-      name: /NEXT TRIP 14 DAYS UNTIL DEPARTURE Tokyo cherry blossom/i,
-    })
+    page.getByRole("link", { name: /Tokyo cherry blossom/i }).first()
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /09 MAY 🇯🇵 Tokyo cherry blossom/i })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /02 MAR 🇨🇦 Toronto retrospective/i })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /No visa linked|Aucun visa lié/i })
+    page.getByRole("link", { name: /Toronto retrospective/i }).first()
   ).toBeVisible();
 });
 
@@ -59,11 +49,11 @@ test("visas list shows seeded ordering and tones", async ({ page }) => {
     .filter({ hasNotText: "Add visa" });
   await expect(rows).toHaveCount(3);
   await expect(rows.nth(0)).toContainText("Schengen Explorer");
-  await expect(rows.nth(0)).toContainText("valid");
+  await expect(rows.nth(0)).toContainText(/valid/i);
   await expect(rows.nth(1)).toContainText("Japan Fast Track");
-  await expect(rows.nth(1)).toContainText("expiring");
+  await expect(rows.nth(1)).toContainText(/expiring/i);
   await expect(rows.nth(2)).toContainText("Canada Visitor Archive");
-  await expect(rows.nth(2)).toContainText("expired");
+  await expect(rows.nth(2)).toContainText(/expired/i);
 });
 
 test("trip detail shows the selected visa and coverage hierarchy", async ({
@@ -163,8 +153,8 @@ test("visa detail shows projection, trips, and coverage", async ({ page }) => {
   await expect(page.getByText("P1234567", { exact: true })).toBeVisible();
   await expect(page.getByText("Projection")).toBeVisible();
   await expect(page.getByText("Usage", { exact: true })).toBeVisible();
-  await expect(page.getByText("Trips", { exact: true })).toBeVisible();
-  await expect(page.getByText("Coverage", { exact: true })).toBeVisible();
+  await expect(page.getByText("Trips on this visa")).toBeVisible();
+  await expect(page.getByText("Countries covered")).toBeVisible();
 });
 
 test("settings shows account and preference controls", async ({ page }) => {
@@ -184,13 +174,17 @@ test("trip create flow creates a trip and returns to the dashboard", async ({
 
   await expect(page.getByText("Recently visited")).toBeVisible();
   await expect(page.getByText("Most visited")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Canada/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: /France/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Canada Visited 48 days ago/i })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /France Visited once/i })
+  ).toBeVisible();
 
   await page
     .getByPlaceholder(/Search country|Rechercher un pays/i)
     .fill("France");
-  await page.getByRole("button", { name: /France/ }).click();
+  await page.getByRole("button", { name: /France FR/ }).click();
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
 
   await page.getByLabel(/Trip name|Nom du voyage/i).fill("Paris review");

@@ -143,7 +143,7 @@ export const getVisaDetailSummary = async (
       rollingPeriodLen: visa.rollingPeriodLen,
       mustExitBeforeExpiry: visa.mustExitBeforeExpiry,
       includeEntryAndExitDates: visa.includeEntryAndExitDates,
-      renewalSuccessorId: visa.renewals[0]?.id ?? null,
+      renewalSuccessorId: visa.renewals?.[0]?.id ?? null,
       linkedTrips: visa.VisaTrip.map(({ trip }) => ({
         ...trip,
         linkedVisaId: visa.id,

@@ -254,7 +254,7 @@ export default function DesignSystemShowcase() {
               You have no visa linked for France.
             </AlertBox>
             <EmptyState
-              icon="📭"
+              icon="passport"
               title="No visas yet"
               message="Create your first visa to get started"
             />
@@ -403,7 +403,6 @@ export default function DesignSystemShowcase() {
           >
             <DashboardHeader
               date={new Date()}
-              weekday="Friday"
               title="Trips"
               actions={
                 <Btn size="sm" variant="outline">
@@ -529,7 +528,7 @@ export default function DesignSystemShowcase() {
                       key={name}
                       className="flex flex-col items-center gap-1"
                     >
-                      <Icon name={name} size={size} />
+                      <Icon name={name as any} size={size} />
                       <span className="font-mono text-[7px] text-fg-faint text-center leading-tight">
                         {name}
                       </span>

@@ -1,6 +1,9 @@
-import { PropsWithChildren } from 'react';
-import { cn } from '../cn';
-import { Kicker } from '../primitives/Kicker';
+"use client";
+
+import { PropsWithChildren } from "react";
+import { useTranslations } from "next-intl";
+import { cn } from "../cn";
+import { Kicker } from "../primitives/Kicker";
 
 export interface FieldProps extends PropsWithChildren {
   label: string;
@@ -16,14 +19,19 @@ export function Field({
   className,
   children,
 }: FieldProps) {
+  const t = useTranslations("common");
   return (
-    <label className={cn('block', className)}>
+    <label className={cn("block", className)}>
       <div className="flex items-baseline justify-between gap-3 mb-1.5">
         <Kicker>{label}</Kicker>
-        {optional && <Kicker tone="faint">Optional</Kicker>}
+        {optional && <Kicker tone="faint">{t("optional")}</Kicker>}
       </div>
       <div className="mb-2">{children}</div>
-      {hint && <Kicker tone="muted" className="text-xs">{hint}</Kicker>}
+      {hint && (
+        <Kicker tone="muted" className="text-xs">
+          {hint}
+        </Kicker>
+      )}
     </label>
   );
 }

@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { SCHENGEN_COUNTRIES, VISA_TYPE, VISA_TYPE_META, VisaTypeKey } from "../constants";
 import { createVisa, updateVisa } from "../server-actions";
-import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
+import { COUNTRY_EMOJIS, getCountryLabel, getCountryLabels, getCountryName } from "@/app/constants";
 import {
   AlertBox,
   Btn,
@@ -118,6 +118,7 @@ export default function CreateVisaWizard({
   redirectToCreatedVisa = false,
 }: CreateVisaWizardProps = {}) {
   const t = useTranslations("visa");
+  const locale = useLocale();
   const router = useRouter();
   const [step, setStep] = useState(lockedType ? 1 : 0);
   const [form, setForm] = useState<FormData>(() => formFromDraft(initialVisa));
@@ -127,17 +128,17 @@ export default function CreateVisaWizard({
   const maxSteps = totalSteps(form.type);
   const displayedStep = lockedType ? Math.max(step - 1, 0) : step;
   const displayedTotalSteps = lockedType ? maxSteps - 1 : maxSteps;
-  const shellTitle = title ?? (mode === "edit" ? "Edit visa" : t("create"));
+  const shellTitle = title ?? (mode === "edit" ? t("edit") : t("create"));
 
   const patch = (update: Partial<FormData>) =>
     setForm((current) => ({ ...current, ...update }));
 
   const sortedCountries = useMemo(
     () =>
-      Object.keys(COUNTRY_LABELS)
-        .map((code) => ({ code, label: COUNTRY_LABELS[code] }))
+      Object.keys(getCountryLabels(locale))
+        .map((code) => ({ code, label: getCountryLabel(code, locale) }))
         .sort((a, b) => a.label.localeCompare(b.label)),
-    []
+    [locale]
   );
 
   const filteredCountries = useMemo(() => {
@@ -181,14 +182,14 @@ export default function CreateVisaWizard({
       }
       router.push(submitHref);
     } catch (error) {
-      toast.error(`Error saving visa: ${error}`);
+      toast.error(t("errorSavingVisa", { error: String(error) }));
     } finally {
       setSubmitting(false);
     }
   };
 
   const selectedCountries = form.countries
-    .map((code) => COUNTRY_NAMES[code] ?? code)
+    .map((code) => getCountryName(code, locale))
     .join(" · ");
 
   if (step === 0) {
@@ -207,10 +208,9 @@ export default function CreateVisaWizard({
         }}
       >
         <Stack gap="lg">
-          <AlertBox tone="warn" title="Choose a visa template">
+          <AlertBox tone="warn" title={t("chooseVisaTemplate")}>
             <Text variant="small" tone="muted">
-              Templates prefill the rules for the common cases. You can still
-              change every limit later.
+              {t("chooseVisaTemplateHint")}
             </Text>
           </AlertBox>
           <OptionList maxHeight="46vh" className="overscroll-contain">
@@ -222,7 +222,7 @@ export default function CreateVisaWizard({
                   variant="type"
                   flag={<span>{meta.flag}</span>}
                   title={t(`types.${key}`)}
-                  subtitle={meta.desc}
+                  subtitle={t(`typeDescs.${key}`)}
                   selected={form.type === key}
                   onClick={() => {
                     const preset =
@@ -306,22 +306,19 @@ export default function CreateVisaWizard({
             <Input
               value={form.visaNumber}
               onChange={(e) => patch({ visaNumber: e.target.value })}
-              placeholder="Optional"
+              placeholder={t("optional")}
             />
           </Field>
           <Field label={t("documentNumber")} optional>
             <Input
               value={form.documentNumber}
               onChange={(e) => patch({ documentNumber: e.target.value })}
-              placeholder="Optional"
+              placeholder={t("optional")}
             />
           </Field>
           <FactGrid cols={2}>
             <Fact label={t("typeQuestion")} value={t(`types.${form.type}`)} />
-            <Fact
-              label={t("countriesStep")}
-              value={form.countries.length || "—"}
-            />
+            <Fact label={t("countriesStep")} value={form.countries.length || "—"} />
           </FactGrid>
         </Stack>
       </WizardShell>
@@ -361,7 +358,7 @@ export default function CreateVisaWizard({
               {t("clear")}
             </Btn>
             <Text variant="meta" tone="muted" className="ml-auto">
-              {form.countries.length} selected
+              {t("selectedCount", { count: form.countries.length })}
             </Text>
           </Stack>
 
@@ -373,7 +370,7 @@ export default function CreateVisaWizard({
 
           <OptionList maxHeight="56vh" className="overscroll-contain">
             {filteredCountries.map(({ code, label }) => {
-              const name = COUNTRY_NAMES[code] ?? label;
+              const name = getCountryName(code, locale) ?? label;
               const emoji = COUNTRY_EMOJIS[code] ?? "•";
               return (
                 <OptionRow
@@ -424,14 +421,12 @@ export default function CreateVisaWizard({
         <Stack gap="lg">
           <AlertBox tone="ok" title={form.name || t(`types.${form.type}`)}>
             <Text variant="small" tone="muted">
-              This step controls when the visa can be used and whether departure
-              must happen before expiry.
+              {t("validityHint")}
             </Text>
           </AlertBox>
           <Field label={t("validFrom")}>
             <DatePicker
               value={form.validFrom}
-              minDate={asIso(new Date())}
               onChange={(value) => patch({ validFrom: value })}
             />
           </Field>
@@ -449,7 +444,7 @@ export default function CreateVisaWizard({
             <div className="space-y-1">
               <div className="font-semibold text-fg">{t("mustLeave")}</div>
               <Text variant="small" tone="muted">
-                Leave selected when the visa expires.
+                {t("mustLeaveHint")}
               </Text>
             </div>
           </Checkbox>
@@ -460,7 +455,7 @@ export default function CreateVisaWizard({
             <div className="space-y-1">
               <div className="font-semibold text-fg">{t("countBothDays")}</div>
               <Text variant="small" tone="muted">
-                Entry and exit days count toward the limit.
+                {t("countBothDaysHint")}
               </Text>
             </div>
           </Checkbox>
@@ -485,12 +480,12 @@ export default function CreateVisaWizard({
       }}
     >
       <Stack gap="lg">
-        <AlertBox
+          <AlertBox
           tone="warn"
           title={selectedCountries || t(`types.${form.type}`)}
         >
           <Text variant="small" tone="muted">
-            Configure the remaining limits for this visa.
+            {t("limitsHint")}
           </Text>
         </AlertBox>
 
@@ -506,7 +501,7 @@ export default function CreateVisaWizard({
                     : "",
                 })
               }
-              placeholder="e.g. 90"
+              placeholder={t("exampleDays", { count: 90 })}
             />
           </Field>
           <Field label={t("rollingWindow")}>
@@ -520,7 +515,7 @@ export default function CreateVisaWizard({
                     : "",
                 })
               }
-              placeholder="e.g. 180"
+              placeholder={t("exampleDays", { count: 180 })}
             />
           </Field>
         </Grid>
@@ -537,7 +532,7 @@ export default function CreateVisaWizard({
                     : "",
                 })
               }
-              placeholder="Optional"
+              placeholder={t("optional")}
             />
           </Field>
           <Field label={t("maxDaysPerTrip")} optional>
@@ -551,7 +546,7 @@ export default function CreateVisaWizard({
                     : "",
                 })
               }
-              placeholder="Optional"
+              placeholder={t("optional")}
             />
           </Field>
         </Grid>

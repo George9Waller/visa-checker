@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { cn } from "../cn";
 import { Icon } from "../primitives/Icon";
@@ -18,6 +19,8 @@ export interface FABProps {
 }
 
 export function FAB({ actions }: FABProps) {
+  const t = useTranslations("fab");
+  const commonT = useTranslations("common");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -38,7 +41,7 @@ export function FAB({ actions }: FABProps) {
         <div className="absolute bottom-full right-0 mb-3 w-56 overflow-hidden rounded-lg border border-border bg-bg-raised shadow-lg z-50">
           <div className="border-b border-border px-4 py-3">
             <span className="font-mono text-xs uppercase tracking-wider text-fg-muted">
-              New entry
+              {t("newEntry")}
             </span>
           </div>
           {actions.map((action, i) => (
@@ -88,7 +91,7 @@ export function FAB({ actions }: FABProps) {
           "flex h-12 w-12 items-center justify-center rounded-full bg-fg text-bg shadow-lg transition-all duration-200 hover:opacity-90 focus-visible:ds-focus-ring md:h-14 md:w-14",
           open && "rotate-45",
         )}
-        title={open ? 'Close' : 'Add'}
+        title={open ? commonT("close") : t("newEntry")}
       >
         <Icon name="plus" size="lg" />
       </button>

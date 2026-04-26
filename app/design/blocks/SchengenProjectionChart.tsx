@@ -1,3 +1,6 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import { ProjectionPoint } from "@/app/visas/evaluation";
 
 export type { ProjectionPoint } from "@/app/visas/evaluation";
@@ -8,15 +11,13 @@ export interface SchengenProjectionChartProps {
   today: Date;
 }
 
-function fmtShort(d: Date): string {
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-}
-
 export function SchengenProjectionChart({
   points,
   limit,
   today,
 }: SchengenProjectionChartProps) {
+  const locale = useLocale();
+  const t = useTranslations("visa");
   if (!points.length) return null;
 
   const W = 600,
@@ -61,7 +62,7 @@ export function SchengenProjectionChart({
     if (m !== lastMonth) {
       monthLabels.push({
         i,
-        label: new Date(points[i].date).toLocaleDateString("en-GB", {
+        label: new Date(points[i].date).toLocaleDateString(locale, {
           month: "short",
         }),
       });
@@ -124,14 +125,18 @@ export function SchengenProjectionChart({
     <div className="">
       <div className="mb-1 flex items-baseline justify-between gap-3">
         <div className="font-body font-semibold text-md text-fg">
-          Days left over the next year
+          {t("projectionTitle")}
         </div>
         <div className="font-mono text-[10px] tracking-wide text-fg-faint">
-          {fmtShort(today)} → {fmtShort(new Date(endDate))}
+          {today.toLocaleDateString(locale, { day: "numeric", month: "short" })} →{" "}
+          {new Date(endDate).toLocaleDateString(locale, {
+            day: "numeric",
+            month: "short",
+          })}
         </div>
       </div>
       <div className="font-mono text-[11px] text-fg-muted tracking-[0.03em] mb-2.5">
-        Assuming your current trips stay planned.
+        {t("projectionAssumption")}
       </div>
 
       <svg
@@ -205,15 +210,6 @@ export function SchengenProjectionChart({
           strokeWidth="0.8"
           strokeDasharray="2,2"
         />
-        <text
-          x={x(todayIdx) + 4}
-          y={PT + 10}
-          fontSize="9"
-          fill="var(--color-fg)"
-          fontFamily="var(--font-mono)"
-        >
-          TODAY
-        </text>
 
         {/* Min remaining point */}
         <circle
@@ -233,7 +229,7 @@ export function SchengenProjectionChart({
           fontFamily="var(--font-mono)"
           fontWeight="600"
         >
-          MIN {minPoint.remainingDays}
+          {t("minRemaining", { remaining: minPoint.remainingDays })}
         </text>
 
         {/* Month labels */}
@@ -255,11 +251,11 @@ export function SchengenProjectionChart({
       <div className="flex gap-3.5 mt-2.5 flex-wrap font-mono text-[10px] text-fg-muted tracking-wide">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-3 h-0.5 bg-accent" />
-          DAYS REMAINING
+          {t("daysRemainingLegend")}
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-2.5 h-2.5 bg-danger opacity-10" />
-          TIGHT ZONE
+          {t("tightZoneLegend")}
         </span>
       </div>
     </div>

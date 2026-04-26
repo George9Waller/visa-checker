@@ -11,7 +11,7 @@ import {
   Text,
   TripTimelineRow,
 } from "@/app/design";
-import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
+import { COUNTRY_EMOJIS, getCountryName } from "@/app/constants";
 import { ProfileAvatar } from "./components/ProfileAvatar";
 import {
   getDashboardSummary,
@@ -26,8 +26,16 @@ import {
 import Link from "next/link";
 import { Card } from "./Card";
 import { formatDateRange } from "./utils";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function Home() {
+  const locale = await getLocale();
+  const t = await getTranslations("dashboard");
+  const navT = await getTranslations("nav");
+  const fabT = await getTranslations("fab");
+  const copyT = await getTranslations("copy");
+  const statusT = await getTranslations("status");
+  const tripT = await getTranslations("trip");
   const today = new Date();
   const todayIso = today.toISOString().split("T")[0];
   const [{ alerts, cards, warningOverflowCount }, upcoming, past] =
@@ -36,13 +44,13 @@ export default async function Home() {
       getTripsFrom(todayIso, 8),
       getTripsBefore(todayIso, 8),
     ]);
-  const visibleAlerts = uniqueAlertsForDisplay(alerts);
+  const visibleAlerts = uniqueAlertsForDisplay(copyT, alerts);
 
   return (
     <PageContainer>
       <DashboardHeader
         date={today}
-        weekday={today.toLocaleDateString("en-GB", { weekday: "long" })}
+        title={t("title")}
         actions={
           <>
             <Btn
@@ -53,7 +61,7 @@ export default async function Home() {
               className="rounded-full h-[40px]"
             >
               <Icon name="passport" />
-              Visas
+              {navT("visas")}
             </Btn>
             <ProfileAvatar />
           </>
@@ -75,7 +83,7 @@ export default async function Home() {
         {visibleAlerts.length > 0 && (
           <Stack className="gap-3">
             {visibleAlerts.map((alert) => {
-              const copy = copyForAlert(alert);
+              const copy = copyForAlert(copyT, alert);
               return (
                 <AlertRow
                   key={alert.fingerprint}
@@ -89,29 +97,28 @@ export default async function Home() {
                   tone={toneFromSeverity(alert.severity)}
                   title={copy.title}
                   detail={copy.detail}
-                  action="Review"
+                  action={copyT("labels.review")}
                 />
               );
             })}
             {warningOverflowCount > 0 && (
               <Text className="text-sm text-fg-muted">
-                +{warningOverflowCount} more warning
-                {warningOverflowCount === 1 ? "" : "s"}
+                {copyT("moreWarnings", { count: warningOverflowCount })}
               </Text>
             )}
           </Stack>
         )}
 
         <Stack className="gap-2">
-          <Text className="font-semibold text-lg">Upcoming</Text>
+          <Text className="font-semibold text-lg">{t("upcoming")}</Text>
           {upcoming.trips.length === 0 ? (
             <Stack className="gap-3">
               <EmptyState
                 icon="calendar"
-                title="No upcoming trips"
-                message="Add your first trip to start tracking visas."
+                title={t("noTrips")}
+                message={t("addFirst")}
                 action={{
-                  label: "Add trip",
+                  label: tripT("create"),
                   href: "/trips/create",
                 }}
               />
@@ -122,16 +129,16 @@ export default async function Home() {
                 key={trip.id}
                 href={`/trips/${trip.id}`}
                 date={new Date(trip.startDate)}
-                month={new Date(trip.startDate).toLocaleDateString("en-GB", {
+                month={new Date(trip.startDate).toLocaleDateString(locale, {
                   month: "short",
                 })}
                 title={
                   trip.name ??
-                  COUNTRY_NAMES[trip.countryCode] ??
+                  getCountryName(trip.countryCode, locale) ??
                   trip.countryCode
                 }
                 flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
-                meta={formatDateRange(trip.startDate, trip.endDate)}
+                meta={formatDateRange(trip.startDate, trip.endDate, locale)}
                 length={trip.durationDays}
                 statusTone={
                   trip.visaRequired
@@ -143,9 +150,9 @@ export default async function Home() {
                 statusLabel={
                   trip.visaRequired
                     ? trip.visaValid
-                      ? "valid"
-                      : "invalid"
-                    : "visa-free"
+                      ? statusT("valid")
+                      : statusT("visaInvalid")
+                    : tripT("visaFree")
                 }
                 isLast={index === upcoming.trips.length - 1}
               />
@@ -155,22 +162,22 @@ export default async function Home() {
 
         {past.trips.length > 0 && (
           <Stack className="gap-2">
-            <Text className="font-semibold text-lg">Past</Text>
+            <Text className="font-semibold text-lg">{t("past")}</Text>
             {past.trips.map((trip, index) => (
               <TripTimelineRow
                 key={trip.id}
                 href={`/trips/${trip.id}`}
                 date={new Date(trip.startDate)}
-                month={new Date(trip.startDate).toLocaleDateString("en-GB", {
+                month={new Date(trip.startDate).toLocaleDateString(locale, {
                   month: "short",
                 })}
                 title={
                   trip.name ??
-                  COUNTRY_NAMES[trip.countryCode] ??
+                  getCountryName(trip.countryCode, locale) ??
                   trip.countryCode
                 }
                 flag={COUNTRY_EMOJIS[trip.countryCode] ?? "✈"}
-                meta={formatDateRange(trip.startDate, trip.endDate)}
+                meta={formatDateRange(trip.startDate, trip.endDate, locale)}
                 length={trip.durationDays}
                 statusTone={
                   trip.visaRequired
@@ -182,9 +189,9 @@ export default async function Home() {
                 statusLabel={
                   trip.visaRequired
                     ? trip.visaValid
-                      ? "valid"
-                      : "invalid"
-                    : "visa-free"
+                      ? statusT("valid")
+                      : statusT("visaInvalid")
+                    : tripT("visaFree")
                 }
                 isPast
                 isLast={index === past.trips.length - 1}
@@ -200,14 +207,14 @@ export default async function Home() {
             {
               href: "/trips/create",
               icon: <Icon name="calendar" size="sm" />,
-              title: "Plan trip",
-              description: "Create an upcoming journey",
+              title: fabT("trip"),
+              description: fabT("tripDesc"),
             },
             {
               href: "/visas/create",
               icon: <Icon name="passport" size="sm" />,
-              title: "Add visa",
-              description: "Save a visa or permit",
+              title: fabT("visa"),
+              description: fabT("visaDesc"),
             },
           ]}
         />

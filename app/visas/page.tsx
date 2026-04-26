@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getVisas } from "./server-actions";
-import { VISA_TYPES_DISPLAY_MAP, VisaTypeKey } from "./constants";
+import { VisaTypeKey } from "./constants";
 import {
   EmptyState,
   FAB,
@@ -13,15 +13,20 @@ import {
   VisaListRow,
 } from "@/app/design";
 import { getVisaFlag } from "./utils";
+import { getLocale, getTranslations } from "next-intl/server";
 
-const formatDate = (value: Date) =>
-  value.toLocaleDateString("en-GB", {
+const formatDate = (value: Date, locale: string) =>
+  value.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
 export default async function VisasPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("visa");
+  const fabT = await getTranslations("fab");
+  const statusT = await getTranslations("status");
   const visaGroups = await getVisas();
   const today = new Date();
 
@@ -52,8 +57,10 @@ export default async function VisasPage() {
         kicker={
           kicker ??
           [
-            VISA_TYPES_DISPLAY_MAP[visa.type],
-            visa.expires ? `Expires ${formatDate(visa.expires)}` : "Open-ended",
+            t(`types.${visa.type}`),
+            visa.expires
+              ? t("expiresOnDate", { date: formatDate(visa.expires, locale) })
+              : t("openEnded"),
           ]
             .filter(Boolean)
             .join(" · ")
@@ -62,12 +69,12 @@ export default async function VisasPage() {
         statusTone={statusTone}
         statusLabel={
           muted
-            ? "renewed"
+            ? t("renewed")
             : isExpired
-              ? "expired"
+              ? statusT("expired")
               : isExpiringSoon
-                ? "expiring"
-                : "valid"
+                ? t("expiring")
+                : statusT("valid")
         }
         muted={muted}
       />
@@ -76,16 +83,16 @@ export default async function VisasPage() {
 
   return (
     <>
-      <PageHeader title="All visas" backHref="/" />
+      <PageHeader title={t("all")} backHref="/" />
       <PageContainer>
         <Stack className="gap-4">
           {visaGroups.length === 0 ? (
             <EmptyState
               icon="passport"
-              title="No visas yet"
-              message="Add your first visa to start tracking coverage."
+              title={t("noVisasYet")}
+              message={t("addFirstVisa")}
               action={{
-                label: "Create visa",
+                label: t("create"),
                 href: "/visas/create",
               }}
             />
@@ -100,8 +107,8 @@ export default async function VisasPage() {
                         visa,
                         true,
                         index === 0
-                          ? "Renewed from this chain"
-                          : "Earlier visa"
+                          ? t("renewedFromThisChain")
+                          : t("earlierVisa")
                       )
                     )}
                   </div>
@@ -113,7 +120,7 @@ export default async function VisasPage() {
 
         {visaGroups.length > 0 && (
           <Text className="mt-4 text-sm text-fg-muted">
-            Tap a visa to review its trips, coverage, and remaining validity.
+            {t("tapToReview")}
           </Text>
         )}
 
@@ -123,14 +130,14 @@ export default async function VisasPage() {
               {
                 href: "/trips/create",
                 icon: <Icon name="calendar" size="sm" />,
-                title: "Plan trip",
-                description: "Create an upcoming journey",
+                title: fabT("trip"),
+                description: fabT("tripDesc"),
               },
               {
                 href: "/visas/create",
                 icon: <Icon name="visa-card" size="sm" />,
-                title: "Add visa",
-                description: "Save a visa or permit",
+                title: fabT("visa"),
+                description: fabT("visaDesc"),
               },
             ]}
           />

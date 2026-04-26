@@ -15,7 +15,7 @@ import {
   TripCard,
   UsageBar,
 } from "@/app/design";
-import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
+import { COUNTRY_EMOJIS, getCountryName } from "@/app/constants";
 import {
   copyForAlert,
   detailForTripIssue,
@@ -25,26 +25,22 @@ import {
 } from "@/app/structured-copy";
 import Link from "next/link";
 import { getVisaDetailSummary } from "../server-actions";
-import { VISA_TYPES_DISPLAY_MAP, VisaTypeKey } from "../constants";
+import { VisaTypeKey } from "../constants";
 import { redirect } from "next/navigation";
 import VisaSimulationControl from "./VisaSimulationControl";
 import VisaDetailActions from "./VisaDetailActions";
 import SensitiveValue from "./SensitiveValue";
 import { getVisaFlag } from "../utils";
+import { getLocale, getTranslations } from "next-intl/server";
 
-const formatDate = (date: Date | null) =>
+const formatDate = (date: Date | null, locale: string) =>
   date
-    ? date.toLocaleDateString("en-GB", {
+    ? date.toLocaleDateString(locale, {
         day: "numeric",
         month: "short",
-      year: "numeric",
+        year: "numeric",
       })
-    : "Open-ended";
-
-const formatCount = (value: number, singular: string, plural: string) =>
-  `${value} ${value === 1 ? singular : plural}`;
-
-const formatBoolean = (value: boolean) => (value ? "Yes" : "No");
+    : null;
 
 export default async function VisaDetail({
   params,
@@ -57,6 +53,11 @@ export default async function VisaDetail({
   }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const visaT = await getTranslations("visa");
+  const statusT = await getTranslations("status");
+  const copyT = await getTranslations("copy");
+  const commonT = await getTranslations("common");
   const { date: dateParam, show_outside_rolling_range } = await searchParams;
   const referenceDate = dateParam ? new Date(dateParam.toString()) : new Date();
   const summary = await getVisaDetailSummary(id, referenceDate);
@@ -76,7 +77,7 @@ export default async function VisaDetail({
     (tripEvaluation) =>
       tripEvaluation.projected && tripEvaluation.issueKinds.length > 0
   );
-  const visibleAlerts = uniqueAlertsForDisplay(summary.alerts);
+  const visibleAlerts = uniqueAlertsForDisplay(copyT, summary.alerts);
   const projectedIssueCards = projectedTripIssues
     .flatMap((tripEvaluation) =>
       tripEvaluation.issueKinds.map((issueKind) => {
@@ -85,8 +86,8 @@ export default async function VisaDetail({
         );
         return {
           key: `${tripEvaluation.trip.id}-${issueKind}`,
-          title: titleForTripIssue(issueKind),
-          detail: detailForTripIssue(issueKind, issue?.params),
+          title: titleForTripIssue(copyT, issueKind),
+          detail: detailForTripIssue(copyT, issueKind, issue?.params),
         };
       })
     )
@@ -100,16 +101,22 @@ export default async function VisaDetail({
   const expiresSoon =
     summary.visa.expires &&
     summary.visa.expires.getTime() - referenceDate.getTime() <= 30 * 86400000;
-  const canRenew = Boolean(summary.visa.expires && (summary.visa.expires < referenceDate || expiresSoon));
+  const canRenew = Boolean(
+    summary.visa.expires &&
+    (summary.visa.expires < referenceDate || expiresSoon)
+  );
   const previousVisa = summary.visa.renewedFrom;
   const nextVisa = summary.visa.renewals[0] ?? null;
 
   return (
     <div>
       <PageHeader
-        kicker={VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
+        kicker={visaT(`types.${summary.visa.type}`)}
         title={summary.visa.name}
-        flag={getVisaFlag(summary.visa.type as VisaTypeKey, summary.visa.countries)}
+        flag={getVisaFlag(
+          summary.visa.type as VisaTypeKey,
+          summary.visa.countries
+        )}
         backHref="/visas"
         actions={
           <VisaDetailActions
@@ -121,23 +128,27 @@ export default async function VisaDetail({
       <PageContainer>
         <Stack className="gap-6">
           <Stack className="gap-3">
-            <Text className="font-semibold text-lg">Validity</Text>
+            <Text className="font-semibold text-lg">{visaT("validity")}</Text>
             <FactGrid cols={2}>
               <Fact
-                label="Valid from"
-                value={formatDate(summary.visa.validFrom)}
+                label={visaT("validFrom")}
+                value={formatDate(summary.visa.validFrom, locale)}
               />
               <Fact
-                label="Expires"
-                value={formatDate(summary.visa.expires)}
+                label={visaT("expiresOn")}
+                value={
+                  formatDate(summary.visa.expires, locale) ?? visaT("openEnded")
+                }
               />
               <Fact
-                label="Type"
-                value={VISA_TYPES_DISPLAY_MAP[summary.visa.type]}
+                label={visaT("typeLabel")}
+                value={visaT(`types.${summary.visa.type}`)}
               />
               <Fact
-                label="Countries"
-                value={summary.visa.countries.length}
+                label={visaT("countriesLabel")}
+                value={commonT("countryCount", {
+                  count: summary.visa.countries.length,
+                })}
               />
             </FactGrid>
           </Stack>
@@ -145,43 +156,57 @@ export default async function VisaDetail({
           <Divider />
 
           <Stack className="gap-3">
-            <Text className="font-semibold text-lg">Configuration</Text>
+            <Text className="font-semibold text-lg">
+              {visaT("configuration")}
+            </Text>
             <FactGrid cols={2}>
               {summary.visa.tripMaxLen != null && (
                 <Fact
-                  label="Maximum single trip"
-                  value={formatCount(summary.visa.tripMaxLen, "day", "days")}
+                  label={visaT("singleTripMax")}
+                  value={commonT("dayCount", {
+                    count: summary.visa.tripMaxLen,
+                  })}
                 />
               )}
               {summary.visa.totalMaxLen != null && (
                 <Fact
-                  label="Maximum total stay"
-                  value={formatCount(summary.visa.totalMaxLen, "day", "days")}
+                  label={visaT("totalStayMax")}
+                  value={commonT("dayCount", {
+                    count: summary.visa.totalMaxLen,
+                  })}
                 />
               )}
               {summary.visa.maxNumTrips != null && (
                 <Fact
-                  label="Maximum trips"
-                  value={formatCount(summary.visa.maxNumTrips, "trip", "trips")}
+                  label={visaT("maxTrips")}
+                  value={commonT("tripCount", {
+                    count: summary.visa.maxNumTrips,
+                  })}
                 />
               )}
               {summary.visa.rollingPeriodLen != null && (
                 <Fact
-                  label="Rolling period"
-                  value={formatCount(
-                    summary.visa.rollingPeriodLen,
-                    "day",
-                    "days"
-                  )}
+                  label={visaT("rollingPeriod")}
+                  value={commonT("dayCount", {
+                    count: summary.visa.rollingPeriodLen,
+                  })}
                 />
               )}
               <Fact
-                label="Must exit before expiry"
-                value={formatBoolean(summary.visa.mustExitBeforeExpiry)}
+                label={visaT("mustLeave")}
+                value={
+                  summary.visa.mustExitBeforeExpiry
+                    ? commonT("yes")
+                    : commonT("no")
+                }
               />
               <Fact
-                label="Include entry and exit dates"
-                value={formatBoolean(summary.visa.includeEntryAndExitDates)}
+                label={visaT("countBothDays")}
+                value={
+                  summary.visa.includeEntryAndExitDates
+                    ? commonT("yes")
+                    : commonT("no")
+                }
               />
             </FactGrid>
           </Stack>
@@ -190,14 +215,16 @@ export default async function VisaDetail({
             <>
               <Divider />
               <Stack className="gap-3">
-                <Text className="font-semibold text-lg">Identifiers</Text>
+                <Text className="font-semibold text-lg">
+                  {visaT("identifiers")}
+                </Text>
                 <FactGrid cols={2}>
                   {summary.visa.visaNumber && (
                     <Fact
-                      label="Visa number"
+                      label={visaT("number")}
                       value={
                         <SensitiveValue
-                          label="visa number"
+                          label={visaT("number").toLowerCase()}
                           value={summary.visa.visaNumber}
                         />
                       }
@@ -205,10 +232,10 @@ export default async function VisaDetail({
                   )}
                   {summary.visa.documentNumber && (
                     <Fact
-                      label="Document number"
+                      label={visaT("documentNumber")}
                       value={
                         <SensitiveValue
-                          label="document number"
+                          label={visaT("documentNumber").toLowerCase()}
                           value={summary.visa.documentNumber}
                         />
                       }
@@ -223,11 +250,13 @@ export default async function VisaDetail({
             <>
               <Divider />
               <Stack className="gap-3">
-                <Text className="font-semibold text-lg">Renewal history</Text>
+                <Text className="font-semibold text-lg">
+                  {visaT("renewalHistory")}
+                </Text>
                 <FactGrid cols={2}>
                   {previousVisa && (
                     <Fact
-                      label="Renewed from"
+                      label={visaT("renewedFrom")}
                       value={
                         <Link
                           href={`/visas/${previousVisa.id}`}
@@ -240,7 +269,7 @@ export default async function VisaDetail({
                   )}
                   {nextVisa && (
                     <Fact
-                      label="Renewed by"
+                      label={visaT("renewedBy")}
                       value={
                         <Link
                           href={`/visas/${nextVisa.id}`}
@@ -258,18 +287,21 @@ export default async function VisaDetail({
 
           <Divider />
 
-          {summary.projection && summary.rollingWindowTripIds.length > 0 && (
+          {summary.projection && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Projection</Text>
+              <Text className="font-semibold text-lg">
+                {visaT("projection")}
+              </Text>
               <StatCard>
-              <SchengenProjectionChart
-                points={summary.projection.points}
-                limit={summary.visa.totalMaxLen ?? 90}
-                today={referenceDate}
-              /></StatCard>
+                <SchengenProjectionChart
+                  points={summary.projection.points}
+                  limit={summary.visa.totalMaxLen ?? 90}
+                  today={referenceDate}
+                />
+              </StatCard>
               <VisaSimulationControl
                 id={summary.visa.id}
-                initialDate={referenceDate.toISOString().split('T')[0]}
+                initialDate={referenceDate.toISOString().split("T")[0]}
                 showAllTrips={showAllTrips}
               />
             </Stack>
@@ -277,27 +309,29 @@ export default async function VisaDetail({
 
           {summary.rollingLimit && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Usage</Text>
+              <Text className="font-semibold text-lg">
+                {visaT("aggregates")}
+              </Text>
               <UsageBar
                 used={summary.rollingUsed ?? 0}
                 limit={summary.rollingLimit}
-                tone={
-                  summary.status === "valid"
-                    ? "ok"
-                    : "danger"
-                }
+                tone={summary.status === "valid" ? "ok" : "danger"}
               />
               <Text className="text-sm text-fg-muted">
-                {summary.rollingUsed} / {summary.rollingLimit} days used in the last {summary.rollingWindow} days
+                {commonT("daysUsedInWindow", {
+                  used: summary.rollingUsed ?? 0,
+                  limit: summary.rollingLimit,
+                  window: summary.rollingWindow ?? 0,
+                })}
               </Text>
             </Stack>
           )}
 
           {visibleAlerts.length > 0 && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Alerts</Text>
+              <Text className="font-semibold text-lg">{visaT("alerts")}</Text>
               {visibleAlerts.map((alert) => {
-                const copy = copyForAlert(alert);
+                const copy = copyForAlert(copyT, alert);
                 return (
                   <AlertBox
                     key={alert.fingerprint}
@@ -313,13 +347,11 @@ export default async function VisaDetail({
 
           {projectedIssueCards.length > 0 && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Upcoming issues</Text>
+              <Text className="font-semibold text-lg">
+                {visaT("upcomingIssues")}
+              </Text>
               {projectedIssueCards.map((card) => (
-                <AlertBox
-                  key={card.key}
-                  tone="warn"
-                  title={card.title}
-                >
+                <AlertBox key={card.key} tone="warn" title={card.title}>
                   <Text className="text-sm text-fg-muted">{card.detail}</Text>
                 </AlertBox>
               ))}
@@ -328,16 +360,32 @@ export default async function VisaDetail({
 
           {visibleTrips.length > 0 && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Trips</Text>
+              <Text className="font-semibold text-lg">{visaT("trips")}</Text>
               {visibleTrips.map((tripEvaluation) => (
                 <TripCard
                   key={tripEvaluation.trip.id}
                   flag={COUNTRY_EMOJIS[tripEvaluation.trip.countryCode] ?? "✈"}
-                  title={tripEvaluation.trip.name ?? COUNTRY_NAMES[tripEvaluation.trip.countryCode] ?? tripEvaluation.trip.countryCode}
-                  dateRange={`${formatDate(tripEvaluation.trip.startDate)} – ${formatDate(tripEvaluation.trip.endDate)}`}
-                  length={Math.round((new Date(tripEvaluation.trip.endDate).getTime() - new Date(tripEvaluation.trip.startDate).getTime()) / 86400000) + 1}
-                  statusTone={tripEvaluation.status === "valid" ? "ok" : "danger"}
-                  statusLabel={tripEvaluation.status}
+                  title={
+                    tripEvaluation.trip.name ??
+                    getCountryName(tripEvaluation.trip.countryCode, locale) ??
+                    tripEvaluation.trip.countryCode
+                  }
+                  dateRange={`${formatDate(tripEvaluation.trip.startDate, locale)} – ${formatDate(tripEvaluation.trip.endDate, locale)}`}
+                  length={
+                    Math.round(
+                      (new Date(tripEvaluation.trip.endDate).getTime() -
+                        new Date(tripEvaluation.trip.startDate).getTime()) /
+                        86400000
+                    ) + 1
+                  }
+                  statusTone={
+                    tripEvaluation.status === "valid" ? "ok" : "danger"
+                  }
+                  statusLabel={
+                    tripEvaluation.status === "valid"
+                      ? statusT("valid")
+                      : statusT("visaInvalid")
+                  }
                 />
               ))}
             </Stack>
@@ -345,13 +393,13 @@ export default async function VisaDetail({
 
           {summary.visa.countries.length > 0 && (
             <Stack className="gap-3">
-              <Text className="font-semibold text-lg">Coverage</Text>
+              <Text className="font-semibold text-lg">{visaT("coverage")}</Text>
               <div className="flex flex-wrap gap-2">
                 {summary.visa.countries.map((countryCode) => (
                   <TagPill
                     key={countryCode}
                     flag={COUNTRY_EMOJIS[countryCode] ?? "🌍"}
-                    label={COUNTRY_NAMES[countryCode] ?? countryCode}
+                    label={getCountryName(countryCode, locale) ?? countryCode}
                   />
                 ))}
               </div>

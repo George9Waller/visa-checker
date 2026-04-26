@@ -8,7 +8,7 @@ import {
   StatusBadge,
   Text,
 } from "@/app/design";
-import { COUNTRY_EMOJIS, COUNTRY_NAMES } from "@/app/constants";
+import { COUNTRY_EMOJIS, getCountryName } from "@/app/constants";
 import {
   detailForTripIssue,
   titleForTripIssue,
@@ -17,9 +17,10 @@ import {
 import { getTripDetailSummary } from "../server-actions";
 import TripVisaSelector from "./TripVisaSelector";
 import TripDetailActions from "./TripDetailActions";
+import { getLocale, getTranslations } from "next-intl/server";
 
-const formatDate = (value: string | Date) =>
-  new Date(value).toLocaleDateString("en-GB", {
+const formatDate = (value: string | Date, locale: string) =>
+  new Date(value).toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -31,6 +32,10 @@ export default async function TripDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const tripT = await getTranslations("trip");
+  const statusT = await getTranslations("status");
+  const copyT = await getTranslations("copy");
   const summary = await getTripDetailSummary(id);
 
   const durationDays =
@@ -59,15 +64,17 @@ export default async function TripDetailPage({
     tripStatus = "past";
   }
   const kickerText =
-    tripStatus === "current" ? "Currently in" :
-    tripStatus === "past" ? "Past trip" :
-    "Upcoming";
+    tripStatus === "current"
+      ? tripT("currentlyIn")
+      : tripStatus === "past"
+        ? tripT("pastTrip")
+        : tripT("upcoming");
 
   return (
     <div>
       <PageHeader
         kicker={kickerText}
-        title={summary.trip.name ?? COUNTRY_NAMES[summary.trip.countryCode] ?? summary.trip.countryCode}
+        title={summary.trip.name ?? getCountryName(summary.trip.countryCode, locale) ?? summary.trip.countryCode}
         flag={COUNTRY_EMOJIS[summary.trip.countryCode] ?? "✈"}
         backHref="/"
         actions={<TripDetailActions tripId={summary.trip.id} />}
@@ -75,17 +82,17 @@ export default async function TripDetailPage({
       <PageContainer>
         <Stack className="gap-6">
           <FactGrid cols={2}>
-          <Fact label="From" value={formatDate(summary.trip.startDate)} />
-          <Fact label="To" value={formatDate(summary.trip.endDate)} />
-          <Fact label="Length" value={`${durationDays} days`} />
+          <Fact label={tripT("from")} value={formatDate(summary.trip.startDate, locale)} />
+          <Fact label={tripT("to")} value={formatDate(summary.trip.endDate, locale)} />
+          <Fact label={tripT("length")} value={tripT("lengthValue", { count: durationDays })} />
           <Fact
-            label="Visa status"
+            label={tripT("visaStatus")}
             value={
               <StatusBadge
                 tone={summary.status === "valid" ? "ok" : "danger"}
                 size="xs"
               >
-                {summary.status}
+                {summary.status === "valid" ? statusT("valid") : statusT("visaInvalid")}
               </StatusBadge>
             }
           />
@@ -101,10 +108,11 @@ export default async function TripDetailPage({
                     (issue) => issue.kind === issueKind
                   )?.severity ?? "danger"
                 )}
-                title={titleForTripIssue(issueKind)}
+                title={titleForTripIssue(copyT, issueKind)}
               >
                 <Text className="text-sm text-fg-muted">
                   {detailForTripIssue(
+                    copyT,
                     issueKind,
                     summary.selectedCandidate?.issues.find(
                       (issue) => issue.kind === issueKind
@@ -115,11 +123,13 @@ export default async function TripDetailPage({
             ))}
           </Stack>
         ) : (
-          <AlertBox tone="ok" title="Trip covered">
+          <AlertBox tone="ok" title={tripT("tripCovered")}>
             <Text className="text-sm text-fg-muted">
               {summary.selectedCandidate
-                ? `${summary.selectedCandidate.name} covers this trip.`
-                : "No visa required for this trip."}
+                ? tripT("tripCoveredByVisa", {
+                    visaName: summary.selectedCandidate.name,
+                  })
+                : tripT("noVisaRequired")}
             </Text>
           </AlertBox>
         )}
@@ -134,7 +144,7 @@ export default async function TripDetailPage({
 
         {summary.selectedCandidate && (
           <Stack className="gap-3">
-            <Text className="font-semibold text-lg">Selected visa</Text>
+            <Text className="font-semibold text-lg">{tripT("selectedVisa")}</Text>
             <AlertBox
               tone={
                 summary.selectedCandidate.status === "valid" ? "ok" : "danger"
@@ -144,14 +154,17 @@ export default async function TripDetailPage({
               <Text className="text-sm text-fg-muted">
                 {selectedIssueKinds.length > 0
                   ? `${detailForTripIssue(
+                      copyT,
                       selectedIssueKinds[0],
                       selectedIssue?.params
                     )}${
                       selectedIssueKinds.length > 1
-                        ? ` · +${selectedIssueKinds.length - 1} more issue${selectedIssueKinds.length - 1 === 1 ? "" : "s"}`
+                        ? ` · ${copyT("moreIssues", {
+                            count: selectedIssueKinds.length - 1,
+                          })}`
                         : ""
                     }`
-                  : "This visa currently evaluates as valid for the trip."}
+                  : tripT("visaCurrentlyValid")}
               </Text>
             </AlertBox>
           </Stack>

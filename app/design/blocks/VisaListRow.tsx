@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { cn } from "../cn";
 import { Tone } from "../tokens";
@@ -33,8 +36,8 @@ export function VisaListRow({
   href,
   muted,
 }: VisaListRowProps) {
-  const countryLabel =
-    countryCount === 1 ? "1 country" : `${countryCount ?? 0} countries`;
+  const t = useTranslations("common");
+  const countryLabel = t("countryCount", { count: countryCount ?? 0 });
   const classes = cn(
     "w-full rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
     "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",

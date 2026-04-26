@@ -3,13 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   createTrip,
   getPossibleVisasForDraftTrip,
   updateTrip,
 } from "../server-actions";
-import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
+import {
+  COUNTRY_EMOJIS,
+  getCountryLabel,
+  getCountryLabels,
+  getCountryName,
+} from "@/app/constants";
 import {
   AlertBox,
   Checkbox,
@@ -68,7 +73,7 @@ interface CreateTripWizardProps {
   submitHref?: string;
 }
 
-const formatLastVisited = (value: string) => {
+const formatLastVisited = (t: (key: string, values?: any) => string, value: string) => {
   const now = new Date();
   const then = new Date(`${value}T00:00:00`);
   const diffDays = Math.max(
@@ -77,19 +82,22 @@ const formatLastVisited = (value: string) => {
   );
 
   if (diffDays === 0) {
-    return "Visited today";
+    return t("visitedToday");
   }
   if (diffDays === 1) {
-    return "Visited yesterday";
+    return t("visitedYesterday");
   }
-  return `Visited ${diffDays} days ago`;
+  return t("visitedDaysAgo", { days: diffDays });
 };
 
-const formatVisitCount = (count?: number) => {
+const formatVisitCount = (
+  t: (key: string, values?: any) => string,
+  count?: number
+) => {
   if (!count) {
-    return "Frequently visited";
+    return t("frequentlyVisited");
   }
-  return count === 1 ? "Visited once" : `Visited ${count} times`;
+  return t("visitedTimes", { count });
 };
 
 export default function CreateTripWizard({
@@ -102,6 +110,8 @@ export default function CreateTripWizard({
   submitHref = "/",
 }: CreateTripWizardProps) {
   const t = useTranslations("trip");
+  const copyT = useTranslations("copy");
+  const locale = useLocale();
   const router = useRouter();
 
   const [step, setStep] = useState(0);
@@ -124,10 +134,10 @@ export default function CreateTripWizard({
 
   const sortedCountries = useMemo(
     () =>
-      Object.keys(COUNTRY_LABELS)
-        .map((code) => ({ code, label: COUNTRY_LABELS[code] }))
+      Object.keys(getCountryLabels(locale))
+        .map((code) => ({ code, label: getCountryLabel(code, locale) }))
         .sort((a, b) => a.label.localeCompare(b.label)),
-    []
+    [locale]
   );
 
   const filteredCountries = useMemo(() => {
@@ -187,7 +197,7 @@ export default function CreateTripWizard({
       })
       .catch((error) => {
         if (!cancelled) {
-          toast.error(`Error loading visa options: ${error}`);
+          toast.error(t("errorLoadingVisaOptions", { error: String(error) }));
           setVisaCandidates([]);
           setSelectedVisaId(null);
         }
@@ -208,6 +218,7 @@ export default function CreateTripWizard({
     mode,
     startDate,
     selectedVisaId,
+    t,
     visaRequired,
   ]);
 
@@ -237,15 +248,15 @@ export default function CreateTripWizard({
       }
       router.push(submitHref);
     } catch (error) {
-      toast.error(`Error saving trip: ${error}`);
+      toast.error(t("errorSavingTrip", { error: String(error) }));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const selectedCountryName = COUNTRY_NAMES[country] ?? country;
-  const shellTitle = title ?? (mode === "edit" ? "Edit trip" : t("create"));
-  const submitLabel = mode === "edit" ? "Save changes" : t("create");
+  const selectedCountryName = getCountryName(country, locale);
+  const shellTitle = title ?? (mode === "edit" ? t("edit") : t("create"));
+  const submitLabel = mode === "edit" ? t("save") : t("create");
 
   if (step === 0) {
     return (
@@ -265,12 +276,12 @@ export default function CreateTripWizard({
         <Stack gap="lg">
           <AlertBox
             tone={country ? "ok" : "warn"}
-            title={country ? selectedCountryName : "Choose a destination"}
+            title={country ? selectedCountryName : t("chooseDestination")}
           >
             <Text variant="small" tone="muted">
               {country
-                ? "You can refine the trip details once the destination is selected."
-                : "Pick from a suggested country or search the full list below."}
+                ? t("destinationHintSelected")
+                : t("destinationHintUnselected")}
             </Text>
           </AlertBox>
 
@@ -278,16 +289,15 @@ export default function CreateTripWizard({
             <Stack gap="md">
               <div>
                 <Text className="font-semibold text-base">
-                  Recently visited
+                  {t("recentlyVisited")}
                 </Text>
                 <Text variant="small" tone="muted">
-                  Countries from your latest completed trips.
+                  {t("recentTripsHint")}
                 </Text>
               </div>
               <OptionGrid cols={2}>
                 {countrySuggestions.recent.map(({ code, lastVisited }) => {
-                  const name =
-                    COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
+                  const name = getCountryName(code, locale);
                   const emoji = COUNTRY_EMOJIS[code] ?? "✈";
                   return (
                     <OptionRow
@@ -295,7 +305,7 @@ export default function CreateTripWizard({
                       variant="grid"
                       flag={<span className="text-2xl">{emoji}</span>}
                       title={name}
-                      subtitle={formatLastVisited(lastVisited ?? "")}
+                      subtitle={formatLastVisited(t, lastVisited ?? "")}
                       selected={country === code}
                       onClick={() => setCountry(code)}
                     />
@@ -308,15 +318,14 @@ export default function CreateTripWizard({
           {countrySuggestions.popular.length > 0 && (
             <Stack gap="md">
               <div>
-                <Text className="font-semibold text-base">Most visited</Text>
+                <Text className="font-semibold text-base">{t("mostVisited")}</Text>
                 <Text variant="small" tone="muted">
-                  Countries you travel to most often.
+                  {t("mostVisitedHint")}
                 </Text>
               </div>
               <OptionGrid cols={2}>
                 {countrySuggestions.popular.map(({ code, tripCount }) => {
-                  const name =
-                    COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
+                  const name = getCountryName(code, locale);
                   const emoji = COUNTRY_EMOJIS[code] ?? "✈";
                   return (
                     <OptionRow
@@ -324,7 +333,7 @@ export default function CreateTripWizard({
                       variant="grid"
                       flag={<span className="text-2xl">{emoji}</span>}
                       title={name}
-                      subtitle={formatVisitCount(tripCount)}
+                      subtitle={formatVisitCount(t, tripCount)}
                       selected={country === code}
                       onClick={() => setCountry(code)}
                     />
@@ -342,7 +351,7 @@ export default function CreateTripWizard({
             />
             <OptionList maxHeight="40vh" className="overscroll-contain">
               {filteredCountries.map(({ code, label }) => {
-                const name = COUNTRY_NAMES[code] ?? label;
+                const name = getCountryName(code, locale) ?? label;
                 const emoji = COUNTRY_EMOJIS[code] ?? "✈";
                 return (
                   <OptionRow
@@ -449,7 +458,7 @@ export default function CreateTripWizard({
           <Text variant="small" tone="muted">
             {visaRequired
               ? t("requiresVisaHint")
-              : "This trip will be marked as visa-free and can be linked later if needed."}
+              : t("visaFreeNotice")}
           </Text>
         </AlertBox>
 
@@ -467,10 +476,10 @@ export default function CreateTripWizard({
             <Field label={t("selectedVisa")}>
               <Text variant="small" tone="muted">
                 {loadingVisas
-                  ? "Loading matching visas..."
+                  ? t("loadingMatchingVisas")
                   : visaCandidates.length > 0
-                    ? "Pick a visa that covers this trip."
-                    : "No visas cover this destination yet."}
+                    ? t("pickVisaCoversTrip")
+                    : t("noVisasCoverDestination")}
               </Text>
             </Field>
 
@@ -485,19 +494,19 @@ export default function CreateTripWizard({
                       : toneFromSeverity(firstIssue?.severity ?? "danger");
                   const issueSummary =
                     candidate.status === "valid"
-                      ? "Valid for this trip"
+                      ? t("validForTrip")
                       : firstIssue
-                        ? detailForTripIssue(firstIssue.kind, firstIssue.params)
+                        ? detailForTripIssue(copyT, firstIssue.kind, firstIssue.params)
                         : issueKinds[0]
-                          ? titleForTripIssue(issueKinds[0])
-                          : "Needs review";
+                          ? titleForTripIssue(copyT, issueKinds[0])
+                          : t("needsReview");
                   const subtitle =
                     candidate.status === "valid"
                       ? issueSummary
                       : issueKinds.length > 1
-                        ? `${issueSummary} · +${issueKinds.length - 1} more issue${
-                            issueKinds.length - 1 === 1 ? "" : "s"
-                          }`
+                        ? `${issueSummary} · ${copyT("moreIssues", {
+                            count: issueKinds.length - 1,
+                          })}`
                         : issueSummary;
 
                   return (

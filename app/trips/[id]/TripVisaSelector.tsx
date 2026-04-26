@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { OptionList, OptionRow, Stack, StatusBadge, Text } from "@/app/design";
 import { TripVisaCandidate, selectVisaForTrip } from "../server-actions";
 import {
@@ -22,13 +23,16 @@ export default function TripVisaSelector({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [pendingVisaId, setPendingVisaId] = useState<string | null>(null);
+  const t = useTranslations("trip");
+  const statusT = useTranslations("status");
+  const copyT = useTranslations("copy");
 
   return (
     <Stack className="gap-3">
-      <Text className="font-semibold text-lg">Visa options</Text>
+      <Text className="font-semibold text-lg">{t("visaOptions")}</Text>
       {candidates.length === 0 ? (
         <Text className="text-sm text-fg-muted">
-          Create a visa for this country before you travel.
+          {t("createVisaBeforeTravel")}
         </Text>
       ) : (
         <OptionList maxHeight="48vh" className="overscroll-contain">
@@ -42,19 +46,19 @@ export default function TripVisaSelector({
             const firstIssueKind = issueKinds[0];
             const issueSummary =
               candidate.status === "valid"
-                ? "Valid for this trip"
+                ? t("validForTrip")
                 : issue
-                  ? detailForTripIssue(issue.kind, issue.params)
+                  ? detailForTripIssue(copyT, issue.kind, issue.params)
                   : firstIssueKind
-                    ? titleForTripIssue(firstIssueKind)
-                    : "Needs review";
+                    ? titleForTripIssue(copyT, firstIssueKind)
+                    : t("needsReview");
             const subtitle =
               candidate.status === "valid"
                 ? issueSummary
                 : issueKinds.length > 1
-                  ? `${issueSummary} · +${issueKinds.length - 1} more issue${
-                      issueKinds.length - 1 === 1 ? "" : "s"
-                    }`
+                  ? `${issueSummary} · ${copyT("moreIssues", {
+                      count: issueKinds.length - 1,
+                    })}`
                   : issueSummary;
             return (
               <OptionRow
@@ -65,8 +69,8 @@ export default function TripVisaSelector({
                 trailing={
                   <StatusBadge tone={badgeTone} size="xs">
                     {isPending && pendingVisaId === candidate.id
-                      ? "saving"
-                      : candidate.status}
+                      ? t("saving")
+                      : statusT(candidate.status as "valid" | "invalid")}
                   </StatusBadge>
                 }
                 onClick={() => {

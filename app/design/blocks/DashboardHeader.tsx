@@ -1,11 +1,13 @@
+"use client";
+
 import { ReactNode } from "react";
+import { useLocale } from "next-intl";
 import { cn } from "../cn";
 import { Kicker } from "../primitives/Kicker";
 import { Display } from "../primitives/Display";
 
 export interface DashboardHeaderProps {
   date: Date;
-  weekday: string;
   title?: string;
   actions?: ReactNode;
   className?: string;
@@ -13,12 +15,13 @@ export interface DashboardHeaderProps {
 
 export function DashboardHeader({
   date,
-  weekday,
-  title = "Trips",
+  title,
   actions,
   className,
 }: DashboardHeaderProps) {
-  const dateStr = date.toLocaleDateString("en-GB", {
+  const locale = useLocale();
+  const weekday = date.toLocaleDateString(locale, { weekday: "long" });
+  const dateStr = date.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
   });

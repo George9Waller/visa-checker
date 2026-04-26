@@ -1,4 +1,7 @@
+"use client";
+
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { cn } from "../cn";
 import { Tone } from "../tokens";
@@ -32,6 +35,7 @@ export function TripCard({
   onClick,
   href,
 }: TripCardProps) {
+  const t = useTranslations("common");
   const classes = cn(
     "w-full rounded-[var(--radius)] border border-border bg-bg-raised p-4 text-left transition-all",
     "mb-3 flex flex-col gap-3 hover:border-fg/70 hover:bg-bg-sunken",
@@ -56,7 +60,7 @@ export function TripCard({
       </div>
       {visaLabel && (
         <div className="text-xs font-mono text-fg-muted pt-2 border-t border-border">
-          VISA · {visaLabel}
+          {t("visaPrefix")} · {visaLabel}
         </div>
       )}
     </>

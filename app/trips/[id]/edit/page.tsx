@@ -1,6 +1,7 @@
 import { getTripCountrySuggestions } from "../../server-actions";
 import { getTripDetailSummary } from "../../server-actions";
 import CreateTripWizard from "../../create/CreateTripWizard";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditTripPage({
   params,
@@ -8,12 +9,13 @@ export default async function EditTripPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations("trip");
   const summary = await getTripDetailSummary(id);
   const countrySuggestions = await getTripCountrySuggestions();
 
   return (
     <CreateTripWizard
-      title="Edit trip"
+      title={t("edit")}
       mode="edit"
       cancelHref={`/trips/${id}`}
       submitHref={`/trips/${id}`}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Btn, DatePicker, Stack, Text } from "@/app/design";
 
 const asIso = (value: Date) => value.toISOString().split("T")[0];
@@ -16,6 +17,7 @@ export default function VisaSimulationControl({
   showAllTrips: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("visa");
   const [date, setDate] = useState(initialDate);
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -37,8 +39,7 @@ export default function VisaSimulationControl({
   return (
     <Stack gap="sm">
       <Text variant="small" tone="muted">
-        Change the date to see how your visa usage looks at a different point in
-        time.
+        {t("simulationDesc")}
       </Text>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
@@ -49,7 +50,7 @@ export default function VisaSimulationControl({
           onClick={apply}
           className="w-full justify-center sm:w-auto"
         >
-          Apply
+          {t("apply")}
         </Btn>
         {(hasChanged || date !== initialDate) && (
           <Btn
@@ -57,7 +58,7 @@ export default function VisaSimulationControl({
             onClick={reset}
             className="w-full justify-center sm:w-auto"
           >
-            Reset
+            {t("reset")}
           </Btn>
         )}
       </div>

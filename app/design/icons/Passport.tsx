@@ -14,7 +14,7 @@ export function Passport() {
         height="18"
         rx="2"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
 
       <circle
@@ -22,19 +22,19 @@ export function Passport() {
         cy="10.5"
         r="3.5"
         stroke="currentColor"
-        stroke-width="1.5"
+        strokeWidth="1.5"
       />
       <path
         d="M12 7V14"
         stroke="currentColor"
-        stroke-width="1"
-        stroke-linecap="round"
+        strokeWidth="1"
+        strokeLinecap="round"
       />
       <path
         d="M8.5 10.5H15.5"
         stroke="currentColor"
-        stroke-width="1"
-        stroke-linecap="round"
+        strokeWidth="1"
+        strokeLinecap="round"
       />
 
       <rect
@@ -44,7 +44,7 @@ export function Passport() {
         height="2.5"
         rx="0.5"
         stroke="currentColor"
-        stroke-width="1.2"
+        strokeWidth="1.2"
       />
     </svg>
   );

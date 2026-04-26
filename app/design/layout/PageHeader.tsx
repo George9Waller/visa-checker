@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "../cn";
 import { IconBtn } from "../primitives/IconBtn";
 import { Icon } from "../primitives/Icon";
@@ -25,6 +28,7 @@ export function PageHeader({
   actions,
   className,
 }: PageHeaderProps) {
+  const t = useTranslations("common");
   return (
     <div
       className={cn(
@@ -36,6 +40,7 @@ export function PageHeader({
         {(onBack || backHref) && backHref ? (
           <Link
             href={backHref}
+            title={t("back")}
             className="inline-flex items-center justify-center w-8 h-8 border border-border rounded-[var(--radius)] bg-transparent hover:bg-bg-sunken transition-all"
           >
             <IconBtn>
@@ -47,7 +52,7 @@ export function PageHeader({
             <button
               onClick={onBack}
               className="inline-flex items-center justify-center w-8 h-8 border border-border rounded-[var(--radius)] bg-transparent hover:bg-bg-sunken transition-all"
-              title="Back"
+              title={t("back")}
             >
               <IconBtn>
                 <Icon name="chevron-left" size="sm" />
