@@ -5,6 +5,7 @@ const { getServerSessionMock, prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     trip: {
       findUniqueOrThrow: vi.fn(),
+      create: vi.fn(),
     },
     visa: {
       findMany: vi.fn(),
@@ -26,6 +27,8 @@ vi.mock("@/app/constants-server", () => ({
 }));
 
 import {
+  createTrip,
+  getPossibleVisasForDraftTrip,
   getPossibleVisasForTrip,
   getTripDetailSummary,
   selectVisaForTrip,
@@ -54,24 +57,6 @@ describe("trip structured actions", () => {
         id: "visa-1",
         type: "tourist",
         name: "Linked visa",
-        expires: d("2024-12-31"),
-        visaNumber: "ABC123",
-        VisaTrip: [{ id: "link-1" }],
-      },
-      {
-        id: "visa-2",
-        type: "tourist",
-        name: "Too early",
-        expires: d("2024-12-31"),
-        visaNumber: null,
-        VisaTrip: [],
-      },
-    ]);
-    prismaMock.visa.findUniqueOrThrow
-      .mockResolvedValueOnce({
-        id: "visa-1",
-        name: "Linked visa",
-        type: "tourist",
         validFrom: d("2024-01-01"),
         expires: d("2024-12-31"),
         visaNumber: "ABC123",
@@ -96,11 +81,11 @@ describe("trip structured actions", () => {
             },
           },
         ],
-      })
-      .mockResolvedValueOnce({
+      },
+      {
         id: "visa-2",
-        name: "Too early",
         type: "tourist",
+        name: "Too early",
         validFrom: d("2024-07-01"),
         expires: d("2024-12-31"),
         visaNumber: null,
@@ -112,7 +97,8 @@ describe("trip structured actions", () => {
         mustExitBeforeExpiry: true,
         includeEntryAndExitDates: true,
         VisaTrip: [],
-      });
+      },
+    ]);
 
     const candidates = await getPossibleVisasForTrip("trip-1");
 
@@ -134,46 +120,100 @@ describe("trip structured actions", () => {
     );
   });
 
+  it("lists matching draft visas with validity state and reasons", async () => {
+    prismaMock.visa.findMany.mockResolvedValue([
+      {
+        id: "visa-1",
+        type: "tourist",
+        name: "Valid visa",
+        validFrom: d("2024-01-01"),
+        expires: d("2024-12-31"),
+        visaNumber: null,
+        countries: ["FR"],
+        maxNumTrips: null,
+        tripMaxLen: null,
+        totalMaxLen: null,
+        rollingPeriodLen: null,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: [],
+      },
+      {
+        id: "visa-2",
+        type: "tourist",
+        name: "Not yet valid",
+        validFrom: d("2024-07-01"),
+        expires: d("2024-12-31"),
+        visaNumber: null,
+        countries: ["FR"],
+        maxNumTrips: null,
+        tripMaxLen: null,
+        totalMaxLen: null,
+        rollingPeriodLen: null,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: [],
+      },
+    ]);
+
+    const candidates = await getPossibleVisasForDraftTrip({
+      id: "__draft__",
+      countryCode: "FR",
+      startDate: "2024-06-20",
+      endDate: "2024-06-25",
+      name: "Paris",
+      colour: "1",
+      visaRequired: true,
+    });
+
+    expect(candidates[0]).toEqual(
+      expect.objectContaining({
+        id: "visa-1",
+        status: "valid",
+        issueKinds: [],
+      })
+    );
+    expect(candidates[1]).toEqual(
+      expect.objectContaining({
+        id: "visa-2",
+        status: "invalid",
+        issueKinds: ["TRIP_VISA_NOT_YET_VALID"],
+      })
+    );
+  });
+
   it("builds trip detail summary from the selected candidate path", async () => {
     prismaMock.visa.findMany.mockResolvedValue([
       {
         id: "visa-1",
         type: "tourist",
         name: "Wrong country",
+        validFrom: d("2024-01-01"),
         expires: d("2024-12-31"),
         visaNumber: null,
-        VisaTrip: [{ id: "link-1" }],
+        countries: ["DE"],
+        maxNumTrips: null,
+        tripMaxLen: null,
+        totalMaxLen: null,
+        rollingPeriodLen: null,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: [
+          {
+            id: "link-1",
+            trip: {
+              id: "trip-1",
+              startDate: d("2024-06-20"),
+              endDate: d("2024-06-25"),
+              name: "Paris",
+              colour: "1",
+              countryCode: "FR",
+              visaRequired: true,
+            },
+          },
+        ],
       },
     ]);
-    prismaMock.visa.findUniqueOrThrow.mockResolvedValue({
-      id: "visa-1",
-      name: "Wrong country",
-      type: "tourist",
-      validFrom: d("2024-01-01"),
-      expires: d("2024-12-31"),
-      visaNumber: null,
-      countries: ["DE"],
-      maxNumTrips: null,
-      tripMaxLen: null,
-      totalMaxLen: null,
-      rollingPeriodLen: null,
-      mustExitBeforeExpiry: true,
-      includeEntryAndExitDates: true,
-      VisaTrip: [
-        {
-          id: "link-1",
-          trip: {
-            id: "trip-1",
-            startDate: d("2024-06-20"),
-            endDate: d("2024-06-25"),
-            name: "Paris",
-            colour: "1",
-            countryCode: "FR",
-            visaRequired: true,
-          },
-        },
-      ],
-    });
 
     const summary = await getTripDetailSummary("trip-1");
 
@@ -187,40 +227,32 @@ describe("trip structured actions", () => {
         id: "visa-1",
         type: "tourist",
         name: "Linked visa",
+        validFrom: d("2024-01-01"),
         expires: d("2024-12-31"),
         visaNumber: null,
-        VisaTrip: [{ id: "link-1" }],
+        countries: ["FR"],
+        maxNumTrips: null,
+        tripMaxLen: null,
+        totalMaxLen: null,
+        rollingPeriodLen: null,
+        mustExitBeforeExpiry: true,
+        includeEntryAndExitDates: true,
+        VisaTrip: [
+          {
+            id: "link-1",
+            trip: {
+              id: "trip-1",
+              startDate: d("2024-06-20"),
+              endDate: d("2024-06-25"),
+              name: "Paris",
+              colour: "1",
+              countryCode: "FR",
+              visaRequired: true,
+            },
+          },
+        ],
       },
     ]);
-    prismaMock.visa.findUniqueOrThrow.mockResolvedValue({
-      id: "visa-1",
-      name: "Linked visa",
-      type: "tourist",
-      validFrom: d("2024-01-01"),
-      expires: d("2024-12-31"),
-      visaNumber: null,
-      countries: ["FR"],
-      maxNumTrips: null,
-      tripMaxLen: null,
-      totalMaxLen: null,
-      rollingPeriodLen: null,
-      mustExitBeforeExpiry: true,
-      includeEntryAndExitDates: true,
-      VisaTrip: [
-        {
-          id: "link-1",
-          trip: {
-            id: "trip-1",
-            startDate: d("2024-06-20"),
-            endDate: d("2024-06-25"),
-            name: "Paris",
-            colour: "1",
-            countryCode: "FR",
-            visaRequired: true,
-          },
-        },
-      ],
-    });
 
     const summary = await selectVisaForTrip("trip-1", "visa-1");
 
@@ -231,5 +263,30 @@ describe("trip structured actions", () => {
       data: { tripId: "trip-1", visaId: "visa-1" },
     });
     expect(summary.selectedVisaId).toBe("visa-1");
+  });
+
+  it("links the selected visa when creating a trip", async () => {
+    prismaMock.trip.create.mockResolvedValue({
+      id: "trip-1",
+      startDate: d("2024-06-20"),
+      endDate: d("2024-06-25"),
+      countryCode: "FR",
+    });
+
+    await createTrip(
+      "2024-06-20",
+      "2024-06-25",
+      "FR",
+      true,
+      "Paris",
+      "visa-1"
+    );
+
+    expect(prismaMock.visaTrip.create).toHaveBeenCalledWith({
+      data: {
+        tripId: "trip-1",
+        visaId: "visa-1",
+      },
+    });
   });
 });

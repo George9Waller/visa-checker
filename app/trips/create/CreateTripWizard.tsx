@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
-import { createTrip, updateTrip } from "../server-actions";
+import {
+  createTrip,
+  getPossibleVisasForDraftTrip,
+  updateTrip,
+} from "../server-actions";
 import { COUNTRY_EMOJIS, COUNTRY_LABELS, COUNTRY_NAMES } from "@/app/constants";
 import {
   AlertBox,
@@ -18,9 +22,16 @@ import {
   OptionList,
   OptionRow,
   Stack,
+  StatusBadge,
   Text,
   WizardShell,
 } from "@/app/design";
+import {
+  detailForTripIssue,
+  titleForTripIssue,
+  toneFromSeverity,
+} from "@/app/structured-copy";
+import type { TripVisaCandidate } from "../server-actions";
 
 const TOTAL_STEPS = 3;
 
@@ -100,6 +111,11 @@ export default function CreateTripWizard({
   const [visaRequired, setVisaRequired] = useState(
     initialTrip?.visaRequired ?? true
   );
+  const [selectedVisaId, setSelectedVisaId] = useState<string | null>(null);
+  const [visaCandidates, setVisaCandidates] = useState<TripVisaCandidate[]>(
+    []
+  );
+  const [loadingVisas, setLoadingVisas] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const sortedCountries = useMemo(
@@ -128,6 +144,67 @@ export default function CreateTripWizard({
     return diff > 0 ? diff : null;
   }, [startDate, endDate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const shouldLoad = Boolean(
+      mode === "create" && visaRequired && country && startDate && endDate
+    );
+
+    if (!shouldLoad) {
+      setVisaCandidates([]);
+      setSelectedVisaId(null);
+      setLoadingVisas(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setLoadingVisas(true);
+    void getPossibleVisasForDraftTrip({
+      countryCode: country,
+      startDate,
+      endDate,
+      name: null,
+      colour: initialTrip?.colour ?? "1",
+      visaRequired,
+      id: "__draft__",
+    })
+      .then((candidates) => {
+        if (cancelled) {
+          return;
+        }
+        setVisaCandidates(candidates);
+        setSelectedVisaId((current) =>
+          current && candidates.some((candidate) => candidate.id === current)
+            ? current
+            : null
+        );
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          toast.error(`Error loading visa options: ${error}`);
+          setVisaCandidates([]);
+          setSelectedVisaId(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingVisas(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    country,
+    endDate,
+    initialTrip?.colour,
+    mode,
+    startDate,
+    visaRequired,
+  ]);
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
@@ -147,7 +224,8 @@ export default function CreateTripWizard({
           endDate,
           country,
           visaRequired,
-          name || null
+          name || null,
+          selectedVisaId
         );
       }
       router.push(submitHref);
@@ -377,13 +455,62 @@ export default function CreateTripWizard({
           </div>
         </Checkbox>
 
-        {visaRequired && (
-          <Field label={t("selectedVisa")}>
-            <OptionList
-              maxHeight="40vh"
-              className="overscroll-contain"
-            ></OptionList>
-          </Field>
+        {mode === "create" && visaRequired && (
+          <Stack gap="md">
+            <Field label={t("selectedVisa")}>
+              <Text variant="small" tone="muted">
+                {loadingVisas
+                  ? "Loading matching visas..."
+                  : visaCandidates.length > 0
+                    ? "Pick a visa that covers this trip."
+                    : "No visas cover this destination yet."}
+              </Text>
+            </Field>
+
+            {visaCandidates.length > 0 && (
+              <OptionList maxHeight="40vh" className="overscroll-contain">
+                {visaCandidates.map((candidate) => {
+                  const issueKinds = [...new Set(candidate.issueKinds)];
+                  const firstIssue = candidate.issues[0];
+                  const badgeTone =
+                    candidate.status === "valid"
+                      ? "ok"
+                      : toneFromSeverity(firstIssue?.severity ?? "danger");
+                  const issueSummary =
+                    candidate.status === "valid"
+                      ? "Valid for this trip"
+                      : firstIssue
+                        ? detailForTripIssue(firstIssue.kind, firstIssue.params)
+                        : issueKinds[0]
+                          ? titleForTripIssue(issueKinds[0])
+                          : "Needs review";
+                  const subtitle =
+                    candidate.status === "valid"
+                      ? issueSummary
+                      : issueKinds.length > 1
+                        ? `${issueSummary} · +${issueKinds.length - 1} more issue${
+                            issueKinds.length - 1 === 1 ? "" : "s"
+                          }`
+                        : issueSummary;
+
+                  return (
+                    <OptionRow
+                      key={candidate.id}
+                      title={candidate.name}
+                      subtitle={subtitle}
+                      selected={candidate.id === selectedVisaId}
+                      trailing={
+                        <StatusBadge tone={badgeTone} size="xs">
+                          {candidate.status}
+                        </StatusBadge>
+                      }
+                      onClick={() => setSelectedVisaId(candidate.id)}
+                    />
+                  );
+                })}
+              </OptionList>
+            )}
+          </Stack>
         )}
       </Stack>
     </WizardShell>

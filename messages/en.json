@@ -48,6 +48,7 @@
     "days": "days",
     "requiresVisa": "This trip requires a visa",
     "requiresVisaHint": "Select the visa that covers this trip",
+    "selectedVisa": "Selected visa",
     "noVisas": "No matching visas found",
     "searchCountry": "Search country…",
     "step1": "Destination",

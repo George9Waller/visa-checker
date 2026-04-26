@@ -48,6 +48,7 @@
     "days": "jours",
     "requiresVisa": "Ce voyage nécessite un visa",
     "requiresVisaHint": "Sélectionner le visa couvrant ce voyage",
+    "selectedVisa": "Visa sélectionné",
     "noVisas": "Aucun visa correspondant",
     "searchCountry": "Rechercher un pays…",
     "step1": "Destination",

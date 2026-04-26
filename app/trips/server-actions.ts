@@ -27,6 +27,11 @@ export type TripVisaCandidate = Pick<
   linkId?: string;
 };
 
+type TripVisaInput = Pick<
+  Trip,
+  "id" | "countryCode" | "startDate" | "endDate" | "name" | "colour" | "visaRequired"
+>;
+
 export type TripCountrySuggestion = {
   code: string;
   lastVisited?: string;
@@ -54,6 +59,163 @@ const generateHash = (str: string) => {
 
   // Map the hash to the range 1-8
   return (hash % 8) + 1;
+};
+
+const buildTripVisaCandidateList = async (
+  userId: string,
+  trip: TripVisaInput,
+  includeLinkedVisa: boolean
+) => {
+  const visas = await prisma.visa.findMany({
+    where: {
+      user_id: userId,
+      OR: [
+        {
+          countries: { has: trip.countryCode },
+        },
+        ...(includeLinkedVisa
+          ? [
+              {
+                VisaTrip: {
+                  some: {
+                    tripId: trip.id,
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    select: {
+      id: true,
+      type: true,
+      name: true,
+      expires: true,
+      visaNumber: true,
+      validFrom: true,
+      countries: true,
+      maxNumTrips: true,
+      tripMaxLen: true,
+      totalMaxLen: true,
+      rollingPeriodLen: true,
+      mustExitBeforeExpiry: true,
+      includeEntryAndExitDates: true,
+      VisaTrip: {
+        select: {
+          id: true,
+          trip: {
+            select: {
+              id: true,
+              startDate: true,
+              endDate: true,
+              name: true,
+              colour: true,
+              countryCode: true,
+              visaRequired: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const results: TripVisaCandidate[] = [];
+  for (const visa of visas) {
+    const link = visa.VisaTrip.find(
+      ({ trip: linkedTrip }) => linkedTrip.id === trip.id
+    );
+
+    const linkedTrips = visa.VisaTrip.map(({ trip: linkedTrip }) => ({
+      ...linkedTrip,
+      linkedVisaId: visa.id,
+    }));
+    if (!link) {
+      linkedTrips.push({
+        id: trip.id,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        name: trip.name ?? null,
+        colour: trip.colour,
+        countryCode: trip.countryCode,
+        visaRequired: trip.visaRequired,
+        linkedVisaId: visa.id,
+      });
+    }
+
+    const evaluationVisa: EvaluationVisa = {
+      id: visa.id,
+      name: visa.name,
+      type: visa.type,
+      validFrom: visa.validFrom,
+      expires: visa.expires,
+      visaNumber: visa.visaNumber,
+      countries: visa.countries,
+      maxNumTrips: visa.maxNumTrips,
+      tripMaxLen: visa.tripMaxLen,
+      totalMaxLen: visa.totalMaxLen,
+      rollingPeriodLen: visa.rollingPeriodLen,
+      mustExitBeforeExpiry: visa.mustExitBeforeExpiry,
+      includeEntryAndExitDates: visa.includeEntryAndExitDates,
+      linkedTrips,
+    };
+
+    const evaluation = evaluateSingleVisa({
+      visa: evaluationVisa,
+      trips: linkedTrips,
+      referenceDate: trip.endDate,
+      projectionEndDate: trip.endDate,
+    }).tripEvaluations.find(
+      (tripEvaluation) => tripEvaluation.trip.id === trip.id
+    );
+
+    results.push({
+      id: visa.id,
+      type: visa.type,
+      name: visa.name,
+      expires: visa.expires,
+      visaNumber: visa.visaNumber,
+      isSelected: Boolean(link),
+      status: evaluation?.status ?? "valid",
+      issueKinds: evaluation?.issueKinds ?? [],
+      issues:
+        evaluation?.issues.map((issue) => ({
+          kind: issue.kind as TripIssueKind,
+          severity: issue.severity,
+          params: {
+            ...issue.params,
+            tripName: trip.name ?? null,
+            visaName: visa.name,
+          },
+        })) ?? [],
+      alertSeverity:
+        evaluation?.status === "invalid"
+          ? AlertSeverity.DANGER
+          : AlertSeverity.INFO,
+      linkId: link?.id,
+    });
+  }
+
+  return results.sort((a, b) => {
+    if (a.isSelected && !b.isSelected) {
+      return -1;
+    }
+    if (!a.isSelected && b.isSelected) {
+      return 1;
+    }
+    if (a.status !== b.status) {
+      return a.status === "valid" ? -1 : 1;
+    }
+    if (!a.expires && !b.expires) {
+      return 0;
+    }
+    if (!a.expires) {
+      return 1;
+    }
+    if (!b.expires) {
+      return -1;
+    }
+    return a.expires.getTime() - b.expires.getTime();
+  });
 };
 
 export const getTripCountrySuggestions = async (): Promise<TripCountrySuggestionGroups> => {
@@ -168,7 +330,8 @@ export const createTrip = async (
   endDate: string,
   country: string,
   visaRequired: boolean,
-  name: string | null
+  name: string | null,
+  visaId?: string | null
 ) => {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -193,7 +356,16 @@ export const createTrip = async (
     },
   });
 
-  await linkVisaIfApplicable((session.user as any).id, trip);
+  if (visaId) {
+    await prisma.visaTrip.create({
+      data: {
+        tripId: trip.id,
+        visaId,
+      },
+    });
+  } else {
+    await linkVisaIfApplicable((session.user as any).id, trip);
+  }
 
   return trip;
 };
@@ -304,149 +476,41 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
     throw new Error("Authentication Required");
   }
 
-  const results: TripVisaCandidate[] = [];
-
   const trip = await getTrip(tripId);
-  const visas = await prisma.visa.findMany({
-    where: {
-      user_id: (session.user as any).id,
-      OR: [
-        {
-          countries: { has: trip.countryCode },
-        },
-        {
-          VisaTrip: {
-            some: {
-              tripId: trip.id,
-            },
-          },
-        },
-      ],
-    },
-    select: {
-      id: true,
-      type: true,
-      name: true,
-      expires: true,
-      visaNumber: true,
-      VisaTrip: {
-        where: {
-          tripId: trip.id,
-        },
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
+  return await buildTripVisaCandidateList((session.user as any).id, trip, true);
+};
 
-  for await (const visa of visas) {
-    const fullVisa = await prisma.visa.findUniqueOrThrow({
-      where: { id: visa.id },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        validFrom: true,
-        expires: true,
-        visaNumber: true,
-        countries: true,
-        maxNumTrips: true,
-        tripMaxLen: true,
-        totalMaxLen: true,
-        rollingPeriodLen: true,
-        mustExitBeforeExpiry: true,
-        includeEntryAndExitDates: true,
-        VisaTrip: {
-          select: {
-            id: true,
-            trip: {
-              select: {
-                id: true,
-                startDate: true,
-                endDate: true,
-                name: true,
-                colour: true,
-                countryCode: true,
-                visaRequired: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const link = fullVisa.VisaTrip.find(({ trip: linkedTrip }) => linkedTrip.id === trip.id);
-    const linkedTrips = fullVisa.VisaTrip.map(({ trip: linkedTrip }) => ({
-      ...linkedTrip,
-      linkedVisaId: fullVisa.id,
-    }));
-    if (!link) {
-      linkedTrips.push({
-        id: trip.id,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        name: (trip as any).name ?? null,
-        colour: (trip as any).colour ?? "1",
-        countryCode: trip.countryCode,
-        visaRequired: true,
-        linkedVisaId: fullVisa.id,
-      });
-    }
-
-    const evaluationVisa: EvaluationVisa = {
-      ...fullVisa,
-      linkedTrips,
-    };
-    const evaluation = evaluateSingleVisa({
-      visa: evaluationVisa,
-      referenceDate: trip.endDate,
-    }).tripEvaluations.find((tripEvaluation) => tripEvaluation.trip.id === trip.id);
-
-    results.push({
-      id: visa.id,
-      type: visa.type,
-      name: visa.name,
-      expires: visa.expires,
-      visaNumber: visa.visaNumber,
-      isSelected: Boolean(link),
-      status: evaluation?.status ?? "valid",
-      issueKinds: evaluation?.issueKinds ?? [],
-      issues:
-        evaluation?.issues.map((issue) => ({
-          kind: issue.kind as TripIssueKind,
-          severity: issue.severity,
-          params: {
-            ...issue.params,
-            tripName: trip.name ?? null,
-            visaName: visa.name,
-          },
-        })) ?? [],
-      alertSeverity: evaluation?.status === "invalid" ? AlertSeverity.DANGER : AlertSeverity.INFO,
-      linkId: link?.id,
-    });
+export const getPossibleVisasForDraftTrip = async (
+  trip: {
+    id: string;
+    countryCode: string;
+    startDate: string;
+    endDate: string;
+    name: string | null;
+    colour: string;
+    visaRequired: boolean;
   }
-  return results.sort((a, b) => {
-    if (a.isSelected && !b.isSelected) {
-      return -1;
-    }
-    if (!a.isSelected && b.isSelected) {
-      return 1;
-    }
-    if (a.status !== b.status) {
-      return a.status === "valid" ? -1 : 1;
-    }
-    if (!a.expires && !b.expires) {
-      return 0;
-    }
-    if (!a.expires) {
-      return 1;
-    }
-    if (!b.expires) {
-      return -1;
-    }
-    return a.expires.getTime() - b.expires.getTime();
-  });
+) => {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    throw new Error("Authentication Required");
+  }
+
+  const draftTrip: TripVisaInput = {
+    id: "__draft__",
+    countryCode: trip.countryCode,
+    startDate: new Date(trip.startDate),
+    endDate: new Date(trip.endDate),
+    name: trip.name,
+    colour: trip.colour,
+    visaRequired: trip.visaRequired,
+  };
+
+  return await buildTripVisaCandidateList(
+    (session.user as any).id,
+    draftTrip,
+    false
+  );
 };
 
 export const getTripDetailSummary = async (tripId: string) => {
