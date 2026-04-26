@@ -62,6 +62,7 @@ interface CreateTripWizardProps {
   title?: string;
   countrySuggestions: CountrySuggestionGroups;
   initialTrip?: TripDraft;
+  initialVisaId?: string | null;
   mode?: "create" | "edit";
   cancelHref?: string;
   submitHref?: string;
@@ -95,6 +96,7 @@ export default function CreateTripWizard({
   title,
   countrySuggestions,
   initialTrip,
+  initialVisaId = null,
   mode = "create",
   cancelHref = "/",
   submitHref = "/",
@@ -102,7 +104,7 @@ export default function CreateTripWizard({
   const t = useTranslations("trip");
   const router = useRouter();
 
-  const [step, setStep] = useState(initialTrip ? 1 : 0);
+  const [step, setStep] = useState(0);
   const [country, setCountry] = useState(initialTrip?.country ?? "");
   const [search, setSearch] = useState("");
   const [name, setName] = useState(initialTrip?.name ?? "");
@@ -111,7 +113,9 @@ export default function CreateTripWizard({
   const [visaRequired, setVisaRequired] = useState(
     initialTrip?.visaRequired ?? true
   );
-  const [selectedVisaId, setSelectedVisaId] = useState<string | null>(null);
+  const [selectedVisaId, setSelectedVisaId] = useState<string | null>(
+    initialVisaId
+  );
   const [visaCandidates, setVisaCandidates] = useState<TripVisaCandidate[]>(
     []
   );
@@ -147,7 +151,7 @@ export default function CreateTripWizard({
   useEffect(() => {
     let cancelled = false;
     const shouldLoad = Boolean(
-      mode === "create" && visaRequired && country && startDate && endDate
+      visaRequired && country && startDate && endDate
     );
 
     if (!shouldLoad) {
@@ -168,6 +172,7 @@ export default function CreateTripWizard({
       colour: initialTrip?.colour ?? "1",
       visaRequired,
       id: "__draft__",
+      selectedVisaId,
     })
       .then((candidates) => {
         if (cancelled) {
@@ -202,6 +207,7 @@ export default function CreateTripWizard({
     initialTrip?.colour,
     mode,
     startDate,
+    selectedVisaId,
     visaRequired,
   ]);
 
@@ -216,7 +222,8 @@ export default function CreateTripWizard({
           country,
           initialTrip.colour,
           visaRequired,
-          name || null
+          name || null,
+          selectedVisaId
         );
       } else {
         await createTrip(
@@ -455,7 +462,7 @@ export default function CreateTripWizard({
           </div>
         </Checkbox>
 
-        {mode === "create" && visaRequired && (
+        {visaRequired && (
           <Stack gap="md">
             <Field label={t("selectedVisa")}>
               <Text variant="small" tone="muted">

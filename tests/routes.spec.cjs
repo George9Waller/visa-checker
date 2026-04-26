@@ -94,11 +94,41 @@ test("trip edit page opens with the current trip data", async ({ page }) => {
   await page.goto(`/trips/${ids.currentTripId}/edit`);
 
   await expect(page.getByText("Edit trip")).toBeVisible();
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
   await expect(page.getByLabel(/Trip name|Nom du voyage/i)).toHaveValue(
     "Barcelona sprint"
   );
   await expect(
     page.getByRole("button", { name: /Continue|Continuer/i })
+  ).toBeVisible();
+});
+
+test("trip edit flow updates the trip and relinks the visa", async ({
+  page,
+}) => {
+  await page.goto(`/trips/${ids.currentTripId}/edit`);
+
+  await page
+    .getByPlaceholder(/Search country|Rechercher un pays/i)
+    .fill("Japan");
+  await page.getByRole("button", { name: /Japan JP/ }).click();
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+
+  await page.getByLabel(/Trip name|Nom du voyage/i).fill("Tokyo sprint");
+  await page.getByRole("button", { name: /Continue|Continuer/i }).click();
+  await expect(
+    page.getByRole("button", { name: /Japan Fast Track/ })
+  ).toBeVisible();
+  await page.getByRole("button", { name: /Japan Fast Track/ }).click();
+  await page.getByRole("button", { name: /Save changes|Enregistrer/i }).click();
+
+  await page.waitForURL(`/trips/${ids.currentTripId}`);
+  await expect(page.getByText("Tokyo sprint", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Japan Fast Track covers this trip.")
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Japan Fast Track/ })
   ).toBeVisible();
 });
 

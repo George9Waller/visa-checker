@@ -1,5 +1,5 @@
-import { getTrip } from "../../server-actions";
 import { getTripCountrySuggestions } from "../../server-actions";
+import { getTripDetailSummary } from "../../server-actions";
 import CreateTripWizard from "../../create/CreateTripWizard";
 
 export default async function EditTripPage({
@@ -8,7 +8,7 @@ export default async function EditTripPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const trip = await getTrip(id);
+  const summary = await getTripDetailSummary(id);
   const countrySuggestions = await getTripCountrySuggestions();
 
   return (
@@ -18,14 +18,15 @@ export default async function EditTripPage({
       cancelHref={`/trips/${id}`}
       submitHref={`/trips/${id}`}
       countrySuggestions={countrySuggestions}
+      initialVisaId={summary.selectedVisaId}
       initialTrip={{
-        id: trip.id,
-        country: trip.countryCode,
-        name: trip.name ?? "",
-        startDate: trip.startDate.toISOString().split("T")[0],
-        endDate: trip.endDate.toISOString().split("T")[0],
-        visaRequired: trip.visaRequired,
-        colour: trip.colour,
+        id: summary.trip.id,
+        country: summary.trip.countryCode,
+        name: summary.trip.name ?? "",
+        startDate: summary.trip.startDate.toISOString().split("T")[0],
+        endDate: summary.trip.endDate.toISOString().split("T")[0],
+        visaRequired: summary.trip.visaRequired,
+        colour: summary.trip.colour,
       }}
     />
   );

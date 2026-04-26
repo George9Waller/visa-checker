@@ -64,7 +64,7 @@ const generateHash = (str: string) => {
 const buildTripVisaCandidateList = async (
   userId: string,
   trip: TripVisaInput,
-  includeLinkedVisa: boolean
+  selectedVisaId?: string | null
 ) => {
   const visas = await prisma.visa.findMany({
     where: {
@@ -73,14 +73,10 @@ const buildTripVisaCandidateList = async (
         {
           countries: { has: trip.countryCode },
         },
-        ...(includeLinkedVisa
+        ...(selectedVisaId
           ? [
               {
-                VisaTrip: {
-                  some: {
-                    tripId: trip.id,
-                  },
-                },
+                id: selectedVisaId,
               },
             ]
           : []),
@@ -121,15 +117,12 @@ const buildTripVisaCandidateList = async (
 
   const results: TripVisaCandidate[] = [];
   for (const visa of visas) {
-    const link = visa.VisaTrip.find(
-      ({ trip: linkedTrip }) => linkedTrip.id === trip.id
-    );
-
+    const isSelected = visa.id === selectedVisaId;
     const linkedTrips = visa.VisaTrip.map(({ trip: linkedTrip }) => ({
       ...linkedTrip,
       linkedVisaId: visa.id,
     }));
-    if (!link) {
+    if (!isSelected) {
       linkedTrips.push({
         id: trip.id,
         startDate: trip.startDate,
@@ -174,7 +167,7 @@ const buildTripVisaCandidateList = async (
       name: visa.name,
       expires: visa.expires,
       visaNumber: visa.visaNumber,
-      isSelected: Boolean(link),
+      isSelected,
       status: evaluation?.status ?? "valid",
       issueKinds: evaluation?.issueKinds ?? [],
       issues:
@@ -191,7 +184,10 @@ const buildTripVisaCandidateList = async (
         evaluation?.status === "invalid"
           ? AlertSeverity.DANGER
           : AlertSeverity.INFO,
-      linkId: link?.id,
+      linkId: isSelected
+        ? visa.VisaTrip.find(({ trip: linkedTrip }) => linkedTrip.id === trip.id)
+            ?.id
+        : undefined,
     });
   }
 
@@ -357,6 +353,11 @@ export const createTrip = async (
   });
 
   if (visaId) {
+    await prisma.visaTrip.deleteMany({
+      where: {
+        tripId: trip.id,
+      },
+    });
     await prisma.visaTrip.create({
       data: {
         tripId: trip.id,
@@ -377,7 +378,8 @@ export const updateTrip = async (
   country: string,
   colour: string,
   visaRequired: boolean,
-  name: string | null
+  name: string | null,
+  visaId?: string | null
 ) => {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -417,11 +419,18 @@ export const updateTrip = async (
     },
   });
 
-  if (visaRequired && country !== existingTrip?.countryCode) {
-    await linkVisaIfApplicable((session.user as any).id, trip);
-  }
   if (!trip.visaRequired) {
     await prisma.visaTrip.deleteMany({ where: { tripId: trip.id } });
+  } else if (visaId) {
+    await prisma.visaTrip.deleteMany({ where: { tripId: trip.id } });
+    await prisma.visaTrip.create({
+      data: {
+        tripId: trip.id,
+        visaId,
+      },
+    });
+  } else if (country !== existingTrip?.countryCode) {
+    await linkVisaIfApplicable((session.user as any).id, trip);
   }
   return trip;
 };
@@ -477,7 +486,18 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
   }
 
   const trip = await getTrip(tripId);
-  return await buildTripVisaCandidateList((session.user as any).id, trip, true);
+  const selectedVisaId =
+    (
+      await prisma.visaTrip.findFirst({
+        where: { tripId },
+        select: { visaId: true },
+      })
+    )?.visaId ?? null;
+  return await buildTripVisaCandidateList(
+    (session.user as any).id,
+    trip,
+    selectedVisaId
+  );
 };
 
 export const getPossibleVisasForDraftTrip = async (
@@ -489,6 +509,7 @@ export const getPossibleVisasForDraftTrip = async (
     name: string | null;
     colour: string;
     visaRequired: boolean;
+    selectedVisaId?: string | null;
   }
 ) => {
   const session = await getServerSession(authOptions);
@@ -509,7 +530,7 @@ export const getPossibleVisasForDraftTrip = async (
   return await buildTripVisaCandidateList(
     (session.user as any).id,
     draftTrip,
-    false
+    trip.selectedVisaId ?? null
   );
 };
 

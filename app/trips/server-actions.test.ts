@@ -5,6 +5,8 @@ const { getServerSessionMock, prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     trip: {
       findUniqueOrThrow: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
       create: vi.fn(),
     },
     visa: {
@@ -14,6 +16,7 @@ const { getServerSessionMock, prismaMock } = vi.hoisted(() => ({
     visaTrip: {
       deleteMany: vi.fn(),
       create: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -32,6 +35,7 @@ import {
   getPossibleVisasForTrip,
   getTripDetailSummary,
   selectVisaForTrip,
+  updateTrip,
 } from "./server-actions";
 
 const d = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
@@ -40,6 +44,7 @@ describe("trip structured actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getServerSessionMock.mockResolvedValue({ user: { id: "user-1" } });
+    prismaMock.visaTrip.findFirst.mockResolvedValue({ visaId: "visa-1" });
     prismaMock.trip.findUniqueOrThrow.mockResolvedValue({
       id: "trip-1",
       startDate: d("2024-06-20"),
@@ -286,6 +291,40 @@ describe("trip structured actions", () => {
       data: {
         tripId: "trip-1",
         visaId: "visa-1",
+      },
+    });
+  });
+
+  it("updates the selected visa when editing a trip", async () => {
+    prismaMock.trip.findUnique.mockResolvedValue({
+      countryCode: "FR",
+    });
+    prismaMock.trip.update.mockResolvedValue({
+      id: "trip-1",
+      startDate: d("2024-06-20"),
+      endDate: d("2024-06-25"),
+      countryCode: "FR",
+      visaRequired: true,
+    });
+
+    await updateTrip(
+      "trip-1",
+      "2024-06-20",
+      "2024-06-25",
+      "FR",
+      "1",
+      true,
+      "Paris",
+      "visa-2"
+    );
+
+    expect(prismaMock.visaTrip.deleteMany).toHaveBeenCalledWith({
+      where: { tripId: "trip-1" },
+    });
+    expect(prismaMock.visaTrip.create).toHaveBeenCalledWith({
+      data: {
+        tripId: "trip-1",
+        visaId: "visa-2",
       },
     });
   });
