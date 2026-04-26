@@ -55,6 +55,10 @@
   --font-display: "Instrument Serif", Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Shadows */
+  --shadow-md: 0 4px 16px color-mix(in oklab, var(--color-fg) 12%, transparent),
+               0 1px 4px color-mix(in oklab, var(--color-fg) 8%, transparent);
 }
 
 /* ════════════════════════════════════════════

@@ -550,3 +550,6 @@ export const COLOURS: Record<string, string> = {
   "7": "#75A9A9",
   "8": "#D4B483",
 };
+
+export const APP_NAME = "Visa Checker";
+export const APP_ESTABLISHED_YEAR = 2024;

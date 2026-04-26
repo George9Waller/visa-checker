@@ -8,11 +8,12 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { AppShell } from "./design";
+import { APP_NAME } from "./constants";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Visa checker",
+  title: APP_NAME,
   description:
     "Helps track your time abroad so you can remain legal and compliant",
 };

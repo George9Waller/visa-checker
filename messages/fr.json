@@ -28,11 +28,28 @@
     "moreWarnings": "{count, plural, one {# avertissement de plus} other {# avertissements de plus}}"
   },
   "signin": {
-    "brand": "Visa checker",
-    "title": "Se connecter",
-    "subtitle": "La connexion Google peut être bloquée par les contrôles de sécurité OAuth locaux. Utilisez le compte de développement pour l'audit local du navigateur.",
-    "devSignIn": "Se connecter en tant qu'utilisateur dev",
-    "continueWithGoogle": "Continuer avec Google"
+    "established": "ÉTABLI · {year}",
+    "kicker": "— UN CARNET DE TERRAIN POUR",
+    "headlinePart1": "Les visas,",
+    "headlinePart2": "suivi",
+    "headlinePart3": "avec élégance.",
+    "body": "Enregistrez chaque voyage, suivez vos jours, et n'oubliez jamais si vous avez dépassé votre quota.",
+    "promiseTrips": "Voyages",
+    "promiseTripsLabel": "Enregistrés.",
+    "promiseDays": "Jours",
+    "promiseDaysLabel": "Comptés.",
+    "promiseVisas": "Visas",
+    "promiseVisasLabel": "Suivis.",
+    "howItWorksTitle": "— COMMENT ÇA MARCHE",
+    "howItWorksCount": "3 ÉTAPES",
+    "step1Title": "Ajoutez vos visas",
+    "step1Desc": "Schengen, entrée unique, résidence — choisissez un type, définissez les règles une fois.",
+    "step2Title": "Enregistrez chaque voyage",
+    "step2Desc": "Pays, dates, une note. Passé ou futur, tout est registré.",
+    "step3Title": "Lisez les calculs",
+    "step3Desc": "Comptages, fenêtres glissantes, alertes d'expiration — tout discrètement.",
+    "continueWithGoogle": "Continuer avec Google",
+    "devSignIn": "Se connecter en tant qu'utilisateur dev"
   },
   "settings": {
     "title": "Paramètres",

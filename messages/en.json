@@ -28,11 +28,27 @@
     "moreWarnings": "{count, plural, one {# more warning} other {# more warnings}}"
   },
   "signin": {
-    "brand": "Visa checker",
-    "title": "Sign in",
-    "subtitle": "Google sign-in can be blocked by local OAuth security checks. Use the dev account for local browser auditing.",
-    "devSignIn": "Sign in as Dev User",
-    "continueWithGoogle": "Continue with Google"
+    "kicker": "— A FIELD-NOTEBOOK FOR",
+    "headlinePart1": "Visas,",
+    "headlinePart2": "tracked",
+    "headlinePart3": "gracefully.",
+    "body": "Plot every trip, watch your day-counts, and never wake up at 3 a.m. wondering whether you've overstayed.",
+    "promiseTrips": "Trips",
+    "promiseTripsLabel": "Logged.",
+    "promiseDays": "Days",
+    "promiseDaysLabel": "Counted.",
+    "promiseVisas": "Visas",
+    "promiseVisasLabel": "Watched.",
+    "howItWorksTitle": "— HOW IT WORKS",
+    "howItWorksCount": "3 STEPS",
+    "step1Title": "Add your visas",
+    "step1Desc": "Schengen, single-entry, residency — pick a kind, set the rules once.",
+    "step2Title": "Log every trip",
+    "step2Desc": "Country, dates, a one-line note. Past or planned, it all goes in.",
+    "step3Title": "Read the math",
+    "step3Desc": "Day-counts, rolling windows, expiry alerts — quietly, in the background.",
+    "continueWithGoogle": "Continue with Google",
+    "devSignIn": "Sign in as Dev User"
   },
   "settings": {
     "title": "Settings",
