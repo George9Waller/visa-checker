@@ -78,7 +78,11 @@ export function SchengenProjectionChart({
     points[points.length - 1]?.date ??
     new Date(today.getTime() + 365 * 86400000);
 
-  type AreaSegment = { startIdx: number; endIdx: number; direction: "up" | "down" };
+  type AreaSegment = {
+    startIdx: number;
+    endIdx: number;
+    direction: "up" | "down";
+  };
   const areaSegments: AreaSegment[] = [];
 
   let segStart = 0;
@@ -128,7 +132,8 @@ export function SchengenProjectionChart({
           {t("projectionTitle")}
         </div>
         <div className="font-mono text-[10px] tracking-wide text-fg-faint">
-          {today.toLocaleDateString(locale, { day: "numeric", month: "short" })} →{" "}
+          {today.toLocaleDateString(locale, { day: "numeric", month: "short" })}{" "}
+          →{" "}
           {new Date(endDate).toLocaleDateString(locale, {
             day: "numeric",
             month: "short",

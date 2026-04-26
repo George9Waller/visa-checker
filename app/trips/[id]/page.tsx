@@ -74,7 +74,11 @@ export default async function TripDetailPage({
     <div>
       <PageHeader
         kicker={kickerText}
-        title={summary.trip.name ?? getCountryName(summary.trip.countryCode, locale) ?? summary.trip.countryCode}
+        title={
+          summary.trip.name ??
+          getCountryName(summary.trip.countryCode, locale) ??
+          summary.trip.countryCode
+        }
         flag={COUNTRY_EMOJIS[summary.trip.countryCode] ?? "✈"}
         backHref="/"
         actions={<TripDetailActions tripId={summary.trip.id} />}
@@ -82,93 +86,106 @@ export default async function TripDetailPage({
       <PageContainer>
         <Stack className="gap-6">
           <FactGrid cols={2}>
-          <Fact label={tripT("from")} value={formatDate(summary.trip.startDate, locale)} />
-          <Fact label={tripT("to")} value={formatDate(summary.trip.endDate, locale)} />
-          <Fact label={tripT("length")} value={tripT("lengthValue", { count: durationDays })} />
-          <Fact
-            label={tripT("visaStatus")}
-            value={
-              <StatusBadge
-                tone={summary.status === "valid" ? "ok" : "danger"}
-                size="xs"
-              >
-                {summary.status === "valid" ? statusT("valid") : statusT("visaInvalid")}
-              </StatusBadge>
-            }
-          />
-        </FactGrid>
+            <Fact
+              label={tripT("from")}
+              value={formatDate(summary.trip.startDate, locale)}
+            />
+            <Fact
+              label={tripT("to")}
+              value={formatDate(summary.trip.endDate, locale)}
+            />
+            <Fact
+              label={tripT("length")}
+              value={tripT("lengthValue", { count: durationDays })}
+            />
+            <Fact
+              label={tripT("visaStatus")}
+              value={
+                <StatusBadge
+                  tone={summary.status === "valid" ? "ok" : "danger"}
+                  size="xs"
+                >
+                  {summary.status === "valid"
+                    ? statusT("valid")
+                    : statusT("visaInvalid")}
+                </StatusBadge>
+              }
+            />
+          </FactGrid>
 
-        {issueKinds.length > 0 ? (
-          <Stack className="gap-3">
-            {issueKinds.map((issueKind) => (
-              <AlertBox
-                key={issueKind}
-                tone={toneFromSeverity(
-                  summary.selectedCandidate?.issues.find(
-                    (issue) => issue.kind === issueKind
-                  )?.severity ?? "danger"
-                )}
-                title={titleForTripIssue(copyT, issueKind)}
-              >
-                <Text className="text-sm text-fg-muted">
-                  {detailForTripIssue(
-                    copyT,
-                    issueKind,
+          {issueKinds.length > 0 ? (
+            <Stack className="gap-3">
+              {issueKinds.map((issueKind) => (
+                <AlertBox
+                  key={issueKind}
+                  tone={toneFromSeverity(
                     summary.selectedCandidate?.issues.find(
                       (issue) => issue.kind === issueKind
-                    )?.params
+                    )?.severity ?? "danger"
                   )}
-                </Text>
-              </AlertBox>
-            ))}
-          </Stack>
-        ) : (
-          <AlertBox tone="ok" title={tripT("tripCovered")}>
-            <Text className="text-sm text-fg-muted">
-              {summary.selectedCandidate
-                ? tripT("tripCoveredByVisa", {
-                    visaName: summary.selectedCandidate.name,
-                  })
-                : tripT("noVisaRequired")}
-            </Text>
-          </AlertBox>
-        )}
-
-        {summary.trip.visaRequired && (
-          <TripVisaSelector
-            tripId={summary.trip.id}
-            candidates={summary.candidates}
-            selectedVisaId={summary.selectedVisaId}
-          />
-        )}
-
-        {summary.selectedCandidate && (
-          <Stack className="gap-3">
-            <Text className="font-semibold text-lg">{tripT("selectedVisa")}</Text>
-            <AlertBox
-              tone={
-                summary.selectedCandidate.status === "valid" ? "ok" : "danger"
-              }
-              title={summary.selectedCandidate.name}
-            >
-              <Text className="text-sm text-fg-muted">
-                {selectedIssueKinds.length > 0
-                  ? `${detailForTripIssue(
+                  title={titleForTripIssue(copyT, issueKind)}
+                >
+                  <Text className="text-sm text-fg-muted">
+                    {detailForTripIssue(
                       copyT,
-                      selectedIssueKinds[0],
-                      selectedIssue?.params
-                    )}${
-                      selectedIssueKinds.length > 1
-                        ? ` · ${copyT("moreIssues", {
-                            count: selectedIssueKinds.length - 1,
-                          })}`
-                        : ""
-                    }`
-                  : tripT("visaCurrentlyValid")}
+                      issueKind,
+                      summary.selectedCandidate?.issues.find(
+                        (issue) => issue.kind === issueKind
+                      )?.params
+                    )}
+                  </Text>
+                </AlertBox>
+              ))}
+            </Stack>
+          ) : (
+            <AlertBox tone="ok" title={tripT("tripCovered")}>
+              <Text className="text-sm text-fg-muted">
+                {summary.selectedCandidate
+                  ? tripT("tripCoveredByVisa", {
+                      visaName: summary.selectedCandidate.name,
+                    })
+                  : tripT("noVisaRequired")}
               </Text>
             </AlertBox>
-          </Stack>
-        )}
+          )}
+
+          {summary.trip.visaRequired && (
+            <TripVisaSelector
+              tripId={summary.trip.id}
+              candidates={summary.candidates}
+              selectedVisaId={summary.selectedVisaId}
+            />
+          )}
+
+          {summary.selectedCandidate && (
+            <Stack className="gap-3">
+              <Text className="font-semibold text-lg">
+                {tripT("selectedVisa")}
+              </Text>
+              <AlertBox
+                tone={
+                  summary.selectedCandidate.status === "valid" ? "ok" : "danger"
+                }
+                title={summary.selectedCandidate.name}
+              >
+                <Text className="text-sm text-fg-muted">
+                  {selectedIssueKinds.length > 0
+                    ? `${detailForTripIssue(
+                        copyT,
+                        selectedIssueKinds[0],
+                        selectedIssue?.params
+                      )}${
+                        selectedIssueKinds.length > 1
+                          ? ` · ${copyT("moreIssues", {
+                              count: selectedIssueKinds.length - 1,
+                            })}`
+                          : ""
+                      }`
+                    : tripT("visaCurrentlyValid")}
+                </Text>
+              </AlertBox>
+            </Stack>
+          )}
         </Stack>
       </PageContainer>
     </div>

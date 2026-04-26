@@ -3,6 +3,7 @@
 Lists and grids for selecting from options.
 
 ## OptionRow
+
 Selectable row supporting list, grid, and type-selection layouts.
 
 ```tsx
@@ -41,6 +42,7 @@ import { OptionRow, OptionGrid, OptionList } from '@/app/design';
 ```
 
 **Props:**
+
 - `flag`: optional emoji
 - `title`: option label
 - `subtitle`: optional secondary text
@@ -49,6 +51,7 @@ import { OptionRow, OptionGrid, OptionList } from '@/app/design';
 - `variant`: 'list' (default) | 'grid' | 'type'
 
 ## OptionGrid
+
 2-column grid container for options.
 
 ```tsx
@@ -58,10 +61,12 @@ import { OptionRow, OptionGrid, OptionList } from '@/app/design';
 ```
 
 **Props:**
+
 - `cols`: 1 | 2
 - `children`: OptionRow components
 
 ## OptionList
+
 Bordered list container (with optional max-height).
 
 ```tsx
@@ -71,5 +76,6 @@ Bordered list container (with optional max-height).
 ```
 
 **Props:**
+
 - `maxHeight`: max height with scroll (default: '360px')
 - `children`: OptionRow components

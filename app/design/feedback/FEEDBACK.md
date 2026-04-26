@@ -3,6 +3,7 @@
 Status indicators, alerts, empty states, and progress visualization.
 
 ## StatusBadge
+
 Colored pill with status indicator.
 
 ```tsx
@@ -14,10 +15,12 @@ import { StatusBadge } from '@/app/design';
 ```
 
 **Props:**
+
 - `tone`: 'ok' | 'warn' | 'danger' | 'muted' | 'accent'
 - `size`: 'xs' | 'sm'
 
 ## UsageBar
+
 Horizontal progress bar with optional labels.
 
 ```tsx
@@ -26,6 +29,7 @@ Horizontal progress bar with optional labels.
 ```
 
 **Props:**
+
 - `used`: number of units used
 - `limit`: total limit
 - `tone`: 'ok' | 'warn' | 'danger' | 'muted' | 'accent'
@@ -33,6 +37,7 @@ Horizontal progress bar with optional labels.
 - `compact`: smaller bar (default: false)
 
 ## AlertRow
+
 Interactive alert strip for dashboard.
 
 ```tsx
@@ -46,6 +51,7 @@ Interactive alert strip for dashboard.
 ```
 
 **Props:**
+
 - `tone`: 'ok' | 'warn' | 'danger' | 'muted' | 'accent'
 - `title`: main alert text
 - `detail`: optional secondary text
@@ -53,6 +59,7 @@ Interactive alert strip for dashboard.
 - `onClick`: handler
 
 ## AlertBox
+
 Inline tinted block with optional title.
 
 ```tsx
@@ -62,11 +69,13 @@ Inline tinted block with optional title.
 ```
 
 **Props:**
+
 - `tone`: 'ok' | 'warn' | 'danger' | 'muted' | 'accent'
 - `title`: optional header
 - `children`: content
 
 ## EmptyState
+
 Centered empty state with icon, message, and action.
 
 ```tsx
@@ -74,11 +83,12 @@ Centered empty state with icon, message, and action.
   icon="📭"
   title="No visas yet"
   message="Create your first visa to get started"
-  action={{ label: 'Create visa', onClick: create }}
+  action={{ label: "Create visa", onClick: create }}
 />
 ```
 
 **Props:**
+
 - `icon`: emoji or ReactNode
 - `title`: heading
 - `message`: optional subtitle

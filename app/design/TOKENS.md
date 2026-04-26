@@ -7,24 +7,29 @@ All visual values (colors, spacing, typography, radius) are **CSS variables** ex
 ### Colors (Editorial Theme)
 
 **Surfaces:**
+
 - `--color-bg`: Primary background (#f6f1e8 light, #14120e dark)
 - `--color-bg-sunken`: Recessed surface (#ede6d8 light, #0d0b08 dark)
 - `--color-bg-raised`: Elevated surface (#fcf9f3 light, #1e1b15 dark)
 
 **Typography:**
+
 - `--color-fg`: Foreground text (#1a1814 light, #f5efe2 dark)
 - `--color-fg-muted`: Secondary text (#6b6558 light, #a89f8a dark)
 - `--color-fg-faint`: Tertiary text (#a39e92 light, #6b6555 dark)
 
 **Borders:**
+
 - `--color-border`: Standard border (#e0d8c6 light, #2a2620 dark)
 - `--color-border-strong`: Emphasized border (#c6bda8 light, #3d382d dark)
 
 **Accent:**
+
 - `--color-accent`: Warm amber (oklch(0.58 0.16 18) light, oklch(0.68 0.16 30) dark)
 - `--color-accent-fg`: Text on accent (#fff)
 
 **Status Tones:**
+
 - `--color-ok`: Green (oklch(0.55 0.13 150) light, oklch(0.65 0.14 150) dark)
 - `--color-warn`: Yellow (oklch(0.65 0.15 60) light, oklch(0.70 0.15 60) dark)
 - `--color-danger`: Red (oklch(0.55 0.20 25) light, oklch(0.62 0.20 25) dark)
@@ -46,6 +51,7 @@ Used in Tailwind as `p-1`, `gap-2`, `mt-4`, etc.
 ### Typography
 
 **Sizes:**
+
 ```
 --font-size-xs:      11px
 --font-size-sm:      13px
@@ -59,6 +65,7 @@ Used in Tailwind as `p-1`, `gap-2`, `mt-4`, etc.
 ```
 
 **Fonts:**
+
 ```
 --font-display: "Instrument Serif", Georgia, serif    (headings)
 --font-body:    "Inter", system fonts                 (body text)
@@ -87,24 +94,27 @@ All tokens are exposed via Tailwind's `@theme` in `styles.css`:
 ## Dark Mode
 
 **Automatic (via `@media prefers-color-scheme`):**
+
 ```tsx
 <AppShell theme="system">  {/* or 'light' or 'dark' */}
 ```
 
 **Manual override:**
+
 ```tsx
 <html data-theme="dark">  {/* or 'light', or remove for system */}
 ```
 
 The CSS variables automatically flip:
+
 ```css
 /* app/design/styles.css */
 @theme {
-  --color-fg: #1a1814;  /* light default */
+  --color-fg: #1a1814; /* light default */
 }
 
 @dark {
-  --color-fg: #f5efe2;  /* dark override */
+  --color-fg: #f5efe2; /* dark override */
 }
 ```
 
@@ -113,12 +123,12 @@ The CSS variables automatically flip:
 **TypeScript token types:**
 
 ```tsx
-import { Tone, Size, Variant, Density } from '@/app/design';
+import { Tone, Size, Variant, Density } from "@/app/design";
 
-type Tone = 'ok' | 'warn' | 'danger' | 'muted' | 'accent';
-type Size = 'xs' | 'sm' | 'md' | 'lg';
-type Variant = 'primary' | 'accent' | 'ghost' | 'outline' | 'danger';
-type Density = 'compact' | 'comfortable';
+type Tone = "ok" | "warn" | "danger" | "muted" | "accent";
+type Size = "xs" | "sm" | "md" | "lg";
+type Variant = "primary" | "accent" | "ghost" | "outline" | "danger";
+type Density = "compact" | "comfortable";
 ```
 
 **Color helper functions:**
@@ -164,6 +174,7 @@ To add a new token:
 4. Update TypeScript types if needed (`tokens.ts`)
 
 Example: adding a new spacing level:
+
 ```css
 @theme {
   --spacing-7: 28px;
@@ -180,6 +191,7 @@ The current design uses **Editorial** (warm ivory + serif display). Two other th
 - **Passport:** Deep navy, cream, burgundy accent
 
 To add Passport (example):
+
 ```css
 @theme {
   /* light mode vars */
@@ -190,7 +202,7 @@ To add Passport (example):
 }
 
 [data-theme="passport"] {
-  --color-bg: #FBF7F2;
+  --color-bg: #fbf7f2;
   /* ... all palette overrides ... */
 }
 ```

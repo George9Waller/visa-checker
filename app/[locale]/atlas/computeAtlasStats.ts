@@ -25,11 +25,11 @@ export type AtlasStats = {
 };
 
 const VISA_COLOR_PALETTE = [
-  "oklch(65% 0.15 50)",   // amber
-  "oklch(60% 0.13 200)",  // teal
-  "oklch(58% 0.12 280)",  // blue
-  "oklch(62% 0.14 130)",  // green
-  "oklch(55% 0.12 350)",  // pink
+  "oklch(65% 0.15 50)", // amber
+  "oklch(60% 0.13 200)", // teal
+  "oklch(58% 0.12 280)", // blue
+  "oklch(62% 0.14 130)", // green
+  "oklch(55% 0.12 350)", // pink
 ];
 
 function getDayCount(startDate: string, endDate: string): number {
@@ -40,7 +40,11 @@ function getDayCount(startDate: string, endDate: string): number {
   return diffDays + 1; // inclusive of both start and end
 }
 
-function isDateInRange(date: string, startDate: string, endDate: string): boolean {
+function isDateInRange(
+  date: string,
+  startDate: string,
+  endDate: string
+): boolean {
   return date >= startDate && date <= endDate;
 }
 
@@ -89,7 +93,9 @@ export function computeAtlasStats(
   const totalTrips = filteredTrips.length;
 
   // Years
-  const allYears = new Set(trips.map((t) => new Date(t.startDate).getFullYear()));
+  const allYears = new Set(
+    trips.map((t) => new Date(t.startDate).getFullYear())
+  );
   const years = Array.from(allYears).sort((a, b) => a - b);
 
   // Top countries
@@ -125,8 +131,8 @@ export function computeAtlasStats(
     (t) => new Date(t.startDate).getFullYear() === ribbonYear
   );
   const ribbonDays = ribbonDates.map((date) => {
-    const trip = ribbonTripsForYear.find(
-      (t) => isDateInRange(date, t.startDate, t.endDate)
+    const trip = ribbonTripsForYear.find((t) =>
+      isDateInRange(date, t.startDate, t.endDate)
     );
     return {
       date,
@@ -139,9 +145,7 @@ export function computeAtlasStats(
   const heatmapRange = getPastNDays(365);
   const heatmapDates = dateRange(heatmapRange.start, heatmapRange.end);
   const heatmapDays = heatmapDates.map((date) => {
-    const trip = trips.find(
-      (t) => isDateInRange(date, t.startDate, t.endDate)
-    );
+    const trip = trips.find((t) => isDateInRange(date, t.startDate, t.endDate));
     return {
       date,
       abroad: !!trip,
@@ -181,8 +185,8 @@ export function computeAtlasStats(
   const busiestMonth =
     Object.keys(monthDays).length > 0
       ? (() => {
-          const [yearMonth, days] = Object.entries(monthDays).reduce((max, [k, v]) =>
-            v > max[1] ? [k, v] : max
+          const [yearMonth, days] = Object.entries(monthDays).reduce(
+            (max, [k, v]) => (v > max[1] ? [k, v] : max)
           );
           const [year, month] = yearMonth.split("-");
           return { days, year: parseInt(year), month: parseInt(month) };

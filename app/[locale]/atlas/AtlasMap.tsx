@@ -110,8 +110,16 @@ export function AtlasMap({ stats }: AtlasMapProps) {
 
           {/* Radial glow for dots */}
           <radialGradient id="atlas-glow">
-            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
+            <stop
+              offset="0%"
+              stopColor="var(--color-accent)"
+              stopOpacity="0.5"
+            />
+            <stop
+              offset="100%"
+              stopColor="var(--color-accent)"
+              stopOpacity="0"
+            />
           </radialGradient>
         </defs>
 
@@ -258,7 +266,10 @@ export function AtlasMap({ stats }: AtlasMapProps) {
       {/* Legend strip (below SVG) */}
       <div
         className="absolute bottom-0 left-0 right-0 px-5 py-2 flex justify-between items-center text-[8px] font-mono text-fg-muted tracking-[0.18em] uppercase"
-        style={{ background: "var(--color-bg)", borderTop: "1px solid var(--color-border)" }}
+        style={{
+          background: "var(--color-bg)",
+          borderTop: "1px solid var(--color-border)",
+        }}
       >
         <div>
           {visitedCountries.length} countries · {stats.totalDays} days ·{" "}

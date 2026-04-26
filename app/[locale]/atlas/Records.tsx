@@ -34,10 +34,10 @@ export function Records({ stats, t }: RecordsProps) {
   }
 
   if (stats.busiestMonth) {
-    const monthName = new Date(stats.busiestMonth.year, stats.busiestMonth.month - 1).toLocaleDateString(
-      locale,
-      { month: "short", year: "numeric" }
-    );
+    const monthName = new Date(
+      stats.busiestMonth.year,
+      stats.busiestMonth.month - 1
+    ).toLocaleDateString(locale, { month: "short", year: "numeric" });
     records.push({
       kicker: t("busiestMonth"),
       value: stats.busiestMonth.days,

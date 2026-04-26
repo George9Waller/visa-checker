@@ -22,7 +22,7 @@
   /* Status & accent */
   --color-ok: oklch(0.55 0.13 150);
   --color-warn: oklch(0.65 0.15 60);
-  --color-danger: oklch(0.55 0.20 25);
+  --color-danger: oklch(0.55 0.2 25);
   --color-muted: #8a8370;
   --color-accent: oklch(0.58 0.16 18);
   --color-accent-fg: #fff;
@@ -53,12 +53,15 @@
 
   /* Fonts */
   --font-display: "Instrument Serif", Georgia, serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-body:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    sans-serif;
   --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
   /* Shadows */
-  --shadow-md: 0 4px 16px color-mix(in oklab, var(--color-fg) 12%, transparent),
-               0 1px 4px color-mix(in oklab, var(--color-fg) 8%, transparent);
+  --shadow-md:
+    0 4px 16px color-mix(in oklab, var(--color-fg) 12%, transparent),
+    0 1px 4px color-mix(in oklab, var(--color-fg) 8%, transparent);
 }
 
 /* ════════════════════════════════════════════
@@ -75,8 +78,8 @@
   --color-border: #2a2620;
   --color-border-strong: #3d382d;
   --color-ok: oklch(0.65 0.14 150);
-  --color-warn: oklch(0.70 0.15 60);
-  --color-danger: oklch(0.62 0.20 25);
+  --color-warn: oklch(0.7 0.15 60);
+  --color-danger: oklch(0.62 0.2 25);
   --color-muted: #706860;
   --color-accent: oklch(0.68 0.16 30);
 }
@@ -119,7 +122,11 @@
 
 .ds-alert-danger {
   @apply border border-l-4 rounded-sm p-3;
-  background: color-mix(in oklch, var(--color-danger) 7%, var(--color-bg-raised));
+  background: color-mix(
+    in oklch,
+    var(--color-danger) 7%,
+    var(--color-bg-raised)
+  );
   border-left-color: var(--color-danger);
 }
 
@@ -136,15 +143,15 @@
 
 /* Progress bar */
 progress {
-  border-radius: var(--radius); 
+  border-radius: var(--radius);
   width: 100%;
   height: 4px;
 }
 progress::-webkit-progress-bar {
-  border-radius: var(--radius); 
+  border-radius: var(--radius);
   background-color: var(--color-bg-sunken);
 }
 progress::-webkit-progress-value {
-  border-radius: var(--radius) 0 0 var(--radius); 
+  border-radius: var(--radius) 0 0 var(--radius);
   background-color: var(--color-fg);
 }

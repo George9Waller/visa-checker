@@ -1,6 +1,6 @@
-import { PropsWithChildren } from 'react';
-import { cn } from '../cn';
-import { Kicker } from '../primitives/Kicker';
+import { PropsWithChildren } from "react";
+import { cn } from "../cn";
+import { Kicker } from "../primitives/Kicker";
 
 export interface YearGroupProps extends PropsWithChildren {
   year: number;
@@ -15,8 +15,8 @@ export function YearGroup({
   children,
 }: YearGroupProps) {
   return (
-    <div className={cn('mb-5', className)}>
-      <Kicker tone={muted ? 'faint' : 'muted'} className="mb-2 pl-1">
+    <div className={cn("mb-5", className)}>
+      <Kicker tone={muted ? "faint" : "muted"} className="mb-2 pl-1">
         — {year}
       </Kicker>
       <div>{children}</div>

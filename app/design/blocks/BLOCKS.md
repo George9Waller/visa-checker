@@ -3,26 +3,29 @@
 Presentational composites aware of visa/trip domain concepts but still fully prop-driven (no data fetching, server actions, or logic).
 
 ## DashboardHeader
+
 Dashboard header with date, weekday, and trailing actions.
 
 ```tsx
-import { DashboardHeader } from '@/app/design';
+import { DashboardHeader } from "@/app/design";
 
 <DashboardHeader
   date={new Date()}
   weekday="Wednesday"
   title="Trips"
   actions={<button>Visas</button>}
-/>
+/>;
 ```
 
 **Props:**
+
 - `date`: Date object
 - `weekday`: day name string
 - `title`: main heading (default: 'Trips')
 - `actions`: trailing ReactNode (avatar, nav buttons, etc)
 
 ## TripHeroCard
+
 Large inverted hero card for current trip.
 
 ```tsx
@@ -37,6 +40,7 @@ Large inverted hero card for current trip.
 ```
 
 **Props:**
+
 - `flag`: emoji
 - `title`: trip name
 - `kicker`: label (default: 'Currently in')
@@ -45,11 +49,12 @@ Large inverted hero card for current trip.
 - `onClick`: handler
 
 ## TripTimelineRow
+
 Trip in timeline layout (date tile | content | length + status).
 
 ```tsx
 <TripTimelineRow
-  date={new Date('2026-05-01')}
+  date={new Date("2026-05-01")}
   month="May"
   title="Berlin"
   flag="🇩🇪"
@@ -64,6 +69,7 @@ Trip in timeline layout (date tile | content | length + status).
 ```
 
 **Props:**
+
 - `date`: Date of trip start
 - `month`: month abbreviation
 - `title`: trip name
@@ -78,6 +84,7 @@ Trip in timeline layout (date tile | content | length + status).
 - `onClick`: handler
 
 ## TripCard
+
 Alternate card layout for trips.
 
 ```tsx
@@ -95,6 +102,7 @@ Alternate card layout for trips.
 ```
 
 **Props:**
+
 - `flag`: emoji
 - `title`: trip name
 - `dateRange`: date range string
@@ -106,6 +114,7 @@ Alternate card layout for trips.
 - `onClick`: handler
 
 ## VisaListRow
+
 Visa in list view.
 
 ```tsx
@@ -122,6 +131,7 @@ Visa in list view.
 ```
 
 **Props:**
+
 - `flag`: emoji
 - `title`: visa name
 - `kicker`: optional visa type or rule
@@ -132,26 +142,29 @@ Visa in list view.
 - `onClick`: handler
 
 ## SchengenProjectionChart
+
 Year-long SVG projection of rolling visa days remaining over the next 12 months.
 
 ```tsx
-import { SchengenProjectionChart } from '@/app/design';
+import { SchengenProjectionChart } from "@/app/design";
 
 <SchengenProjectionChart
-  points={projectionPoints}  // computed array
+  points={projectionPoints} // computed array
   limit={90}
   windowDays={180}
   today={new Date()}
-/>
+/>;
 ```
 
 **Props:**
+
 - `points`: array of `ProjectionPoint` — `{ date: Date, remaining: number }[]`. Pre-computed outside component (page logic). Each point represents remaining days at that date under the rolling window.
 - `limit`: days limit (e.g., 90 for Schengen)
 - `windowDays`: rolling window duration (e.g., 180 for Schengen 90/180)
 - `today`: current date, used to mark TODAY line and compute default range
 
 **SVG Chart Anatomy:**
+
 - **Gridlines:** Horizontal lines at 0, limit/3, 2×limit/3, limit. Solid line at 0 and limit; dashed at intervals. Labels on left.
 - **Danger zone:** Light red rect from y=0 to y=15 (remaining < 15 days)
 - **Projection area:** Accent-colored fill under the projection line (opacity 0.12)
@@ -162,6 +175,7 @@ import { SchengenProjectionChart } from '@/app/design';
 - **Legend:** Below SVG — accent line + "DAYS REMAINING", danger swatch + "TIGHT ZONE"
 
 **Color usage:**
+
 - Accent line/area: `var(--color-accent)` and `var(--color-accent)` opacity 0.12
 - Danger zone: `var(--color-danger)` opacity 0.05
 - Min point: `var(--color-danger)` stroke

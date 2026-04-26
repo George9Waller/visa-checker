@@ -4,11 +4,7 @@ interface YearRibbonProps {
   visaColors: Record<string, string>;
 }
 
-export function YearRibbon({
-  year,
-  ribbonDays,
-  visaColors,
-}: YearRibbonProps) {
+export function YearRibbon({ year, ribbonDays, visaColors }: YearRibbonProps) {
   const today = new Date();
   const todayString = today.toISOString().split("T")[0];
   const currentYear = today.getFullYear();

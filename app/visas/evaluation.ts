@@ -176,7 +176,10 @@ export type DashboardCard = {
   visaName?: string;
   tripId?: string;
   rankingScore: number;
-  params: Record<string, string | number | boolean | null | ProjectionPoint[] | string[]>;
+  params: Record<
+    string,
+    string | number | boolean | null | ProjectionPoint[] | string[]
+  >;
 };
 
 export type ProjectionPoint = {

@@ -1,5 +1,5 @@
-import { PropsWithChildren } from 'react';
-import { cn } from '../cn';
+import { PropsWithChildren } from "react";
+import { cn } from "../cn";
 
 export interface CheckboxProps extends PropsWithChildren {
   checked?: boolean;
@@ -14,16 +14,21 @@ export function Checkbox({
   children,
 }: CheckboxProps) {
   return (
-    <label className={cn('flex items-start gap-3 cursor-pointer select-none', className)}>
+    <label
+      className={cn(
+        "flex items-start gap-3 cursor-pointer select-none",
+        className
+      )}
+    >
       <div
         onClick={() => onChange?.(!checked)}
         className={cn(
-          'w-5 h-5 flex-shrink-0 rounded-sm mt-0.5',
-          'border-[1.5px] transition-all duration-150',
+          "w-5 h-5 flex-shrink-0 rounded-sm mt-0.5",
+          "border-[1.5px] transition-all duration-150",
           checked
-            ? 'bg-fg border-fg'
-            : 'bg-transparent border-[1.5px] border-fg hover:border-fg',
-          'flex items-center justify-center',
+            ? "bg-fg border-fg"
+            : "bg-transparent border-[1.5px] border-fg hover:border-fg",
+          "flex items-center justify-center"
         )}
       >
         {checked && (

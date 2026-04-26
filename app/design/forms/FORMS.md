@@ -3,6 +3,7 @@
 Form inputs and field wrappers.
 
 ## Field
+
 Label + hint + optional indicator wrapper.
 
 ```tsx
@@ -18,16 +19,18 @@ import { Field, Input } from '@/app/design';
 ```
 
 **Props:**
+
 - `label`: required label text
 - `hint`: optional helper text below input
 - `optional`: show "OPTIONAL" badge
 - `children`: wrapped input component
 
 ## DatePicker
+
 Themed popover calendar with month navigation, date grid, and quick actions.
 
 ```tsx
-import { DatePicker } from '@/app/design';
+import { DatePicker } from "@/app/design";
 
 <DatePicker
   value={selectedDate}
@@ -35,10 +38,11 @@ import { DatePicker } from '@/app/design';
   placeholder="Pick a date"
   minDate="2026-04-01"
   maxDate="2027-12-31"
-/>
+/>;
 ```
 
 **Props:**
+
 - `value`: ISO date string (`YYYY-MM-DD`), empty string if unset
 - `onChange`: (date: string) => void — receives ISO string or empty string on clear
 - `placeholder`: optional text shown when no date selected (default: "Pick a date")
@@ -46,6 +50,7 @@ import { DatePicker } from '@/app/design';
 - `maxDate`: optional ISO date — disables later days (greyed out, unclickable)
 
 **Behavior:**
+
 - Trigger button shows formatted date or placeholder, with calendar icon
 - Click trigger to open/close popover above input
 - Month nav: chevron buttons to shift months

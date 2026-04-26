@@ -6,11 +6,7 @@ import { useTranslations } from "next-intl";
 import { deleteTrip } from "../server-actions";
 import { Icon } from "@/app/design";
 
-export default function TripDetailActions({
-  tripId,
-}: {
-  tripId: string;
-}) {
+export default function TripDetailActions({ tripId }: { tripId: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations("trip");

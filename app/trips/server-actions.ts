@@ -29,7 +29,13 @@ export type TripVisaCandidate = Pick<
 
 type TripVisaInput = Pick<
   Trip,
-  "id" | "countryCode" | "startDate" | "endDate" | "name" | "colour" | "visaRequired"
+  | "id"
+  | "countryCode"
+  | "startDate"
+  | "endDate"
+  | "name"
+  | "colour"
+  | "visaRequired"
 >;
 
 export type TripCountrySuggestion = {
@@ -186,8 +192,9 @@ const buildTripVisaCandidateList = async (
           ? AlertSeverity.DANGER
           : AlertSeverity.INFO,
       linkId: isSelected
-        ? visa.VisaTrip.find(({ trip: linkedTrip }) => linkedTrip.id === trip.id)
-            ?.id
+        ? visa.VisaTrip.find(
+            ({ trip: linkedTrip }) => linkedTrip.id === trip.id
+          )?.id
         : undefined,
     });
   }
@@ -215,77 +222,78 @@ const buildTripVisaCandidateList = async (
   });
 };
 
-export const getTripCountrySuggestions = async (): Promise<TripCountrySuggestionGroups> => {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    throw new Error("Authentication Required");
-  }
-
-  const userId = (session.user as any).id as string;
-  const todayIso = new Date().toISOString().split("T")[0];
-  const pastTripWhere = {
-    user_id: userId,
-    endDate: { lt: new Date(todayIso) },
-  };
-
-  const recentTrips = await prisma.trip.findMany({
-    where: pastTripWhere,
-    select: {
-      countryCode: true,
-      endDate: true,
-    },
-    orderBy: {
-      endDate: "desc",
-    },
-    take: 24,
-  });
-
-  const recent: TripCountrySuggestion[] = [];
-  const recentSeen = new Set<string>();
-  for (const trip of recentTrips) {
-    if (recentSeen.has(trip.countryCode)) {
-      continue;
+export const getTripCountrySuggestions =
+  async (): Promise<TripCountrySuggestionGroups> => {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      throw new Error("Authentication Required");
     }
-    recentSeen.add(trip.countryCode);
-    recent.push({
-      code: trip.countryCode,
-      lastVisited: trip.endDate.toISOString().split("T")[0],
-    });
-    if (recent.length === 2) {
-      break;
-    }
-  }
 
-  const popularTrips = await prisma.trip.groupBy({
-    by: ["countryCode"],
-    where: pastTripWhere,
-    _count: {
-      countryCode: true,
-    },
-    orderBy: {
-      _count: {
-        countryCode: "desc",
+    const userId = (session.user as any).id as string;
+    const todayIso = new Date().toISOString().split("T")[0];
+    const pastTripWhere = {
+      user_id: userId,
+      endDate: { lt: new Date(todayIso) },
+    };
+
+    const recentTrips = await prisma.trip.findMany({
+      where: pastTripWhere,
+      select: {
+        countryCode: true,
+        endDate: true,
       },
-    },
-    take: 12,
-  });
-
-  const popular: TripCountrySuggestion[] = [];
-  for (const trip of popularTrips) {
-    if (recentSeen.has(trip.countryCode)) {
-      continue;
-    }
-    popular.push({
-      code: trip.countryCode,
-      tripCount: trip._count.countryCode,
+      orderBy: {
+        endDate: "desc",
+      },
+      take: 24,
     });
-    if (popular.length === 2) {
-      break;
-    }
-  }
 
-  return { recent, popular };
-};
+    const recent: TripCountrySuggestion[] = [];
+    const recentSeen = new Set<string>();
+    for (const trip of recentTrips) {
+      if (recentSeen.has(trip.countryCode)) {
+        continue;
+      }
+      recentSeen.add(trip.countryCode);
+      recent.push({
+        code: trip.countryCode,
+        lastVisited: trip.endDate.toISOString().split("T")[0],
+      });
+      if (recent.length === 2) {
+        break;
+      }
+    }
+
+    const popularTrips = await prisma.trip.groupBy({
+      by: ["countryCode"],
+      where: pastTripWhere,
+      _count: {
+        countryCode: true,
+      },
+      orderBy: {
+        _count: {
+          countryCode: "desc",
+        },
+      },
+      take: 12,
+    });
+
+    const popular: TripCountrySuggestion[] = [];
+    for (const trip of popularTrips) {
+      if (recentSeen.has(trip.countryCode)) {
+        continue;
+      }
+      popular.push({
+        code: trip.countryCode,
+        tripCount: trip._count.countryCode,
+      });
+      if (popular.length === 2) {
+        break;
+      }
+    }
+
+    return { recent, popular };
+  };
 
 const linkVisaIfApplicable = async (
   userId: string,
@@ -501,18 +509,16 @@ export const getPossibleVisasForTrip = async (tripId: string) => {
   );
 };
 
-export const getPossibleVisasForDraftTrip = async (
-  trip: {
-    id: string;
-    countryCode: string;
-    startDate: string;
-    endDate: string;
-    name: string | null;
-    colour: string;
-    visaRequired: boolean;
-    selectedVisaId?: string | null;
-  }
-) => {
+export const getPossibleVisasForDraftTrip = async (trip: {
+  id: string;
+  countryCode: string;
+  startDate: string;
+  endDate: string;
+  name: string | null;
+  colour: string;
+  visaRequired: boolean;
+  selectedVisaId?: string | null;
+}) => {
   const session = await getServerSession(authOptions);
   if (!session) {
     throw new Error("Authentication Required");
@@ -538,12 +544,14 @@ export const getPossibleVisasForDraftTrip = async (
 export const getTripDetailSummary = async (tripId: string) => {
   const trip = await getTrip(tripId);
   const candidates = await getPossibleVisasForTrip(tripId);
-  const selectedCandidate = candidates.find((candidate) => candidate.isSelected);
+  const selectedCandidate = candidates.find(
+    (candidate) => candidate.isSelected
+  );
   const issueKinds = !trip.visaRequired
     ? []
     : selectedCandidate
-    ? selectedCandidate.issueKinds
-    : [TripIssueKind.TRIP_NO_VISA_LINKED];
+      ? selectedCandidate.issueKinds
+      : [TripIssueKind.TRIP_NO_VISA_LINKED];
   const status =
     !trip.visaRequired || issueKinds.length === 0 ? "valid" : "invalid";
 

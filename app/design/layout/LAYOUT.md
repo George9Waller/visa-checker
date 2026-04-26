@@ -3,6 +3,7 @@
 Page scaffolding and structural primitives.
 
 ## AppShell
+
 Root container managing theme and FAB slot.
 
 ```tsx
@@ -14,22 +15,24 @@ import { AppShell, FAB } from '@/app/design';
 ```
 
 **Props:**
+
 - `theme`: 'light' | 'dark' | 'system'
 - `fab`: optional FAB component or ReactNode
 
 ## PageContainer
+
 Max-width wrapper with responsive padding.
 
 ```tsx
-<PageContainer density="comfortable">
-  {/* content */}
-</PageContainer>
+<PageContainer density="comfortable">{/* content */}</PageContainer>
 ```
 
 **Props:**
+
 - `density`: 'comfortable' (20px) | 'compact' (16px)
 
 ## PageHeader
+
 Sticky header with back, kicker, title, trailing actions.
 
 ```tsx
@@ -43,6 +46,7 @@ Sticky header with back, kicker, title, trailing actions.
 ```
 
 **Props:**
+
 - `kicker`: optional secondary text
 - `title`: main heading
 - `flag`: optional emoji
@@ -50,6 +54,7 @@ Sticky header with back, kicker, title, trailing actions.
 - `actions`: trailing action components
 
 ## SectionHeader
+
 Numbered section heading with optional count.
 
 ```tsx
@@ -57,11 +62,13 @@ Numbered section heading with optional count.
 ```
 
 **Props:**
+
 - `num`: optional step number (e.g., '01')
 - `title`: section name
 - `count`: optional item count (padded to 2 digits)
 
 ## Stack
+
 Flex column with configurable gap.
 
 ```tsx
@@ -73,9 +80,11 @@ Flex column with configurable gap.
 ```
 
 **Props:**
+
 - `gap`: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 ## Row
+
 Flex row with gap, alignment, and justification.
 
 ```tsx
@@ -86,11 +95,13 @@ Flex row with gap, alignment, and justification.
 ```
 
 **Props:**
+
 - `gap`: 'xs' | 'sm' | 'md' | 'lg'
 - `align`: 'start' | 'center' | 'end'
 - `justify`: 'start' | 'center' | 'end' | 'between'
 
 ## Grid
+
 CSS grid with column count and gap.
 
 ```tsx
@@ -101,10 +112,12 @@ CSS grid with column count and gap.
 ```
 
 **Props:**
+
 - `cols`: 1 | 2 | 3 | 4
 - `gap`: 'xs' | 'sm' | 'md' | 'lg'
 
 ## StickyBar
+
 Sticky positioned bar with optional blur.
 
 ```tsx
@@ -114,4 +127,5 @@ Sticky positioned bar with optional blur.
 ```
 
 **Props:**
+
 - `position`: 'top' | 'bottom'

@@ -16,8 +16,10 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (
-          credentials?.username === (process.env.PLAYWRIGHT_AUTH_USER ?? "dev") &&
-          credentials?.password === (process.env.PLAYWRIGHT_AUTH_PASSWORD ?? "dev")
+          credentials?.username ===
+            (process.env.PLAYWRIGHT_AUTH_USER ?? "dev") &&
+          credentials?.password ===
+            (process.env.PLAYWRIGHT_AUTH_PASSWORD ?? "dev")
         ) {
           return {
             id: process.env.PLAYWRIGHT_AUTH_USER_ID ?? "user-1",

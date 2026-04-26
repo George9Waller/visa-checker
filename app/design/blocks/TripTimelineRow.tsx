@@ -35,20 +35,20 @@ export function TripTimelineRow({
   length,
   statusTone,
   statusLabel,
-  density = 'comfortable',
+  density = "comfortable",
   isPast,
   isLast,
   onClick,
   href,
 }: TripTimelineRowProps) {
   const t = useTranslations("common");
-  const dateStr = String(date.getDate()).padStart(2, '0');
+  const dateStr = String(date.getDate()).padStart(2, "0");
   const classes = cn(
-    'w-full text-left grid gap-4 items-center',
-    'px-1 py-4 border-b border-border transition-opacity',
-    isLast && 'border-b-0',
-    isPast && 'opacity-55',
-    density === 'compact' ? 'px-0 py-3' : 'px-1 py-4',
+    "w-full text-left grid gap-4 items-center",
+    "px-1 py-4 border-b border-border transition-opacity",
+    isLast && "border-b-0",
+    isPast && "opacity-55",
+    density === "compact" ? "px-0 py-3" : "px-1 py-4"
   );
 
   const content = (
@@ -92,7 +92,7 @@ export function TripTimelineRow({
       <Link
         href={href}
         className={classes}
-        style={{ gridTemplateColumns: '44px 1fr auto' }}
+        style={{ gridTemplateColumns: "44px 1fr auto" }}
       >
         {content}
       </Link>
@@ -103,7 +103,7 @@ export function TripTimelineRow({
     <button
       onClick={onClick}
       className={classes}
-      style={{ gridTemplateColumns: '44px 1fr auto' }}
+      style={{ gridTemplateColumns: "44px 1fr auto" }}
     >
       {content}
     </button>

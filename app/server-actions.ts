@@ -193,20 +193,22 @@ export const getCurrentTrip = async (): Promise<TimelineTrip[]> => {
 export const getNextTrip = async (): Promise<TimelineTrip | null> => {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Authentication required");
-  
+
   const todayStr = new Date().toISOString().split("T")[0];
-  const trips = await prisma.trip.findMany({
-    where: {
-      user_id: (session.user as any).id,
-      startDate: { gt: new Date(todayStr) },
-    },
-    select: TRIP_SELECT,
-    orderBy: { startDate: "asc" },
-    take: 1,
-  }).then(enrichTrips);
+  const trips = await prisma.trip
+    .findMany({
+      where: {
+        user_id: (session.user as any).id,
+        startDate: { gt: new Date(todayStr) },
+      },
+      select: TRIP_SELECT,
+      orderBy: { startDate: "asc" },
+      take: 1,
+    })
+    .then(enrichTrips);
 
   return trips.length > 0 ? trips[0] : null;
-}
+};
 
 export const getRollingWindowVisas = async (): Promise<Visa[]> => {
   const session = await getServerSession(authOptions);
@@ -343,7 +345,9 @@ export const getDashboardSummary = async (): Promise<{
     referenceDate: today,
   });
 
-  const tripById = new Map(result.tripEvaluations.map((trip) => [trip.trip.id, trip]));
+  const tripById = new Map(
+    result.tripEvaluations.map((trip) => [trip.trip.id, trip])
+  );
   const currentTrip = result.tripEvaluations.find(
     (trip) =>
       startOfUtcDay(trip.trip.startDate).getTime() <= todayDay &&
@@ -373,7 +377,10 @@ export const getDashboardSummary = async (): Promise<{
     (alert) => alert.severity === AlertSeverity.INFO
   );
   const cappedWarnings = warningAlerts.slice(0, 3);
-  const warningOverflowCount = Math.max(warningAlerts.length - cappedWarnings.length, 0);
+  const warningOverflowCount = Math.max(
+    warningAlerts.length - cappedWarnings.length,
+    0
+  );
   return {
     alerts: [...dangerAlerts, ...cappedWarnings, ...infoAlerts],
     warningOverflowCount,
@@ -405,7 +412,10 @@ export const getRollingWindowProjection = async (
     referenceDate: new Date(),
   });
 
-  return result.projections.find((projection) => projection.visaId === visaId) ?? null;
+  return (
+    result.projections.find((projection) => projection.visaId === visaId) ??
+    null
+  );
 };
 
 export const getWarnings = async (): Promise<Warning[]> => {

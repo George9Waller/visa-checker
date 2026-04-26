@@ -3,10 +3,11 @@
 Multi-step form flows.
 
 ## WizardShell
+
 Full-screen wizard with header, progress bar, body, and sticky footer.
 
 ```tsx
-import { WizardShell } from '@/app/design';
+import { WizardShell } from "@/app/design";
 
 <WizardShell
   title="New trip"
@@ -16,17 +17,18 @@ import { WizardShell } from '@/app/design';
   onClose={handleCancel}
   onBack={step > 0 ? () => setStep(step - 1) : null}
   primary={{
-    label: step === 2 ? 'Create trip' : 'Continue',
+    label: step === 2 ? "Create trip" : "Continue",
     onClick: handleNext,
     enabled: canAdvance(),
   }}
 >
   <h2>Where are you going?</h2>
   {/* step-specific form fields */}
-</WizardShell>
+</WizardShell>;
 ```
 
 **Props:**
+
 - `title`: wizard name (e.g., 'New trip', 'Edit visa')
 - `step`: current step index (0-based)
 - `totalSteps`: total number of steps
@@ -40,6 +42,7 @@ import { WizardShell } from '@/app/design';
 - `children`: step content (form fields, etc)
 
 **Styling notes:**
+
 - Header: back button, step indicator, close button
 - Progress bar: line per step, filled up to current
 - Body: scrollable, max-width centered

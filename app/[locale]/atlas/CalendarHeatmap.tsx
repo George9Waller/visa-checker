@@ -73,11 +73,7 @@ export function CalendarHeatmap({ heatmapDays, t }: CalendarHeatmapProps) {
               width={CELL_SIZE}
               height={CELL_SIZE}
               rx="1.2"
-              fill={
-                day.abroad
-                  ? "var(--color-accent)"
-                  : "var(--color-border)"
-              }
+              fill={day.abroad ? "var(--color-accent)" : "var(--color-border)"}
               opacity={day.abroad ? 1 : 0.4}
             />
           );

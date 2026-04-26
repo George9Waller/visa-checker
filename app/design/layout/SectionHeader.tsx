@@ -1,6 +1,6 @@
-import { cn } from '../cn';
-import { Kicker } from '../primitives/Kicker';
-import { Display } from '../primitives/Display';
+import { cn } from "../cn";
+import { Kicker } from "../primitives/Kicker";
+import { Display } from "../primitives/Display";
 
 export interface SectionHeaderProps {
   num?: string;
@@ -16,7 +16,12 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div className={cn('flex items-baseline gap-3 mb-4 flex-wrap min-w-0', className)}>
+    <div
+      className={cn(
+        "flex items-baseline gap-3 mb-4 flex-wrap min-w-0",
+        className
+      )}
+    >
       {num && (
         <Kicker tone="faint" className="flex-shrink-0">
           {num}
@@ -27,7 +32,7 @@ export function SectionHeader({
       </Display>
       {count !== undefined && (
         <Kicker tone="faint" className="ml-auto flex-shrink-0">
-          {String(count).padStart(2, '0')}
+          {String(count).padStart(2, "0")}
         </Kicker>
       )}
     </div>

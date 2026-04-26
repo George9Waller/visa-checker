@@ -23,7 +23,9 @@ export function getSavedScheme(): ColorScheme {
 export function saveScheme(scheme: ColorScheme) {
   localStorage.setItem(STORAGE_KEY, scheme);
   applyScheme(scheme);
-  window.dispatchEvent(new StorageEvent("storage", { key: STORAGE_KEY, newValue: scheme }));
+  window.dispatchEvent(
+    new StorageEvent("storage", { key: STORAGE_KEY, newValue: scheme })
+  );
 }
 
 export function ThemeProvider() {

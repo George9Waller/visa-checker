@@ -54,7 +54,5 @@ export function StatCard({
     );
   }
 
-  return (
-    <div className={classes}>{content}</div>
-  );
+  return <div className={classes}>{content}</div>;
 }

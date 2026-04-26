@@ -63,10 +63,12 @@ describe("evaluateVisaPortfolio", () => {
     });
 
     expect(
-      result.tripEvaluations.find((trip) => trip.trip.id === "trip-no-visa")?.issueKinds
+      result.tripEvaluations.find((trip) => trip.trip.id === "trip-no-visa")
+        ?.issueKinds
     ).toEqual([TripIssueKind.TRIP_NO_VISA_LINKED]);
     expect(
-      result.tripEvaluations.find((trip) => trip.trip.id === "trip-country")?.issueKinds
+      result.tripEvaluations.find((trip) => trip.trip.id === "trip-country")
+        ?.issueKinds
     ).toContain(TripIssueKind.TRIP_COUNTRY_NOT_COVERED);
   });
 
@@ -94,7 +96,8 @@ describe("evaluateVisaPortfolio", () => {
     });
 
     expect(
-      result.tripEvaluations.find((trip) => trip.trip.id === "planned")?.issueKinds
+      result.tripEvaluations.find((trip) => trip.trip.id === "planned")
+        ?.issueKinds
     ).toContain(TripIssueKind.TRIP_EXCEEDS_ROLLING_WINDOW_LIMIT);
     expect(
       result.alerts.some(
@@ -158,7 +161,9 @@ describe("evaluateVisaPortfolio", () => {
 
     expect(result.dashboardCards[0]?.kind).toBe(CardKind.CURRENTLY_TRAVELING);
     expect(result.dashboardCards).toHaveLength(3);
-    expect(result.dashboardCards.map((card) => card.kind)).toContain(CardKind.NEXT_TRIP);
+    expect(result.dashboardCards.map((card) => card.kind)).toContain(
+      CardKind.NEXT_TRIP
+    );
     expect(result.dashboardCards.map((card) => card.kind)).toContain(
       CardKind.ROLLING_WINDOW_USAGE
     );
@@ -183,7 +188,9 @@ describe("evaluateVisaPortfolio", () => {
       referenceDate: d("2024-06-10"),
     });
 
-    expect(result.alerts.map((alert) => alert.kind)).toContain(AlertKind.VISA_VALID_SOON);
+    expect(result.alerts.map((alert) => alert.kind)).toContain(
+      AlertKind.VISA_VALID_SOON
+    );
     expect(result.alerts.map((alert) => alert.kind)).toContain(
       AlertKind.LONG_GAP_SINCE_LAST_TRIP
     );

@@ -1,14 +1,14 @@
-import { PropsWithChildren, ReactNode } from 'react';
+import { PropsWithChildren, ReactNode } from "react";
 
 export interface AppShellProps extends PropsWithChildren {
   fab?: ReactNode;
-  theme?: 'light' | 'dark' | 'system';
+  theme?: "light" | "dark" | "system";
 }
 
-export function AppShell({ children, fab, theme = 'system' }: AppShellProps) {
+export function AppShell({ children, fab, theme = "system" }: AppShellProps) {
   return (
     <div
-      data-theme={theme === 'system' ? undefined : theme}
+      data-theme={theme === "system" ? undefined : theme}
       className="relative min-h-screen overflow-x-hidden bg-bg text-fg"
     >
       <div className="flex flex-col">{children}</div>

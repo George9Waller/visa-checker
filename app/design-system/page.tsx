@@ -53,8 +53,8 @@ export default function DesignSystemShowcase() {
   const [wizardStep, setWizardStep] = useState(0);
   const [wizardMode, setWizardMode] = useState(false);
   const [pickedDate, setPickedDate] = useState("");
-  const [theme, setTheme] = useState<"light" | "dark" | "system">(
-    () => getSavedScheme()
+  const [theme, setTheme] = useState<"light" | "dark" | "system">(() =>
+    getSavedScheme()
   );
 
   const chartToday = useMemo(() => new Date(), []);
@@ -115,11 +115,7 @@ export default function DesignSystemShowcase() {
         <div className="text-lg font-display font-semibold text-fg">
           Design System Showcase
         </div>
-        <Btn
-          variant="outline"
-          size="sm"
-          onClick={handleThemeToggle}
-        >
+        <Btn variant="outline" size="sm" onClick={handleThemeToggle}>
           <Icon name={theme === "dark" ? "sun" : "moon"} size="sm" />
           {theme === "dark" ? "Light" : "Dark"}
         </Btn>
@@ -447,9 +443,15 @@ export default function DesignSystemShowcase() {
           >
             <TimelineSectionHeader label="May 2026" count={3} />
             <YearGroup year={2026}>
-              <div className="text-sm text-fg-muted">Trip 1: Paris (Apr 18–25)</div>
-              <div className="text-sm text-fg-muted">Trip 2: Berlin (May 1–8)</div>
-              <div className="text-sm text-fg-muted">Trip 3: Barcelona (May 15–20)</div>
+              <div className="text-sm text-fg-muted">
+                Trip 1: Paris (Apr 18–25)
+              </div>
+              <div className="text-sm text-fg-muted">
+                Trip 2: Berlin (May 1–8)
+              </div>
+              <div className="text-sm text-fg-muted">
+                Trip 3: Barcelona (May 15–20)
+              </div>
             </YearGroup>
           </Stack>
         </section>

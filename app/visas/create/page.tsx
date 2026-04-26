@@ -4,9 +4,19 @@ import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { SCHENGEN_COUNTRIES, VISA_TYPE, VISA_TYPE_META, VisaTypeKey } from "../constants";
+import {
+  SCHENGEN_COUNTRIES,
+  VISA_TYPE,
+  VISA_TYPE_META,
+  VisaTypeKey,
+} from "../constants";
 import { createVisa, updateVisa } from "../server-actions";
-import { COUNTRY_EMOJIS, getCountryLabel, getCountryLabels, getCountryName } from "@/app/constants";
+import {
+  COUNTRY_EMOJIS,
+  getCountryLabel,
+  getCountryLabels,
+  getCountryName,
+} from "@/app/constants";
 import {
   AlertBox,
   Btn,
@@ -318,7 +328,10 @@ export default function CreateVisaWizard({
           </Field>
           <FactGrid cols={2}>
             <Fact label={t("typeQuestion")} value={t(`types.${form.type}`)} />
-            <Fact label={t("countriesStep")} value={form.countries.length || "—"} />
+            <Fact
+              label={t("countriesStep")}
+              value={form.countries.length || "—"}
+            />
           </FactGrid>
         </Stack>
       </WizardShell>
@@ -480,7 +493,7 @@ export default function CreateVisaWizard({
       }}
     >
       <Stack gap="lg">
-          <AlertBox
+        <AlertBox
           tone="warn"
           title={selectedCountries || t(`types.${form.type}`)}
         >

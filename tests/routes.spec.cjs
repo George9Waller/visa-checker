@@ -46,9 +46,7 @@ test("french dashboard renders without manual cookie setup", async ({
 }) => {
   await page.goto("/fr");
 
-  await expect(
-    page.getByRole("heading", { name: /Voyages/i })
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Voyages/i })).toBeVisible();
   await expect(page.getByText("À venir")).toBeVisible();
 });
 
@@ -80,9 +78,7 @@ test("trip detail shows the selected visa and coverage hierarchy", async ({
   ).toBeVisible();
   await expect(page.getByText("Selected visa")).toBeVisible();
   await expect(page.getByText("Visa options")).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /Edit trip/i })
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Edit trip/i })).toBeVisible();
   await expect(
     page.getByRole("button", { name: /Delete trip/i })
   ).toBeVisible();
@@ -152,14 +148,10 @@ test("visa detail shows projection, trips, and coverage", async ({ page }) => {
   );
   await expect(visaNumber).toHaveClass(/blur-md/);
   await expect(documentNumber).toHaveClass(/blur-md/);
-  await page
-    .getByRole("button", { name: /Reveal visa number/i })
-    .click();
+  await page.getByRole("button", { name: /Reveal visa number/i }).click();
   await expect(visaNumber).not.toHaveClass(/blur-md/);
   await expect(page.getByText("SCH-2401", { exact: true })).toBeVisible();
-  await page
-    .getByRole("button", { name: /Reveal document number/i })
-    .click();
+  await page.getByRole("button", { name: /Reveal document number/i }).click();
   await expect(documentNumber).not.toHaveClass(/blur-md/);
   await expect(page.getByText("P1234567", { exact: true })).toBeVisible();
   await expect(page.getByText("Projection")).toBeVisible();
@@ -255,9 +247,7 @@ test("visa edit flow updates the visa and restores the original", async ({
     .fill("Schengen Explorer Edited");
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
-  await page
-    .getByRole("button", { name: /Save changes|Enregistrer/i })
-    .click();
+  await page.getByRole("button", { name: /Save changes|Enregistrer/i }).click();
 
   await page.waitForURL(`/en/visas/${ids.activeVisaId}`);
   await expect(
@@ -266,14 +256,10 @@ test("visa edit flow updates the visa and restores the original", async ({
 
   await page.goto(`/en/visas/${ids.activeVisaId}/edit`);
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
-  await page
-    .getByLabel(/Visa name|Nom du visa/i)
-    .fill("Schengen Explorer");
+  await page.getByLabel(/Visa name|Nom du visa/i).fill("Schengen Explorer");
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
   await page.getByRole("button", { name: /Continue|Continuer/i }).click();
-  await page
-    .getByRole("button", { name: /Save changes|Enregistrer/i })
-    .click();
+  await page.getByRole("button", { name: /Save changes|Enregistrer/i }).click();
 
   await page.waitForURL(`/en/visas/${ids.activeVisaId}`);
   await expect(

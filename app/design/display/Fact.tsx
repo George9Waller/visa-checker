@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { Kicker } from '../primitives/Kicker';
+import { ReactNode } from "react";
+import { Kicker } from "../primitives/Kicker";
 
 export interface FactProps {
   label: string;

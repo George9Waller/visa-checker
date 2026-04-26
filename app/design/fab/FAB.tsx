@@ -31,8 +31,8 @@ export function FAB({ actions }: FABProps) {
         setOpen(false);
       }
     };
-    setTimeout(() => document.addEventListener('mousedown', handler), 0);
-    return () => document.removeEventListener('mousedown', handler);
+    setTimeout(() => document.addEventListener("mousedown", handler), 0);
+    return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
   return (
@@ -44,7 +44,7 @@ export function FAB({ actions }: FABProps) {
               {t("newEntry")}
             </span>
           </div>
-          {actions.map((action, i) => (
+          {actions.map((action, i) =>
             action.href ? (
               <Link
                 key={i}
@@ -82,14 +82,14 @@ export function FAB({ actions }: FABProps) {
                 </div>
               </button>
             )
-          ))}
+          )}
         </div>
       )}
       <button
         onClick={() => setOpen((o) => !o)}
         className={cn(
           "flex h-12 w-12 items-center justify-center rounded-full bg-fg text-bg shadow-lg transition-all duration-200 hover:opacity-90 focus-visible:ds-focus-ring md:h-14 md:w-14",
-          open && "rotate-45",
+          open && "rotate-45"
         )}
         title={open ? commonT("close") : t("newEntry")}
       >

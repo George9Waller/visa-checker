@@ -1,4 +1,4 @@
-import { cn } from '../cn';
+import { cn } from "../cn";
 
 export interface DividerProps {
   label?: string;
@@ -7,7 +7,7 @@ export interface DividerProps {
 
 export function Divider({ label, className }: DividerProps) {
   return (
-    <div className={cn('flex items-center gap-3 text-fg-faint', className)}>
+    <div className={cn("flex items-center gap-3 text-fg-faint", className)}>
       {label && (
         <span className="font-mono text-xs uppercase tracking-widest text-fg-muted flex-shrink-0">
           {label}

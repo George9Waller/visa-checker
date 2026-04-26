@@ -7,7 +7,10 @@ const handleI18n = createMiddleware(routing);
 
 function getLocaleFromPath(pathname: string) {
   const match = pathname.match(/^\/(en|fr)(?:\/|$)/);
-  return (match?.[1] as (typeof routing.locales)[number] | undefined) ?? routing.defaultLocale;
+  return (
+    (match?.[1] as (typeof routing.locales)[number] | undefined) ??
+    routing.defaultLocale
+  );
 }
 
 function isPublicPath(pathname: string, locale: string) {
@@ -43,9 +46,7 @@ export default async function proxy(request: NextRequest) {
   }
 
   const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
-  const token = secret
-    ? await getToken({ req: request, secret })
-    : null;
+  const token = secret ? await getToken({ req: request, secret }) : null;
 
   if (!token) {
     return NextResponse.redirect(new URL(`/${locale}/signin`, request.url));

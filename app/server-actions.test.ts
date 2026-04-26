@@ -1,22 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  getServerSessionMock,
-  visaInfoForDateMock,
-  prismaMock,
-} = vi.hoisted(() => ({
-  getServerSessionMock: vi.fn(),
-  visaInfoForDateMock: vi.fn(),
-  prismaMock: {
-    trip: {
-      count: vi.fn(),
-      findMany: vi.fn(),
+const { getServerSessionMock, visaInfoForDateMock, prismaMock } = vi.hoisted(
+  () => ({
+    getServerSessionMock: vi.fn(),
+    visaInfoForDateMock: vi.fn(),
+    prismaMock: {
+      trip: {
+        count: vi.fn(),
+        findMany: vi.fn(),
+      },
+      visa: {
+        findMany: vi.fn(),
+      },
     },
-    visa: {
-      findMany: vi.fn(),
-    },
-  },
-}));
+  })
+);
 
 vi.mock("next-auth", () => ({
   getServerSession: getServerSessionMock,

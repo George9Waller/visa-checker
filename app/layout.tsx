@@ -33,9 +33,7 @@ export default async function RootLayout({
           <NextAuthProvider>
             <ThemeProvider />
             <AppShell theme="system">
-              <main>
-                {children}
-              </main>
+              <main>{children}</main>
             </AppShell>
           </NextAuthProvider>
         </NextIntlClientProvider>

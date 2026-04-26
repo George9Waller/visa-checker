@@ -41,4 +41,3 @@ export function PosterStepList({ steps, className }: PosterStepListProps) {
     </ol>
   );
 }
-

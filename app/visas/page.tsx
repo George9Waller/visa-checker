@@ -119,9 +119,7 @@ export default async function VisasPage() {
         </Stack>
 
         {visaGroups.length > 0 && (
-          <Text className="mt-4 text-sm text-fg-muted">
-            {t("tapToReview")}
-          </Text>
+          <Text className="mt-4 text-sm text-fg-muted">{t("tapToReview")}</Text>
         )}
 
         <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">

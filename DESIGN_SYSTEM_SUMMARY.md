@@ -82,6 +82,7 @@ DESIGN_SYSTEM_SUMMARY.md     (this file)
 ## Getting Started
 
 ### 1. View the Showcase
+
 ```bash
 npm run dev
 # Visit http://localhost:3000/design-system
@@ -90,8 +91,16 @@ npm run dev
 See all 60+ components in every variant, size, and tone. Perfect for QA and visual regression detection.
 
 ### 2. Import and Use
+
 ```tsx
-import { Btn, PageContainer, PageHeader, Stack, Field, Input } from '@/app/design';
+import {
+  Btn,
+  PageContainer,
+  PageHeader,
+  Stack,
+  Field,
+  Input,
+} from "@/app/design";
 
 export default function NewPage() {
   return (
@@ -101,7 +110,9 @@ export default function NewPage() {
         <Field label="Destination">
           <Input placeholder="Search country..." />
         </Field>
-        <Btn variant="accent" onClick={save}>Create</Btn>
+        <Btn variant="accent" onClick={save}>
+          Create
+        </Btn>
       </Stack>
     </PageContainer>
   );
@@ -109,10 +120,12 @@ export default function NewPage() {
 ```
 
 ### 3. Customize Tokens
+
 All styling lives in `app/design/styles.css` under `@theme`:
+
 ```css
 @theme {
-  --color-fg: #1a1814;        /* change once, affects entire app */
+  --color-fg: #1a1814; /* change once, affects entire app */
   --spacing-4: 16px;
   --font-size-md: 15px;
 }
@@ -129,18 +142,19 @@ Old pages at `app/components/` remain unchanged. Migrate one page at a time:
 5. **Delete:** Remove old component references
 
 Example migration:
+
 ```tsx
 // Before
-import { Btn } from '@/app/components/ui';
-<div style={{ display: 'flex', gap: '16px', padding: '20px' }}>
-  <Btn style={{ background: '#1a1814' }}>Save</Btn>
-</div>
+import { Btn } from "@/app/components/ui";
+<div style={{ display: "flex", gap: "16px", padding: "20px" }}>
+  <Btn style={{ background: "#1a1814" }}>Save</Btn>
+</div>;
 
 // After
-import { Stack, Btn } from '@/app/design';
+import { Stack, Btn } from "@/app/design";
 <Stack gap="lg" className="p-5">
   <Btn variant="primary">Save</Btn>
-</Stack>
+</Stack>;
 ```
 
 ## Design Principles

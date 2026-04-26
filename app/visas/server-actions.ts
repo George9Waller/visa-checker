@@ -431,7 +431,9 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
       }
 
       if (visa.tripMaxLen) {
-        const valid = !issueKinds.has(TripIssueKind.TRIP_EXCEEDS_SINGLE_TRIP_LIMIT);
+        const valid = !issueKinds.has(
+          TripIssueKind.TRIP_EXCEEDS_SINGLE_TRIP_LIMIT
+        );
         results.push({
           name: "Maximum Single Trip Length",
           valid,
@@ -539,20 +541,22 @@ export const visaInfoForDate = async (visaId: string, date: Date) => {
               alert.kind === "VISA_EXPIRED"
                 ? "Expired"
                 : alert.kind === "VISA_NOT_YET_VALID_FOR_TRIP"
-                ? "Invalid"
-                : "Warning",
+                  ? "Invalid"
+                  : "Warning",
             content:
               alert.kind === "VISA_EXPIRED"
                 ? "This visa has expired on this date"
                 : alert.kind === "VISA_NOT_YET_VALID_FOR_TRIP"
-                ? "This visa is not yet valid on this date"
-                : "This visa has one or more linked trip issues on this date",
+                  ? "This visa is not yet valid on this date"
+                  : "This visa has one or more linked trip issues on this date",
           })),
         }
       : undefined;
 
   const tripsValid = trips.every((trip) => trip.valid);
-  const aggregatesValid = aggregateValidation.every((aggregate) => aggregate.valid);
+  const aggregatesValid = aggregateValidation.every(
+    (aggregate) => aggregate.valid
+  );
 
   // This adapter preserves the old string-based shape until the UI consumes structured alerts directly.
   // Future hooks for alert dismissal, renewal suppression, passport expiry, and visa-free coverage belong above this boundary.

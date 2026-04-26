@@ -223,7 +223,9 @@ describe("trip structured actions", () => {
     const summary = await getTripDetailSummary("trip-1");
 
     expect(summary.status).toBe("invalid");
-    expect(summary.selectedCandidate?.issueKinds).toEqual(["TRIP_COUNTRY_NOT_COVERED"]);
+    expect(summary.selectedCandidate?.issueKinds).toEqual([
+      "TRIP_COUNTRY_NOT_COVERED",
+    ]);
   });
 
   it("returns a structured refresh after selecting a visa", async () => {
@@ -278,14 +280,7 @@ describe("trip structured actions", () => {
       countryCode: "FR",
     });
 
-    await createTrip(
-      "2024-06-20",
-      "2024-06-25",
-      "FR",
-      true,
-      "Paris",
-      "visa-1"
-    );
+    await createTrip("2024-06-20", "2024-06-25", "FR", true, "Paris", "visa-1");
 
     expect(prismaMock.visaTrip.create).toHaveBeenCalledWith({
       data: {

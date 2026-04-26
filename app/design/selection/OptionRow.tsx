@@ -68,9 +68,7 @@ export function OptionRow({
           "w-full text-left rounded-none px-4 py-4 sm:px-5",
           "flex items-start gap-4 transition-all",
           "focus-visible:ds-focus-ring",
-          selected
-            ? "bg-fg text-bg"
-            : "bg-bg-raised text-fg hover:bg-bg-sunken"
+          selected ? "bg-fg text-bg" : "bg-bg-raised text-fg hover:bg-bg-sunken"
         )}
       >
         {flag && (
@@ -104,9 +102,7 @@ export function OptionRow({
         "w-full text-left px-4 py-3.5 transition-all sm:px-4",
         "flex items-center gap-3",
         "focus-visible:ds-focus-ring",
-        selected
-          ? "bg-bg-sunken"
-          : "bg-bg-raised hover:bg-bg-sunken"
+        selected ? "bg-bg-sunken" : "bg-bg-raised hover:bg-bg-sunken"
       )}
     >
       {flag && <span className="text-lg flex-shrink-0">{flag}</span>}

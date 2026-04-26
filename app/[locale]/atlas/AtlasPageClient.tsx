@@ -3,14 +3,7 @@
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import {
-  Btn,
-  Icon,
-  PageContainer,
-  Stack,
-  Text,
-  Kicker,
-} from "@/app/design";
+import { Btn, Icon, PageContainer, Stack, Text, Kicker } from "@/app/design";
 import type { AtlasTrip } from "./server-actions";
 import { computeAtlasStats } from "./computeAtlasStats";
 import { AtlasMap } from "./AtlasMap";

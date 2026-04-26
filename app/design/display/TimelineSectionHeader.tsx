@@ -1,6 +1,6 @@
-import { cn } from '../cn';
-import { Display } from '../primitives/Display';
-import { Kicker } from '../primitives/Kicker';
+import { cn } from "../cn";
+import { Display } from "../primitives/Display";
+import { Kicker } from "../primitives/Kicker";
 
 export interface TimelineSectionHeaderProps {
   label: string;
@@ -14,10 +14,10 @@ export function TimelineSectionHeader({
   className,
 }: TimelineSectionHeaderProps) {
   return (
-    <div className={cn('flex items-baseline gap-3 mb-3', className)}>
+    <div className={cn("flex items-baseline gap-3 mb-3", className)}>
       <Display level={4}>{label}</Display>
       {count !== undefined && (
-        <Kicker tone="faint">{String(count).padStart(2, '0')}</Kicker>
+        <Kicker tone="faint">{String(count).padStart(2, "0")}</Kicker>
       )}
     </div>
   );

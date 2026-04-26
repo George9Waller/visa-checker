@@ -5,6 +5,7 @@ Simple, reusable atoms with no business logic. Build blocks for everything else.
 ## Buttons
 
 ### Btn
+
 Primary interactive button with variants and sizes.
 
 ```tsx
@@ -19,6 +20,7 @@ import { Btn } from '@/app/design';
 ```
 
 **Props:**
+
 - `variant`: 'primary' | 'accent' | 'ghost' | 'outline' | 'danger'
 - `size`: 'xs' | 'sm' | 'md' | 'lg'
 - `onClick`: handler
@@ -27,6 +29,7 @@ import { Btn } from '@/app/design';
 - `as`: ElementType (default: 'button', can be 'a' or a Link component)
 
 ### IconBtn
+
 Small square button for icons, typically in headers and toolbars.
 
 ```tsx
@@ -36,12 +39,14 @@ Small square button for icons, typically in headers and toolbars.
 ```
 
 **Props:**
+
 - Size fixed at 32px
 - Children: icon SVG or ReactNode
 
 ## Inputs
 
 ### Input
+
 Text, number, search input with focus states.
 
 ```tsx
@@ -52,6 +57,7 @@ Text, number, search input with focus states.
 ```
 
 **Props:**
+
 - `type`: 'text' | 'number' | 'email' | 'search' | etc
 - `placeholder`: string
 - `value`: string
@@ -59,6 +65,7 @@ Text, number, search input with focus states.
 - `variant`: 'default' | 'error'
 
 ### Textarea
+
 Multiline text input.
 
 ```tsx
@@ -66,10 +73,12 @@ Multiline text input.
 ```
 
 **Props:**
+
 - `rows`: number (default: auto)
 - Standard textarea HTMLAttributes
 
 ### Checkbox
+
 Custom styled checkbox with label.
 
 ```tsx
@@ -79,6 +88,7 @@ Custom styled checkbox with label.
 ```
 
 **Props:**
+
 - `checked`: boolean
 - `onChange`: (checked: boolean) => void
 - `children`: label text or ReactNode
@@ -86,6 +96,7 @@ Custom styled checkbox with label.
 ## Status Indicators
 
 ### StatusPip
+
 Tiny colored dot, used in badges and alerts.
 
 ```tsx
@@ -95,12 +106,14 @@ Tiny colored dot, used in badges and alerts.
 ```
 
 **Props:**
+
 - `tone`: 'ok' | 'warn' | 'danger' | 'muted' | 'accent'
 - `size`: 'xs' | 'sm' | 'md' (default: 'sm')
 
 ## Display
 
 ### Flag
+
 Emoji in a container with size control.
 
 ```tsx
@@ -109,10 +122,12 @@ Emoji in a container with size control.
 ```
 
 **Props:**
+
 - `size`: 'sm' | 'md' | 'lg'
 - `children`: emoji string
 
 ### Kicker
+
 Uppercase mono label for headers and metadata.
 
 ```tsx
@@ -122,10 +137,12 @@ Uppercase mono label for headers and metadata.
 ```
 
 **Props:**
+
 - `tone`: 'default' | 'muted' | 'faint'
 - `children`: text
 
 ### Display
+
 Serif display heading with levels.
 
 ```tsx
@@ -137,11 +154,13 @@ Serif display heading with levels.
 ```
 
 **Props:**
+
 - `level`: 1 | 2 | 3 | 4 (affects font size)
 - `as`: 'h1' | 'h2' | 'h3' | 'h4' | 'div' (default: 'div')
 - `children`: text
 
 ### Text
+
 Body, meta, or small text with optional tone.
 
 ```tsx
@@ -151,11 +170,13 @@ Body, meta, or small text with optional tone.
 ```
 
 **Props:**
+
 - `variant`: 'body' | 'meta' | 'small'
 - `tone`: 'default' | 'muted' | 'faint'
 - `children`: text
 
 ### Icon
+
 SVG icon lookup and rendering. Complete set of 15 icons, auto-scaling per size.
 
 ```tsx
@@ -167,6 +188,7 @@ import { Icon } from '@/app/design';
 ```
 
 **Props:**
+
 - `name`: icon name from icon set (e.g., 'chevron-left', 'calendar', 'plus')
 - `size`: 'xs' (12px) | 'sm' (16px) | 'md' (20px) | 'lg' (24px) — default: 'md'
 - `className`: optional Tailwind utilities (e.g., `text-accent`, `opacity-50`)
@@ -174,6 +196,7 @@ import { Icon } from '@/app/design';
 **Icon set:** See [ICONS.md](../icons/ICONS.md) for complete list and usage.
 
 ### Divider
+
 Horizontal rule with optional label.
 
 ```tsx
@@ -182,4 +205,5 @@ Horizontal rule with optional label.
 ```
 
 **Props:**
+
 - `label`: optional text to center on the line
