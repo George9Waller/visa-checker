@@ -133,6 +133,10 @@ export const getVisaDetailSummary = async (
     referenceDate,
   });
 
+  const rollingSnapshot = evaluation.usageSnapshots.find(
+    (snapshot) => snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW
+  );
+
   return {
     visa,
     referenceDate,
@@ -141,10 +145,10 @@ export const getVisaDetailSummary = async (
     usageSnapshots: evaluation.usageSnapshots,
     tripEvaluations: evaluation.tripEvaluations,
     projection: evaluation.projection,
-    rollingWindowTripIds:
-      evaluation.usageSnapshots.find(
-        (snapshot) => snapshot.ruleKind === AggregateRuleKind.ROLLING_WINDOW
-      )?.relevantTripIds ?? [],
+    rollingWindowTripIds: rollingSnapshot?.relevantTripIds ?? [],
+    rollingLimit: rollingSnapshot?.limit,
+    rollingUsed: rollingSnapshot?.used,
+    rollingWindow: visa.rollingPeriodLen,
   };
 };
 

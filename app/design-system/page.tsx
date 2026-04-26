@@ -539,7 +539,6 @@ export default function DesignSystemShowcase() {
           <SchengenProjectionChart
             points={mockPoints}
             limit={90}
-            windowDays={180}
             today={chartToday}
           />
         </section>

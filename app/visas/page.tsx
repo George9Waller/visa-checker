@@ -7,7 +7,10 @@ import {
   Btn,
   DashboardHeader,
   EmptyState,
+  FAB,
+  Icon,
   PageContainer,
+  PageHeader,
   Stack,
   Text,
   VisaListRow,
@@ -27,73 +30,87 @@ export default async function VisasPage() {
   const weekday = today.toLocaleDateString("en-GB", { weekday: "long" });
 
   return (
-    <PageContainer>
-      <DashboardHeader
-        date={today}
-        weekday={weekday}
-        title="Visas"
-        actions={
-          <div className="flex items-center gap-2">
-            <Btn as={Link} href="/" variant="outline" size="sm">
-              Back
-            </Btn>
-            <Btn as={Link} href="/visas/create" variant="primary" size="sm">
-              Add visa
-            </Btn>
-          </div>
-        }
-      />
+    <>
+      <PageHeader title="All visas" backHref="/" />
+      <PageContainer>
+        <Stack className="gap-4">
+          {visas.length === 0 ? (
+            <EmptyState
+              icon="passport"
+              title="No visas yet"
+              message="Add your first visa to start tracking coverage."
+              action={{
+                label: "Create visa",
+                href: "/visas/create",
+              }}
+            />
+          ) : (
+            visas.map((visa) => {
+              const isExpired = Boolean(visa.expires && visa.expires < today);
+              const isExpiringSoon =
+                Boolean(visa.expires) &&
+                !isExpired &&
+                (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
+              const statusTone = isExpired
+                ? "danger"
+                : isExpiringSoon
+                  ? "warn"
+                  : "ok";
 
-      <Stack className="gap-4">
-        {visas.length === 0 ? (
-          <EmptyState
-            icon="passport"
-            title="No visas yet"
-            message="Add your first visa to start tracking coverage."
-            action={{
-              label: "Create visa",
-              href: "/visas/create",
-            }}
-          />
-        ) : (
-          visas.map((visa) => {
-            const isExpired = Boolean(visa.expires && visa.expires < today);
-            const isExpiringSoon =
-              Boolean(visa.expires) &&
-              !isExpired &&
-              (visa.expires!.getTime() - today.getTime()) / 86400000 <= 30;
-            const statusTone = isExpired
-              ? "danger"
-              : isExpiringSoon
-              ? "warn"
-              : "ok";
+              return (
+                <VisaListRow
+                  key={visa.id}
+                  href={`/visas/${visa.id}`}
+                  flag={COUNTRY_EMOJIS[visa.countries[0] ?? ""] ?? "🛂"}
+                  title={visa.name}
+                  kicker={[
+                    VISA_TYPES_DISPLAY_MAP[visa.type],
+                    visa.expires
+                      ? `Expires ${formatDate(visa.expires)}`
+                      : "Open-ended",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  countryCount={visa.countries.length}
+                  statusTone={statusTone}
+                  statusLabel={
+                    isExpired
+                      ? "expired"
+                      : isExpiringSoon
+                        ? "expiring"
+                        : "valid"
+                  }
+                />
+              );
+            })
+          )}
+        </Stack>
 
-            return (
-              <VisaListRow
-                key={visa.id}
-                href={`/visas/${visa.id}`}
-                flag={COUNTRY_EMOJIS[visa.countries[0] ?? ""] ?? "🛂"}
-                title={visa.name}
-                kicker={[
-                  VISA_TYPES_DISPLAY_MAP[visa.type],
-                  visa.expires ? `Expires ${formatDate(visa.expires)}` : "Open-ended",
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                countryCount={visa.countries.length}
-                statusTone={statusTone}
-                statusLabel={isExpired ? "expired" : isExpiringSoon ? "expiring" : "valid"}
-              />
-            );
-          })
+        {visas.length > 0 && (
+          <Text className="mt-4 text-sm text-fg-muted">
+            Tap a visa to review its trips, coverage, and remaining validity.
+          </Text>
         )}
-      </Stack>
 
-      {visas.length > 0 && (
-        <Text className="mt-4 text-sm text-fg-muted">
-          Tap a visa to review its trips, coverage, and remaining validity.
-        </Text>
-      )}
-    </PageContainer>
+        <div className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6">
+          <FAB
+            actions={[
+              {
+                href: "/trips/create",
+                icon: <Icon name="calendar" size="sm" />,
+                title: "Plan trip",
+                description: "Create an upcoming journey",
+              },
+              {
+                href: "/visas/create",
+                icon: <Icon name="visa-card" size="sm" />,
+                title: "Add visa",
+                description: "Save a visa or permit",
+              },
+            ]}
+          />
+        </div>
+      </PageContainer>
+    </>
   );
 }

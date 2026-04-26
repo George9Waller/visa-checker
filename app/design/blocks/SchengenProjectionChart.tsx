@@ -1,12 +1,8 @@
-export interface ProjectionPoint {
-  date: Date;
-  remaining: number;
-}
+import { ProjectionPoint } from "@/app/visas/evaluation";
 
 export interface SchengenProjectionChartProps {
   points: ProjectionPoint[];
   limit: number;
-  windowDays: number;
   today: Date;
 }
 
@@ -36,23 +32,23 @@ export function SchengenProjectionChart({
   const pathRemaining = points
     .map(
       (p, i) =>
-        `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(p.remaining).toFixed(1)}`
+        `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(p.remainingDays).toFixed(1)}`
     )
     .join(" ");
   const areaRemaining = `${pathRemaining} L ${x(points.length - 1).toFixed(1)} ${y(0).toFixed(1)} L ${x(0).toFixed(1)} ${y(0).toFixed(1)} Z`;
 
   const todayMs = today.getTime();
-  const todayIdx = points.reduce(
-    (best, p, i) =>
-      Math.abs(p.date.getTime() - todayMs) <
-      Math.abs(points[best].date.getTime() - todayMs)
-        ? i
-        : best,
-    0
-  );
+  const todayIdx = points.reduce((best, p, i) => {
+    const date = new Date(p.date);
+    const bestDate = new Date(points[best].date);
+    return Math.abs(date.getTime() - todayMs) <
+      Math.abs(bestDate.getTime() - todayMs)
+      ? i
+      : best;
+  }, 0);
 
   const minIdx = points.reduce(
-    (m, p, i) => (p.remaining < points[m].remaining ? i : m),
+    (m, p, i) => (p.remainingDays < points[m].remainingDays ? i : m),
     0
   );
   const minPoint = points[minIdx];
@@ -60,11 +56,13 @@ export function SchengenProjectionChart({
   const monthLabels: { i: number; label: string }[] = [];
   let lastMonth = -1;
   for (let i = 0; i < points.length; i++) {
-    const m = points[i].date.getMonth();
+    const m = new Date(points[i].date).getMonth();
     if (m !== lastMonth) {
       monthLabels.push({
         i,
-        label: points[i].date.toLocaleDateString("en-GB", { month: "short" }),
+        label: new Date(points[i].date).toLocaleDateString("en-GB", {
+          month: "short",
+        }),
       });
       lastMonth = m;
     }
@@ -79,13 +77,13 @@ export function SchengenProjectionChart({
     new Date(today.getTime() + 365 * 86400000);
 
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-bg-raised p-4 shadow-sm md:p-5">
+    <div className="">
       <div className="mb-1 flex items-baseline justify-between gap-3">
         <div className="font-body font-semibold text-md text-fg">
           Days left over the next year
         </div>
         <div className="font-mono text-[10px] tracking-wide text-fg-faint">
-          {fmtShort(today)} → {fmtShort(endDate)}
+          {fmtShort(today)} → {fmtShort(new Date(endDate))}
         </div>
       </div>
       <div className="font-mono text-[11px] text-fg-muted tracking-[0.03em] mb-2.5">
@@ -165,7 +163,7 @@ export function SchengenProjectionChart({
         {/* Min remaining point */}
         <circle
           cx={x(minIdx)}
-          cy={y(minPoint.remaining)}
+          cy={y(minPoint.remainingDays)}
           r="3.5"
           fill="var(--color-bg-raised)"
           stroke="var(--color-danger)"
@@ -173,14 +171,14 @@ export function SchengenProjectionChart({
         />
         <text
           x={x(minIdx)}
-          y={y(minPoint.remaining) - 8}
+          y={y(minPoint.remainingDays) - 8}
           fontSize="9"
           textAnchor="middle"
           fill="var(--color-danger)"
           fontFamily="var(--font-mono)"
           fontWeight="600"
         >
-          MIN {minPoint.remaining}
+          MIN {minPoint.remainingDays}
         </text>
 
         {/* Month labels */}

@@ -36,7 +36,7 @@ export function TripHeroCard({
   const content = (
     <>
       <div className="flex items-center justify-between gap-3">
-        <Kicker className="opacity-70">{kicker}</Kicker>
+        <Kicker>{kicker}</Kicker>
         {livePill && (
           <span className="rounded-full border border-current px-2 py-1 text-xs font-mono uppercase opacity-70">
             LIVE
@@ -46,7 +46,7 @@ export function TripHeroCard({
       <div className="flex items-start gap-4">
         <Flag size="lg">{flag}</Flag>
         <div className="flex-1 min-w-0">
-          <Display level={2} className="text-bg">
+          <Display level={2} inverted>
             {title}
           </Display>
           {subtitle && (

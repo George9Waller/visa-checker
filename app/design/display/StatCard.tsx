@@ -5,7 +5,7 @@ import { Kicker } from "../primitives/Kicker";
 import { Display } from "../primitives/Display";
 
 export interface StatCardProps extends PropsWithChildren {
-  label: string;
+  label?: string;
   sublabel?: string;
   onClick?: () => void;
   href?: string;
@@ -28,10 +28,12 @@ export function StatCard({
 
   const content = (
     <>
-      <div className="flex flex-col gap-0.5">
-        <Kicker tone="muted">{label}</Kicker>
-        {sublabel && <Kicker tone="faint">{sublabel}</Kicker>}
-      </div>
+      {(label || sublabel) && (
+        <div className="flex flex-col gap-0.5">
+          {label && <Kicker tone="muted">{label}</Kicker>}
+          {sublabel && <Kicker tone="faint">{sublabel}</Kicker>}
+        </div>
+      )}
       {children}
     </>
   );

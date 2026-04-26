@@ -169,8 +169,8 @@ export const copyForCard = (card: DashboardCard) => {
       };
     case CardKind.ROLLING_WINDOW_USAGE:
       return {
-        label: "Rolling window",
-        sublabel: `${card.params.used}/${card.params.limit} used`,
+        label: card.visaName ?? "Rolling window",
+        sublabel: `Last ${card.params.windowDays} days`,
       };
     case CardKind.ALLOWANCE_REMAINING:
       return {
@@ -190,7 +190,7 @@ export const copyForCard = (card: DashboardCard) => {
     case CardKind.NEXT_TRIP:
       return {
         label: "Next trip",
-        sublabel: `${card.params.daysUntilStart} days until departure`,
+        sublabel: `In ${card.params.daysUntilStart} days`,
       };
   }
 };

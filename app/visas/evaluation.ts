@@ -172,9 +172,10 @@ export type DashboardCard = {
   kind: CardKind;
   tone: "danger" | "warn" | "ok" | "muted";
   visaId?: string;
+  visaName?: string;
   tripId?: string;
   rankingScore: number;
-  params: Record<string, string | number | boolean | null>;
+  params: Record<string, string | number | boolean | null | ProjectionPoint[]>;
 };
 
 export type ProjectionPoint = {
@@ -1102,6 +1103,12 @@ const buildDashboardCards = (
         daysUntilStart,
         statusSummary: nextTrip.status,
         startDate: isoDate(nextTrip.trip.startDate),
+        endDate: isoDate(nextTrip.trip.endDate),
+        durationDays: diffDays(
+          nextTrip.trip.startDate,
+          nextTrip.trip.endDate,
+          true
+        ),
       },
     });
   }
@@ -1125,6 +1132,7 @@ const buildDashboardCards = (
             ? "warn"
             : "ok",
       visaId: highestRolling.visa.visa.id,
+      visaName: highestRolling.visa.visa.name,
       rankingScore:
         highestRolling.snapshot.remaining < 0
           ? 800
@@ -1136,6 +1144,7 @@ const buildDashboardCards = (
         limit: highestRolling.snapshot.limit,
         remaining: highestRolling.snapshot.remaining,
         resetDate: highestRolling.visa.projection?.nextResetDate ?? null,
+        windowDays: highestRolling.visa.visa.rollingPeriodLen ?? null,
       },
     });
   }

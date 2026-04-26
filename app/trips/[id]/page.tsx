@@ -1,10 +1,9 @@
-import Link from "next/link";
 import {
   AlertBox,
-  Btn,
   Fact,
   FactGrid,
   PageContainer,
+  PageHeader,
   Stack,
   StatusBadge,
   Text,
@@ -50,43 +49,32 @@ export default async function TripDetailPage({
       (issue) => issue.kind === selectedIssueKinds[0]
     );
 
-  return (
-    <PageContainer>
-      <Stack className="gap-6">
-        <Stack className="gap-4 rounded-[var(--radius)] border border-border bg-bg-raised p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Btn as={Link} href="/" variant="ghost" size="sm">
-              Back
-            </Btn>
-            <TripDetailActions tripId={summary.trip.id} />
-          </div>
-          <Text className="text-sm text-fg-muted">
-            {COUNTRY_EMOJIS[summary.trip.countryCode] ?? "✈"}{" "}
-            {COUNTRY_NAMES[summary.trip.countryCode] ??
-              summary.trip.countryCode}
-          </Text>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <Text className="text-3xl font-semibold leading-tight">
-                {summary.trip.name ??
-                  COUNTRY_NAMES[summary.trip.countryCode] ??
-                  summary.trip.countryCode}
-              </Text>
-              <Text className="mt-1 text-sm text-fg-muted">
-                {formatDate(summary.trip.startDate)} -{" "}
-                {formatDate(summary.trip.endDate)}
-              </Text>
-            </div>
-            <StatusBadge
-              tone={summary.status === "valid" ? "ok" : "danger"}
-              size="xs"
-            >
-              {summary.trip.visaRequired ? summary.status : "visa-free"}
-            </StatusBadge>
-          </div>
-        </Stack>
+  const now = new Date();
+  const tripStart = new Date(summary.trip.startDate);
+  const tripEnd = new Date(summary.trip.endDate);
+  let tripStatus: "current" | "upcoming" | "past" = "upcoming";
+  if (now >= tripStart && now <= tripEnd) {
+    tripStatus = "current";
+  } else if (now > tripEnd) {
+    tripStatus = "past";
+  }
+  const kickerText =
+    tripStatus === "current" ? "Currently in" :
+    tripStatus === "past" ? "Past trip" :
+    "Upcoming";
 
-        <FactGrid cols={2}>
+  return (
+    <div>
+      <PageHeader
+        kicker={kickerText}
+        title={summary.trip.name ?? COUNTRY_NAMES[summary.trip.countryCode] ?? summary.trip.countryCode}
+        flag={COUNTRY_EMOJIS[summary.trip.countryCode] ?? "✈"}
+        backHref="/"
+        actions={<TripDetailActions tripId={summary.trip.id} />}
+      />
+      <PageContainer>
+        <Stack className="gap-6">
+          <FactGrid cols={2}>
           <Fact label="From" value={formatDate(summary.trip.startDate)} />
           <Fact label="To" value={formatDate(summary.trip.endDate)} />
           <Fact label="Length" value={`${durationDays} days`} />
@@ -168,7 +156,8 @@ export default async function TripDetailPage({
             </AlertBox>
           </Stack>
         )}
-      </Stack>
-    </PageContainer>
+        </Stack>
+      </PageContainer>
+    </div>
   );
 }

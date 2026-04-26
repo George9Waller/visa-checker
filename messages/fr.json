@@ -31,7 +31,9 @@
     "live": "En direct",
     "dayOf": "Jour {day}",
     "daysToGo": "{days} jours restants",
-    "nextTrip": "Prochain voyage"
+    "nextTrip": "Prochain voyage",
+    "addTrip": "Voyage",
+    "addTripDescription": "Planifier ou enregistrer un voyage"
   },
   "trip": {
     "create": "Nouveau voyage",
@@ -53,7 +55,6 @@
     "step3": "Visa",
     "cancel": "Annuler",
     "continue": "Continuer",
-    "create": "Créer le voyage",
     "save": "Enregistrer",
     "delete": "Supprimer le voyage",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce voyage ?",
@@ -94,7 +95,6 @@
     "step5": "Règles",
     "cancel": "Annuler",
     "continue": "Continuer",
-    "create": "Créer le visa",
     "save": "Enregistrer",
     "delete": "Supprimer le visa",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce visa ?",

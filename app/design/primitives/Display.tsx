@@ -5,6 +5,7 @@ export interface DisplayProps extends PropsWithChildren {
   level?: 1 | 2 | 3 | 4;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'div';
   className?: string;
+  inverted?: boolean;
 }
 
 export function Display({
@@ -12,6 +13,7 @@ export function Display({
   as: As = 'div',
   className,
   children,
+  inverted = false,
 }: DisplayProps) {
   const levelClasses: Record<number, string> = {
     1: 'text-4xl leading-tight font-display tracking-tight',
@@ -21,7 +23,7 @@ export function Display({
   };
 
   return (
-    <As className={cn(levelClasses[level], 'text-fg m-0', className)}>
+    <As className={cn(levelClasses[level], inverted ? 'text-bg' : 'text-fg', 'm-0', className)}>
       {children}
     </As>
   );

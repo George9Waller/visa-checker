@@ -102,15 +102,6 @@ export default function CreateTripWizard({
   );
   const [submitting, setSubmitting] = useState(false);
 
-  const suggestedCodes = useMemo(
-    () =>
-      new Set([
-        ...countrySuggestions.recent.map((item) => item.code),
-        ...countrySuggestions.popular.map((item) => item.code),
-      ]),
-    [countrySuggestions.popular, countrySuggestions.recent]
-  );
-
   const sortedCountries = useMemo(
     () =>
       Object.keys(COUNTRY_LABELS)
@@ -121,48 +112,13 @@ export default function CreateTripWizard({
 
   const filteredCountries = useMemo(() => {
     const q = search.toLowerCase();
-    return sortedCountries.filter((item) => {
-      if (suggestedCodes.has(item.code)) {
-        return false;
-      }
-      return q
+    return sortedCountries.filter((item) =>
+      q
         ? item.label.toLowerCase().includes(q) ||
-            item.code.toLowerCase().includes(q)
-        : true;
-    });
-  }, [search, sortedCountries, suggestedCodes]);
-
-  const filteredRecentCountries = useMemo(
-    () => {
-      const q = search.toLowerCase();
-      return q
-        ? countrySuggestions.recent.filter((item) => {
-            const label = COUNTRY_LABELS[item.code] ?? item.code;
-            return (
-              label.toLowerCase().includes(q) ||
-              item.code.toLowerCase().includes(q)
-            );
-          })
-        : countrySuggestions.recent;
-    },
-    [countrySuggestions.recent, search]
-  );
-
-  const filteredPopularCountries = useMemo(
-    () => {
-      const q = search.toLowerCase();
-      return q
-        ? countrySuggestions.popular.filter((item) => {
-            const label = COUNTRY_LABELS[item.code] ?? item.code;
-            return (
-              label.toLowerCase().includes(q) ||
-              item.code.toLowerCase().includes(q)
-            );
-          })
-        : countrySuggestions.popular;
-    },
-    [countrySuggestions.popular, search]
-  );
+          item.code.toLowerCase().includes(q)
+        : true
+    );
+  }, [search, sortedCountries]);
 
   const durationDays = useMemo(() => {
     if (!startDate || !endDate) return null;
@@ -186,7 +142,13 @@ export default function CreateTripWizard({
           name || null
         );
       } else {
-        await createTrip(startDate, endDate, country, visaRequired, name || null);
+        await createTrip(
+          startDate,
+          endDate,
+          country,
+          visaRequired,
+          name || null
+        );
       }
       router.push(submitHref);
     } catch (error) {
@@ -227,17 +189,20 @@ export default function CreateTripWizard({
             </Text>
           </AlertBox>
 
-          {filteredRecentCountries.length > 0 && (
+          {countrySuggestions.recent.length > 0 && (
             <Stack gap="md">
               <div>
-                <Text className="font-semibold text-base">Recently visited</Text>
+                <Text className="font-semibold text-base">
+                  Recently visited
+                </Text>
                 <Text variant="small" tone="muted">
                   Countries from your latest completed trips.
                 </Text>
               </div>
               <OptionGrid cols={2}>
-                {filteredRecentCountries.map(({ code, lastVisited }) => {
-                  const name = COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
+                {countrySuggestions.recent.map(({ code, lastVisited }) => {
+                  const name =
+                    COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
                   const emoji = COUNTRY_EMOJIS[code] ?? "✈";
                   return (
                     <OptionRow
@@ -255,7 +220,7 @@ export default function CreateTripWizard({
             </Stack>
           )}
 
-          {filteredPopularCountries.length > 0 && (
+          {countrySuggestions.popular.length > 0 && (
             <Stack gap="md">
               <div>
                 <Text className="font-semibold text-base">Most visited</Text>
@@ -264,8 +229,9 @@ export default function CreateTripWizard({
                 </Text>
               </div>
               <OptionGrid cols={2}>
-                {filteredPopularCountries.map(({ code, tripCount }) => {
-                  const name = COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
+                {countrySuggestions.popular.map(({ code, tripCount }) => {
+                  const name =
+                    COUNTRY_NAMES[code] ?? COUNTRY_LABELS[code] ?? code;
                   const emoji = COUNTRY_EMOJIS[code] ?? "✈";
                   return (
                     <OptionRow
@@ -410,6 +376,15 @@ export default function CreateTripWizard({
             </Text>
           </div>
         </Checkbox>
+
+        {visaRequired && (
+          <Field label={t("selectedVisa")}>
+            <OptionList
+              maxHeight="40vh"
+              className="overscroll-contain"
+            ></OptionList>
+          </Field>
+        )}
       </Stack>
     </WizardShell>
   );

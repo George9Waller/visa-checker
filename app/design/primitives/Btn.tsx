@@ -24,7 +24,7 @@ export function Btn({
     primary: 'bg-fg text-bg hover:opacity-90',
     accent: 'bg-accent text-accent-fg hover:opacity-90',
     ghost: 'bg-transparent text-fg hover:bg-bg-sunken',
-    outline: 'bg-transparent text-fg border border-border-strong hover:bg-bg-sunken',
+    outline: 'bg-bg-raised text-fg border border-border-strong hover:bg-bg-sunken',
     danger:
       'bg-[color-mix(in_oklch,var(--color-danger)_15%,var(--color-bg))] text-danger hover:opacity-90',
   };

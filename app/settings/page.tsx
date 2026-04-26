@@ -70,7 +70,13 @@ export default function SettingsPage() {
         weekday={new Date().toLocaleDateString("en-GB", { weekday: "long" })}
         title={t("title")}
         actions={
-          <Btn as={Link} href="/" variant="outline" size="sm">
+          <Btn
+            as={Link}
+            href="/"
+            variant="outline"
+            size="sm"
+            className="rounded-full h-[40px]"
+          >
             Trips
           </Btn>
         }
