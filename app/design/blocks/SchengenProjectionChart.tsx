@@ -35,7 +35,6 @@ export function SchengenProjectionChart({
         `${i === 0 ? "M" : "L"} ${x(i).toFixed(1)} ${y(p.remainingDays).toFixed(1)}`
     )
     .join(" ");
-  const areaRemaining = `${pathRemaining} L ${x(points.length - 1).toFixed(1)} ${y(0).toFixed(1)} L ${x(0).toFixed(1)} ${y(0).toFixed(1)} Z`;
 
   const todayMs = today.getTime();
   const todayIdx = points.reduce((best, p, i) => {
@@ -75,6 +74,49 @@ export function SchengenProjectionChart({
   const endDate =
     points[points.length - 1]?.date ??
     new Date(today.getTime() + 365 * 86400000);
+
+  type AreaSegment = { startIdx: number; endIdx: number; direction: "up" | "down" };
+  const areaSegments: AreaSegment[] = [];
+
+  let segStart = 0;
+  let segDir: "up" | "down" | null = null;
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const delta = points[i + 1].remainingDays - points[i].remainingDays;
+    const pairDir: "up" | "down" | null =
+      delta < 0 ? "down" : delta > 0 ? "up" : segDir;
+
+    if (pairDir === null) {
+      segStart = i + 1;
+      continue;
+    }
+
+    if (segDir === null) {
+      segDir = pairDir;
+    }
+
+    if (pairDir !== segDir) {
+      areaSegments.push({ startIdx: segStart, endIdx: i, direction: segDir });
+      segStart = i;
+      segDir = pairDir;
+    }
+  }
+
+  if (segDir !== null && segStart < points.length - 1) {
+    areaSegments.push({
+      startIdx: segStart,
+      endIdx: points.length - 1,
+      direction: segDir,
+    });
+  }
+
+  const buildSegmentPath = (startIdx: number, endIdx: number): string => {
+    const top = Array.from({ length: endIdx - startIdx + 1 }, (_, k) => {
+      const i = startIdx + k;
+      return `${i === startIdx ? "M" : "L"} ${x(i).toFixed(1)} ${y(points[i].remainingDays).toFixed(1)}`;
+    }).join(" ");
+    return `${top} L ${x(endIdx).toFixed(1)} ${y(0).toFixed(1)} L ${x(startIdx).toFixed(1)} ${y(0).toFixed(1)} Z`;
+  };
 
   return (
     <div className="">
@@ -129,8 +171,19 @@ export function SchengenProjectionChart({
           opacity="0.05"
         />
 
-        {/* Area fill */}
-        <path d={areaRemaining} fill="var(--color-accent)" opacity="0.12" />
+        {/* Segmented area fill: red when decreasing, green when increasing */}
+        {areaSegments.map((seg, i) => (
+          <path
+            key={i}
+            d={buildSegmentPath(seg.startIdx, seg.endIdx)}
+            fill={
+              seg.direction === "down"
+                ? "var(--color-danger)"
+                : "var(--color-ok)"
+            }
+            opacity="0.15"
+          />
+        ))}
 
         {/* Projection line */}
         <path
